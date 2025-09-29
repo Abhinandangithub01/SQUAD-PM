@@ -118,6 +118,45 @@ io.on('connection', (socket) => {
     socket.to(`project_${projectId}`).emit('kanban_updated', update);
   });
 
+  // WebRTC Call Signaling Events
+  socket.on('callUser', (data) => {
+    const { userToCall, signalData, from, name, taskId } = data;
+    console.log(`Call initiated from ${from} to ${userToCall}`);
+    
+    io.to(`user_${userToCall}`).emit('callUser', {
+      signal: signalData,
+      from,
+      name,
+      taskId
+    });
+  });
+
+  socket.on('answerCall', (data) => {
+    const { signal, to } = data;
+    console.log(`Call answered, sending signal to ${to}`);
+    
+    io.to(`user_${to}`).emit('callAccepted', signal);
+  });
+
+  socket.on('endCall', (data) => {
+    const { to } = data;
+    console.log(`Call ended, notifying ${to}`);
+    
+    if (to) {
+      io.to(`user_${to}`).emit('callEnded');
+    }
+  });
+
+  // Handle call rejection
+  socket.on('rejectCall', (data) => {
+    const { to } = data;
+    console.log(`Call rejected, notifying ${to}`);
+    
+    if (to) {
+      io.to(`user_${to}`).emit('callRejected');
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log(`User ${socket.userId} disconnected`);
   });
