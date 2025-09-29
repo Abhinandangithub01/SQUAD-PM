@@ -12,6 +12,9 @@ import {
   PaperClipIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  PhoneIcon,
+  VideoCameraIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
 import api from '../utils/api';
@@ -20,6 +23,7 @@ import { formatChatTime, truncateText } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
 import CreateChannelModal from '../components/CreateChannelModal';
+import CallModal from '../components/CallModal';
 import toast from 'react-hot-toast';
 
 const Chat = () => {
@@ -30,6 +34,9 @@ const Chat = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedProjects, setExpandedProjects] = useState(new Set());
+  const [activeTab, setActiveTab] = useState('channels'); // 'channels' or 'dms'
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [callTarget, setCallTarget] = useState(null);
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
   const { socket, joinChannel, leaveChannel, sendMessage } = useSocket();
@@ -39,6 +46,15 @@ const Chat = () => {
     queryKey: ['chat', 'channels'],
     queryFn: async () => {
       const response = await api.get('/chat/channels');
+      return response.data;
+    },
+  });
+
+  // Fetch users for DMs
+  const { data: usersData, isLoading: usersLoading } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await api.get('/users');
       return response.data;
     },
   });
@@ -56,46 +72,34 @@ const Chat = () => {
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ channelId, content, type = 'text', replyTo = null }) => {
+    mutationFn: async ({ channelId, content }) => {
       const response = await api.post(`/chat/channels/${channelId}/messages`, {
         content,
-        type,
-        reply_to: replyTo,
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setMessage('');
       queryClient.invalidateQueries(['chat', 'messages', channelId]);
+      
+      // Send real-time message via socket
+      if (socket && channelId) {
+        sendMessage(channelId, data.message.content);
+      }
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to send message');
     },
   });
 
-  // Join/leave channels on selection
+  // Socket event handlers
   useEffect(() => {
-    if (channelId) {
-      joinChannel(channelId);
-      const channel = channelsData?.channels?.find(c => c.id === channelId);
-      setSelectedChannel(channel);
-      
-      return () => leaveChannel(channelId);
-    }
-  }, [channelId, channelsData, joinChannel, leaveChannel]);
+    if (!socket || !channelId) return;
 
-  // Listen for real-time messages
-  useEffect(() => {
-    if (!socket) return;
+    joinChannel(channelId);
 
-    const handleNewMessage = (newMessage) => {
-      queryClient.setQueryData(['chat', 'messages', channelId], (oldData) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          messages: [...oldData.messages, newMessage]
-        };
-      });
+    const handleNewMessage = (message) => {
+      queryClient.invalidateQueries(['chat', 'messages', channelId]);
     };
 
     socket.on('new_message', handleNewMessage);
@@ -149,450 +153,417 @@ const Chat = () => {
     setExpandedProjects(newExpanded);
   };
 
+  const startCall = (targetUser, channelId = null) => {
+    setCallTarget(targetUser);
+    setShowCallModal(true);
+  };
+
+  const startChannelCall = (channel) => {
+    // For channel calls, we can implement a group call or select a specific user
+    toast.success(`Starting call for ${channel.name}`);
+    // You can implement group calling logic here
+  };
+
+  const filteredUsers = usersData?.users?.filter(user => 
+    user.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.last_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
   return (
     <div className="h-full flex bg-white p-6">
       <div className="flex-1 flex bg-white rounded-xl shadow-soft overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-80 border-r border-gray-200 flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Chat</h2>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
-            >
-              <PlusIcon className="h-5 w-5" />
-            </button>
+        {/* Sidebar */}
+        <div className="w-80 border-r border-gray-200 flex flex-col">
+          {/* Header */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Chat</h2>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                <PlusIcon className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex mb-4 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('channels')}
+                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'channels'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <HashtagIcon className="h-4 w-4 inline mr-2" />
+                Channels
+              </button>
+              <button
+                onClick={() => setActiveTab('dms')}
+                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'dms'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <UserIcon className="h-4 w-4 inline mr-2" />
+                DMs
+              </button>
+            </div>
+            
+            {/* Search */}
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder={activeTab === 'channels' ? 'Search channels...' : 'Search users...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
           </div>
-          
-          {/* Search */}
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search channels..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
+
+          {/* Channels/DMs List */}
+          <div className="flex-1 overflow-y-auto">
+            {(activeTab === 'channels' ? channelsLoading : usersLoading) ? (
+              <div className="flex items-center justify-center py-8">
+                <LoadingSpinner size="sm" />
+              </div>
+            ) : (
+              <div className="p-2 space-y-4">
+                {activeTab === 'channels' ? (
+                  // Channels Content
+                  <>
+                    {/* General Channels */}
+                    {generalChannels.length > 0 && (
+                      <div>
+                        <div className="flex items-center px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          <HashtagIcon className="h-4 w-4 mr-2" />
+                          General Channels
+                        </div>
+                        <div className="space-y-1">
+                          {generalChannels.map((channel) => (
+                            <ChannelItem
+                              key={channel.id}
+                              channel={channel}
+                              isActive={channel.id === channelId}
+                              onClick={() => navigate(`/chat/${channel.id}`)}
+                              onCall={() => startChannelCall(channel)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Project Channels */}
+                    {projectsWithSubChannels.length > 0 && (
+                      <div>
+                        <div className="flex items-center px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          <UserGroupIcon className="h-4 w-4 mr-2" />
+                          Project Channels
+                        </div>
+                        <div className="space-y-2">
+                          {projectsWithSubChannels.map((project) => (
+                            <ProjectChannelGroup
+                              key={project.id}
+                              project={project}
+                              isExpanded={expandedProjects.has(project.id)}
+                              onToggle={() => toggleProjectExpansion(project.id)}
+                              activeChannelId={channelId}
+                              onChannelClick={(id) => navigate(`/chat/${id}`)}
+                              onCall={(channel) => startChannelCall(channel)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {filteredChannels.length === 0 && (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">No channels found</p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // DMs Content
+                  <>
+                    <div className="flex items-center px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <UserIcon className="h-4 w-4 mr-2" />
+                      Direct Messages
+                    </div>
+                    <div className="space-y-1">
+                      {filteredUsers.map((user) => (
+                        <UserItem
+                          key={user.id}
+                          user={user}
+                          onClick={() => navigate(`/chat/dm/${user.id}`)}
+                          onCall={() => startCall(user)}
+                        />
+                      ))}
+                    </div>
+                    
+                    {filteredUsers.length === 0 && (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">No users found</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Channels List */}
-        <div className="flex-1 overflow-y-auto">
-          {channelsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <LoadingSpinner size="sm" />
-            </div>
-          ) : (
-            <div className="p-2 space-y-4">
-              {/* General Channels */}
-              {generalChannels.length > 0 && (
-                <div>
-                  <div className="flex items-center px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <HashtagIcon className="h-4 w-4 mr-2" />
-                    General Channels
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col">
+          {channelId ? (
+            <>
+              {/* Chat Header */}
+              <div className="p-4 border-b border-gray-200 bg-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
+                      <HashtagIcon className="h-5 w-5 text-gray-400" />
+                      <h3 className="font-semibold text-gray-900">
+                        {selectedChannel?.name || 'Loading...'}
+                      </h3>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {selectedChannel?.description}
+                    </span>
                   </div>
-                  <div className="space-y-1">
-                    {generalChannels.map((channel) => (
-                      <ChannelItem
-                        key={channel.id}
-                        channel={channel}
-                        isActive={channel.id === channelId}
-                        onClick={() => navigate(`/chat/${channel.id}`)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Project Channels */}
-              {projectsWithSubChannels.length > 0 && (
-                <div>
-                  <div className="flex items-center px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <UserGroupIcon className="h-4 w-4 mr-2" />
-                    Project Channels
-                  </div>
-                  <div className="space-y-2">
-                    {projectsWithSubChannels.map((project) => (
-                      <ProjectChannelGroup
-                        key={project.id}
-                        project={project}
-                        isExpanded={expandedProjects.has(project.id)}
-                        onToggle={() => toggleProjectExpansion(project.id)}
-                        activeChannelId={channelId}
-                        onChannelClick={(id) => navigate(`/chat/${id}`)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {filteredChannels.length === 0 && (
-                <div className="text-center py-8">
-                  <div className="text-gray-400 mb-2">
-                    <HashtagIcon className="h-8 w-8 mx-auto" />
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    {searchQuery ? 'No channels found' : 'No channels yet'}
-                  </p>
-                  {!searchQuery && (
+                  
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-500">
+                      {selectedChannel?.member_count || 0} members
+                    </span>
                     <button
-                      onClick={() => setShowCreateModal(true)}
-                      className="mt-2 text-sm text-primary-600 hover:text-primary-700"
+                      onClick={() => startChannelCall(selectedChannel)}
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                      title="Start call"
                     >
-                      Create your first channel
+                      <PhoneIcon className="h-5 w-5" />
                     </button>
-                  )}
+                    <Menu as="div" className="relative">
+                      <Menu.Button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <EllipsisVerticalIcon className="h-5 w-5" />
+                      </Menu.Button>
+                    </Menu>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messagesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <LoadingSpinner size="sm" />
+                  </div>
+                ) : messagesData?.messages?.length > 0 ? (
+                  messagesData.messages.map((msg) => (
+                    <MessageItem key={msg.id} message={msg} />
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No messages yet. Start the conversation!</p>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Message Input */}
+              <div className="p-4 border-t border-gray-200 bg-white">
+                <form onSubmit={handleSendMessage} className="flex items-end space-x-3">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder={`Message #${selectedChannel?.name || 'channel'}`}
+                        className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                        disabled={sendMessageMutation.isLoading}
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+                        <button
+                          type="button"
+                          className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                        >
+                          <PaperClipIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                        >
+                          <FaceSmileIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!message.trim() || sendMessageMutation.isLoading}
+                    className="p-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <PaperAirplaneIcon className="h-4 w-4" />
+                  </button>
+                </form>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <HashtagIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Welcome to Chat
+                </h3>
+                <p className="text-gray-500">
+                  Select a channel to start messaging
+                </p>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {selectedChannel ? (
-          <>
-            {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2">
-                    {selectedChannel.type === 'direct' ? (
-                      <UserGroupIcon className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <HashtagIcon className="h-5 w-5 text-gray-400" />
-                    )}
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {selectedChannel.name}
-                    </h3>
-                  </div>
-                  {selectedChannel.description && (
-                    <span className="text-sm text-gray-500">
-                      {selectedChannel.description}
-                    </span>
-                  )}
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">
-                    {selectedChannel.member_count} members
-                  </span>
-                  <Menu as="div" className="relative">
-                    <Menu.Button className="p-1 rounded-full text-gray-400 hover:text-gray-600">
-                      <EllipsisVerticalIcon className="h-5 w-5" />
-                    </Menu.Button>
-                    <Menu.Items className="dropdown-menu">
-                      <Menu.Item>
-                        <button className="dropdown-item">
-                          Channel Settings
-                        </button>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <button className="dropdown-item">
-                          View Members
-                        </button>
-                      </Menu.Item>
-                    </Menu.Items>
-                  </Menu>
-                </div>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messagesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <LoadingSpinner size="lg" />
-                </div>
-              ) : messagesData?.messages?.length > 0 ? (
-                <>
-                  {messagesData.messages.map((message, index) => (
-                    <MessageItem
-                      key={message.id}
-                      message={message}
-                      showAvatar={
-                        index === 0 || 
-                        messagesData.messages[index - 1].user_id !== message.user_id ||
-                        new Date(message.created_at).getTime() - new Date(messagesData.messages[index - 1].created_at).getTime() > 300000 // 5 minutes
-                      }
-                    />
-                  ))}
-                  <div ref={messagesEndRef} />
-                </>
-              ) : (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <div className="text-gray-400 mb-4">
-                      <HashtagIcon className="h-12 w-12 mx-auto" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Welcome to #{selectedChannel.name}
-                    </h3>
-                    <p className="text-gray-500">
-                      This is the beginning of your conversation.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Message Input */}
-            <div className="p-4 border-t border-gray-200">
-              <form onSubmit={handleSendMessage} className="flex items-end space-x-3">
-                <div className="flex-1">
-                  <div className="relative">
-                    <textarea
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage(e);
-                        }
-                      }}
-                      placeholder={`Message #${selectedChannel.name}`}
-                      rows={1}
-                      className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      style={{ minHeight: '44px', maxHeight: '120px' }}
-                    />
-                    <div className="absolute right-2 bottom-2 flex items-center space-x-1">
-                      <button
-                        type="button"
-                        className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                      >
-                        <PaperClipIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                      >
-                        <FaceSmileIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={!message.trim() || sendMessageMutation.isLoading}
-                  className="p-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {sendMessageMutation.isLoading ? (
-                    <LoadingSpinner size="sm" color="white" />
-                  ) : (
-                    <PaperAirplaneIcon className="h-4 w-4" />
-                  )}
-                </button>
-              </form>
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-gray-400 mb-4">
-                <HashtagIcon className="h-16 w-16 mx-auto" />
-              </div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">
-                Welcome to Chat
-              </h3>
-              <p className="text-gray-500 mb-6">
-                Select a channel to start messaging with your team.
-              </p>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="btn-primary"
-              >
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Create Channel
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Create Channel Modal */}
+      {/* Modals */}
       <CreateChannelModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSuccess={() => {
-          setShowCreateModal(false);
-          queryClient.invalidateQueries(['chat', 'channels']);
-        }}
       />
-      </div>
+      
+      <CallModal
+        isOpen={showCallModal}
+        onClose={() => setShowCallModal(false)}
+        targetUser={callTarget}
+      />
     </div>
   );
 };
 
-
-const MessageItem = ({ message, showAvatar }) => {
-  return (
-    <div className={`flex space-x-3 ${showAvatar ? '' : 'ml-11'}`}>
-      {showAvatar && (
-        <div className="flex-shrink-0">
-          <Avatar
-            user={{
-              first_name: message.first_name,
-              last_name: message.last_name,
-              avatar_url: message.avatar_url,
-            }}
-            size="sm"
-          />
-        </div>
+// Channel Item Component
+const ChannelItem = ({ channel, isActive, onClick, onCall }) => (
+  <div
+    className={`group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+      isActive
+        ? 'bg-primary-100 text-primary-900'
+        : 'text-gray-700 hover:bg-gray-100'
+    }`}
+    onClick={onClick}
+  >
+    <div className="flex items-center space-x-2 flex-1 min-w-0">
+      <HashtagIcon className="h-4 w-4 flex-shrink-0" />
+      <span className="text-sm font-medium truncate">{channel.name}</span>
+      {channel.unread_count > 0 && (
+        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+          {channel.unread_count}
+        </span>
       )}
-      <div className="flex-1 min-w-0">
-        {showAvatar && (
-          <div className="flex items-center space-x-2 mb-1">
-            <span className="text-sm font-medium text-gray-900">
-              {message.first_name} {message.last_name}
-            </span>
-            <span className="text-xs text-gray-500">
-              {formatChatTime(message.created_at)}
-            </span>
-          </div>
-        )}
-        <div className="text-sm text-gray-700 whitespace-pre-wrap">
-          {message.content}
-        </div>
-      </div>
     </div>
-  );
-};
-
-const ChannelItem = ({ channel, isActive, onClick, isProjectChannel = false, className = "" }) => {
-  return (
     <button
-      onClick={onClick}
-      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors duration-150 ${
-        isActive 
-          ? 'bg-primary-100 text-primary-700' 
-          : 'text-gray-700 hover:bg-gray-100'
-      } ${className}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onCall();
+      }}
+      className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-gray-600 rounded transition-opacity"
+      title="Start call"
     >
-      <div className="flex-shrink-0">
-        {channel.type === 'direct' ? (
-          <UserGroupIcon className="h-4 w-4" />
-        ) : channel.type === 'project' ? (
-          <div className="h-4 w-4 bg-primary-500 rounded text-white flex items-center justify-center text-xs font-bold">
-            P
-          </div>
-        ) : (
-          <HashtagIcon className="h-4 w-4" />
-        )}
-      </div>
+      <PhoneIcon className="h-4 w-4" />
+    </button>
+  </div>
+);
+
+// User Item Component for DMs
+const UserItem = ({ user, onClick, onCall }) => (
+  <div
+    className="group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-gray-700 hover:bg-gray-100 transition-colors"
+    onClick={onClick}
+  >
+    <div className="flex items-center space-x-3 flex-1 min-w-0">
+      <Avatar user={user} size="sm" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">
-          {channel.name}
+          {user.first_name} {user.last_name}
         </p>
-        {isProjectChannel && channel.project_name && (
-          <p className="text-xs text-gray-400 truncate">
-            {channel.project_name}
-          </p>
-        )}
-        {channel.last_message && (
-          <p className="text-xs text-gray-500 truncate">
-            {truncateText(channel.last_message, 30)}
-          </p>
-        )}
+        <p className="text-xs text-gray-500 truncate">{user.email}</p>
       </div>
-      <div className="flex-shrink-0 text-xs text-gray-400">
-        {channel.last_message_at && formatChatTime(channel.last_message_at)}
-      </div>
-    </button>
-  );
-};
-
-// Component for hierarchical project channel groups
-const ProjectChannelGroup = ({ project, isExpanded, onToggle, activeChannelId, onChannelClick }) => {
-  return (
-    <div className="space-y-1">
-      {/* Main Project Channel */}
-      <div className="flex items-center">
-        <button
-          onClick={onToggle}
-          className="p-1 hover:bg-gray-100 rounded mr-1"
-        >
-          {isExpanded ? (
-            <ChevronDownIcon className="h-3 w-3 text-gray-400" />
-          ) : (
-            <ChevronRightIcon className="h-3 w-3 text-gray-400" />
-          )}
-        </button>
-        <ChannelItem
-          channel={project}
-          isActive={project.id === activeChannelId}
-          onClick={() => onChannelClick(project.id)}
-          isProjectChannel={true}
-          className="flex-1"
-        />
-      </div>
-
-      {/* Sub-channels */}
-      {isExpanded && project.subChannels && project.subChannels.length > 0 && (
-        <div className="ml-6 space-y-1">
-          {project.subChannels.map((subChannel) => (
-            <SubChannelItem
-              key={subChannel.id}
-              channel={subChannel}
-              isActive={subChannel.id === activeChannelId}
-              onClick={() => onChannelClick(subChannel.id)}
-            />
-          ))}
-        </div>
-      )}
     </div>
-  );
-};
-
-// Component for sub-channels with different styling
-const SubChannelItem = ({ channel, isActive, onClick }) => {
-  const getChannelIcon = (channelName) => {
-    switch (channelName.toLowerCase()) {
-      case 'ui-design':
-        return '🎨';
-      case 'testing':
-        return '🧪';
-      case 'requirements':
-        return '📋';
-      case 'issues':
-        return '🐛';
-      case 'content-creation':
-        return '✍️';
-      case 'analytics':
-        return '📊';
-      default:
-        return '#';
-    }
-  };
-
-  return (
     <button
-      onClick={onClick}
-      className={`w-full flex items-center space-x-2 px-3 py-1.5 rounded-md text-left transition-colors duration-150 text-sm ${
-        isActive 
-          ? 'bg-primary-100 text-primary-700' 
-          : 'text-gray-600 hover:bg-gray-50'
-      }`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onCall();
+      }}
+      className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-gray-600 rounded transition-opacity"
+      title="Start call"
     >
-      <span className="text-xs">{getChannelIcon(channel.name)}</span>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium truncate">
-          {channel.name}
-        </p>
-        {channel.last_message && (
-          <p className="text-xs text-gray-400 truncate">
-            {truncateText(channel.last_message, 25)}
-          </p>
-        )}
-      </div>
-      <div className="flex-shrink-0 text-xs text-gray-400">
-        {channel.last_message_at && formatChatTime(channel.last_message_at)}
-      </div>
+      <PhoneIcon className="h-4 w-4" />
     </button>
-  );
-};
+  </div>
+);
+
+// Project Channel Group Component
+const ProjectChannelGroup = ({ project, isExpanded, onToggle, activeChannelId, onChannelClick, onCall }) => (
+  <div>
+    <div
+      className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-gray-700 hover:bg-gray-100 transition-colors"
+      onClick={onToggle}
+    >
+      <div className="flex items-center space-x-2">
+        {isExpanded ? (
+          <ChevronDownIcon className="h-4 w-4" />
+        ) : (
+          <ChevronRightIcon className="h-4 w-4" />
+        )}
+        <UserGroupIcon className="h-4 w-4" />
+        <span className="text-sm font-medium">{project.name}</span>
+      </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onCall(project);
+        }}
+        className="p-1 text-gray-400 hover:text-gray-600 rounded"
+        title="Start call"
+      >
+        <PhoneIcon className="h-4 w-4" />
+      </button>
+    </div>
+    {isExpanded && project.subChannels && (
+      <div className="ml-6 space-y-1">
+        {project.subChannels.map((subChannel) => (
+          <ChannelItem
+            key={subChannel.id}
+            channel={subChannel}
+            isActive={subChannel.id === activeChannelId}
+            onClick={() => onChannelClick(subChannel.id)}
+            onCall={() => onCall(subChannel)}
+          />
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+// Message Item Component
+const MessageItem = ({ message }) => (
+  <div className="flex items-start space-x-3">
+    <Avatar user={message.user} size="sm" />
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center space-x-2 mb-1">
+        <span className="text-sm font-medium text-gray-900">
+          {message.user?.first_name} {message.user?.last_name}
+        </span>
+        <span className="text-xs text-gray-500">
+          {formatChatTime(message.created_at)}
+        </span>
+      </div>
+      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+        {message.content}
+      </p>
+    </div>
+  </div>
+);
 
 export default Chat;

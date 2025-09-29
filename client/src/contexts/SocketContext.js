@@ -116,6 +116,24 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
+  // Call functionality
+  const initiateCall = (targetUserId, taskId = null) => {
+    if (socket && targetUserId) {
+      socket.emit('initiate_call', {
+        targetUserId,
+        taskId
+      });
+    }
+  };
+
+  const endCall = (targetUserId) => {
+    if (socket && targetUserId) {
+      socket.emit('end_call', {
+        targetUserId
+      });
+    }
+  };
+
   const value = {
     socket,
     isConnected,
