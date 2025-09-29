@@ -24,6 +24,7 @@ import MarketingKanban from './pages/MarketingKanban';
 import MarketingList from './pages/MarketingList';
 import SalesKanban from './pages/SalesKanban';
 import SalesList from './pages/SalesList';
+import FeatureDemo from './components/FeatureDemo';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -112,6 +113,9 @@ function App() {
                   {/* Settings Routes */}
                   <Route path="settings" element={<Settings />} />
                   <Route path="settings/:tab" element={<Settings />} />
+                  
+                  {/* Feature Demo Route */}
+                  <Route path="demo" element={<FeatureDemo />} />
                 </Route>
                 
                 {/* Catch all route */}

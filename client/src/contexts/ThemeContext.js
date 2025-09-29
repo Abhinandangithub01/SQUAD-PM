@@ -141,6 +141,9 @@ export const ThemeProvider = ({ children }) => {
     
     if (savedTheme && themes[savedTheme]) {
       setCurrentTheme(savedTheme);
+    } else {
+      // Apply default theme immediately
+      setCurrentTheme('default');
     }
     
     if (savedBranding) {
