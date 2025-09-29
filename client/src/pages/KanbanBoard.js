@@ -350,22 +350,19 @@ const KanbanBoard = () => {
       });
     }, 100);
 
-    return () => clearTimeout(timer);
   }, [kanbanData, draggedTask]);
 
   // Simple drag handlers
   const handleTaskDragStart = (e, task) => {
-    e.stopPropagation(); // Prevent event bubbling
-    console.log('Dragging task:', task.id, task.title); // Debug log
-    setDraggedTask({ ...task }); // Create a copy to avoid reference issues
+    e.stopPropagation();
+    setDraggedTask({ ...task });
     e.dataTransfer.setData('text/plain', task.id);
     e.dataTransfer.setData('application/json', JSON.stringify(task));
     e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleTaskDragEnd = (e) => {
-    e.stopPropagation(); // Prevent event bubbling
-    console.log('Drag ended'); // Debug log
+    e.stopPropagation();
     
     // Reset all drag states
     setDraggedTask(null);
