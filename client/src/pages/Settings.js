@@ -10,8 +10,13 @@ import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
+  SwatchIcon,
+  PhotoIcon,
+  BuildingOfficeIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useForm } from 'react-hook-form';
 import api from '../utils/api';
 import { formatDate, getRoleColor, getRoleLabel } from '../utils/helpers';
@@ -642,74 +647,277 @@ const SecuritySettings = () => {
 };
 
 const PreferencesSettings = () => {
+  const { currentTheme, themes, customBranding, changeTheme, updateBranding } = useTheme();
+  const [brandingForm, setBrandingForm] = useState(customBranding);
   const [preferences, setPreferences] = useState({
-    theme: 'light',
     language: 'en',
     timezone: 'UTC',
     date_format: 'MM/dd/yyyy',
     time_format: '12h',
   });
 
+  const handleThemeChange = (themeName) => {
+    changeTheme(themeName);
+    toast.success(`Theme changed to ${themes[themeName].name}`);
+  };
+
+  const handleBrandingSubmit = (e) => {
+    e.preventDefault();
+    updateBranding(brandingForm);
+    toast.success('Branding updated successfully!');
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setBrandingForm(prev => ({
+          ...prev,
+          logo: event.target.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
-    <div className="p-6">
-      <h2 className="text-lg font-medium text-gray-900 mb-6">Preferences</h2>
-      
-      <div className="space-y-6 max-w-md">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Theme</label>
-          <select
-            value={preferences.theme}
-            onChange={(e) => setPreferences(prev => ({ ...prev, theme: e.target.value }))}
-            className="mt-1 input"
-          >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="system">System</option>
-          </select>
+    <div className="p-6 space-y-8">
+      <div>
+        <h2 className="text-lg font-medium text-gray-900 mb-2">Preferences</h2>
+        <p className="text-gray-600">Customize your workspace appearance and settings</p>
+      </div>
+
+      {/* Theme Selection */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center mb-4">
+          <SwatchIcon className="h-5 w-5 text-primary-600 mr-2" />
+          <h3 className="text-lg font-medium text-gray-900">Theme & Appearance</h3>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          {Object.entries(themes).map(([key, theme]) => (
+            <button
+              key={key}
+              onClick={() => handleThemeChange(key)}
+              className={`relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
+                currentTheme === key
+                  ? 'border-primary-500 bg-primary-50 shadow-md'
+                  : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+              }`}
+            >
+              {/* Theme Preview */}
+              <div className="space-y-2">
+                <div className="flex space-x-1">
+                  <div 
+                    className="w-4 h-4 rounded"
+                    style={{ backgroundColor: theme.primary[500] }}
+                  />
+                  <div 
+                    className="w-4 h-4 rounded"
+                    style={{ backgroundColor: theme.accent }}
+                  />
+                  <div 
+                    className="w-4 h-4 rounded border"
+                    style={{ backgroundColor: theme.background }}
+                  />
+                </div>
+                <p className="text-sm font-medium text-gray-900">{theme.name}</p>
+              </div>
+              
+              {currentTheme === key && (
+                <div className="absolute top-2 right-2">
+                  <CheckIcon className="h-4 w-4 text-primary-600" />
+                </div>
+              )}
+            </button>
+          ))}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Language</label>
-          <select
-            value={preferences.language}
-            onChange={(e) => setPreferences(prev => ({ ...prev, language: e.target.value }))}
-            className="mt-1 input"
-          >
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-          </select>
+        {/* Current Theme Info */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Current Theme</h4>
+          <div className="flex items-center space-x-3">
+            <div className="flex space-x-1">
+              <div 
+                className="w-6 h-6 rounded"
+                style={{ backgroundColor: themes[currentTheme].primary[500] }}
+              />
+              <div 
+                className="w-6 h-6 rounded"
+                style={{ backgroundColor: themes[currentTheme].accent }}
+              />
+            </div>
+            <div>
+              <p className="font-medium text-gray-900">{themes[currentTheme].name}</p>
+              <p className="text-sm text-gray-500">
+                {themes[currentTheme].name === 'Dark Mode' || themes[currentTheme].name === 'Midnight Blue' 
+                  ? 'Dark theme for reduced eye strain' 
+                  : 'Light theme with vibrant colors'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Custom Branding */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center mb-4">
+          <BuildingOfficeIcon className="h-5 w-5 text-primary-600 mr-2" />
+          <h3 className="text-lg font-medium text-gray-900">Custom Branding</h3>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Date Format</label>
-          <select
-            value={preferences.date_format}
-            onChange={(e) => setPreferences(prev => ({ ...prev, date_format: e.target.value }))}
-            className="mt-1 input"
+        <form onSubmit={handleBrandingSubmit} className="space-y-6">
+          {/* Company Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Company Name
+            </label>
+            <input
+              type="text"
+              value={brandingForm.companyName}
+              onChange={(e) => setBrandingForm(prev => ({
+                ...prev,
+                companyName: e.target.value
+              }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="Your Company Name"
+            />
+          </div>
+
+          {/* Logo Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <PhotoIcon className="h-4 w-4 inline mr-2" />
+              Company Logo
+            </label>
+            <div className="flex items-center space-x-4">
+              {brandingForm.logo && (
+                <img
+                  src={brandingForm.logo}
+                  alt="Company Logo"
+                  className="h-16 w-16 object-contain rounded-lg border border-gray-200 bg-white p-2"
+                />
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Upload a logo (PNG, JPG, SVG recommended, max 2MB)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Preview</h4>
+            <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border">
+              {brandingForm.logo ? (
+                <img
+                  src={brandingForm.logo}
+                  alt="Logo"
+                  className="h-8 w-8 object-contain"
+                />
+              ) : (
+                <div className="h-8 w-8 bg-primary-100 rounded flex items-center justify-center">
+                  <BuildingOfficeIcon className="h-5 w-5 text-primary-600" />
+                </div>
+              )}
+              <span className="font-semibold text-gray-900">
+                {brandingForm.companyName}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors font-medium"
           >
-            <option value="MM/dd/yyyy">MM/dd/yyyy</option>
-            <option value="dd/MM/yyyy">dd/MM/yyyy</option>
-            <option value="yyyy-MM-dd">yyyy-MM-dd</option>
-          </select>
+            Save Branding
+          </button>
+        </form>
+      </div>
+
+      {/* Other Preferences */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center mb-4">
+          <Cog6ToothIcon className="h-5 w-5 text-primary-600 mr-2" />
+          <h3 className="text-lg font-medium text-gray-900">General Settings</h3>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Time Format</label>
-          <select
-            value={preferences.time_format}
-            onChange={(e) => setPreferences(prev => ({ ...prev, time_format: e.target.value }))}
-            className="mt-1 input"
-          >
-            <option value="12h">12 Hour</option>
-            <option value="24h">24 Hour</option>
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+            <select
+              value={preferences.language}
+              onChange={(e) => setPreferences(prev => ({ ...prev, language: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="en">🇺🇸 English</option>
+              <option value="es">🇪🇸 Spanish</option>
+              <option value="fr">🇫🇷 French</option>
+              <option value="de">🇩🇪 German</option>
+              <option value="it">🇮🇹 Italian</option>
+              <option value="pt">🇵🇹 Portuguese</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+            <select
+              value={preferences.timezone}
+              onChange={(e) => setPreferences(prev => ({ ...prev, timezone: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="UTC">UTC (GMT+0)</option>
+              <option value="EST">Eastern Time (GMT-5)</option>
+              <option value="PST">Pacific Time (GMT-8)</option>
+              <option value="IST">India Standard Time (GMT+5:30)</option>
+              <option value="JST">Japan Standard Time (GMT+9)</option>
+              <option value="CET">Central European Time (GMT+1)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Date Format</label>
+            <select
+              value={preferences.date_format}
+              onChange={(e) => setPreferences(prev => ({ ...prev, date_format: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="MM/dd/yyyy">MM/dd/yyyy (US)</option>
+              <option value="dd/MM/yyyy">dd/MM/yyyy (EU)</option>
+              <option value="yyyy-MM-dd">yyyy-MM-dd (ISO)</option>
+              <option value="dd MMM yyyy">dd MMM yyyy</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Time Format</label>
+            <select
+              value={preferences.time_format}
+              onChange={(e) => setPreferences(prev => ({ ...prev, time_format: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="12h">12 Hour (AM/PM)</option>
+              <option value="24h">24 Hour</option>
+            </select>
+          </div>
         </div>
 
-        <button className="btn-primary">
-          Save Preferences
-        </button>
+        <div className="mt-6">
+          <button 
+            onClick={() => toast.success('General preferences saved!')}
+            className="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded-lg transition-colors font-medium"
+          >
+            Save General Settings
+          </button>
+        </div>
       </div>
     </div>
   );
