@@ -26,9 +26,24 @@ import { useAuth } from '../contexts/AuthContext';
 import { formatRelativeTime, getPriorityColor, getStatusColor } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
+import TimeTrackingWidget from '../components/TimeTrackingWidget';
+import MilestoneCelebration from '../components/MilestoneCelebration';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const [celebrationMilestone, setCelebrationMilestone] = useState(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  // Demo milestone for testing
+  const demoMilestone = {
+    id: 'milestone-1',
+    title: 'MVP Development Complete',
+    description: 'Successfully completed the minimum viable product with all core features implemented.',
+    due_date: new Date().toISOString(),
+    completed_tasks: 15,
+    progress: 100,
+    team_members: 5,
+  };
 
   // Fetch dashboard data
   const { data: dashboardData, isLoading } = useQuery({
@@ -283,6 +298,26 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Time Tracking Widget */}
+          <TimeTrackingWidget />
+
+          {/* Milestone Celebration Demo */}
+          <div className="card p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">🎉 Celebrations</h3>
+            <button
+              onClick={() => {
+                setCelebrationMilestone(demoMilestone);
+                setShowCelebration(true);
+              }}
+              className="w-full px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-medium rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all transform hover:scale-105"
+            >
+              🏆 Celebrate Milestone (Demo)
+            </button>
+            <p className="text-sm text-gray-500 mt-2">
+              Click to see milestone celebration animation!
+            </p>
+          </div>
+
           {/* Quick Actions */}
           <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
@@ -314,6 +349,16 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Milestone Celebration Modal */}
+      <MilestoneCelebration
+        milestone={celebrationMilestone}
+        isVisible={showCelebration}
+        onClose={() => {
+          setShowCelebration(false);
+          setCelebrationMilestone(null);
+        }}
+      />
     </div>
   );
 };

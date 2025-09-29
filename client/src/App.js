@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { TimeTrackingProvider } from './contexts/TimeTrackingContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
@@ -38,8 +40,10 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <Router>
-          <AuthProvider>
-            <SocketProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <TimeTrackingProvider>
+                <SocketProvider>
               <div className="App">
               <Toaster
                 position="top-right"
@@ -114,9 +118,11 @@ function App() {
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </div>
-          </SocketProvider>
-        </AuthProvider>
-      </Router>
+                </SocketProvider>
+              </TimeTrackingProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </Router>
     </QueryClientProvider>
     </ErrorBoundary>
   );

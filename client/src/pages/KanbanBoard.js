@@ -28,6 +28,8 @@ import { Menu } from '@headlessui/react';
 import api from '../utils/api';
 import { formatDate, getPriorityColor, truncateText } from '../utils/helpers';
 import { mockProjects } from '../utils/mockData';
+import TaskTimer from '../components/TaskTimer';
+import EffortEstimation from '../components/EffortEstimation';
 import CreateTaskModal from '../components/CreateTaskModal';
 import TaskDetailModal from '../components/TaskDetailModal';
 import toast from 'react-hot-toast';
@@ -1095,6 +1097,26 @@ const KanbanBoard = () => {
                           {truncateText(task.description, 100)}
                         </p>
                       )}
+
+                      {/* Timer and Estimation */}
+                      <div className="mb-3 space-y-2">
+                        <TaskTimer task={task} size="sm" showStats={false} />
+                        <EffortEstimation 
+                          task={task} 
+                          size="sm"
+                          onUpdate={(updatedTask) => {
+                            // Update task in kanbanData
+                            setKanbanData(prev => ({
+                              ...prev,
+                              columns: prev.columns.map(col => ({
+                                ...col,
+                                tasks: col.tasks.map(t => t.id === updatedTask.id ? updatedTask : t)
+                              }))
+                            }));
+                            toast.success('Task estimation updated!');
+                          }}
+                        />
+                      </div>
 
                       {/* Task Meta */}
                       <div className="flex items-center justify-between text-xs text-gray-500">

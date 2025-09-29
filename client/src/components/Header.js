@@ -7,16 +7,21 @@ import {
   UserCircleIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
+  SwatchIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useQuery } from '@tanstack/react-query';
 import api from '../utils/api';
 import Avatar from './Avatar';
 import NotificationDropdown from './NotificationDropdown';
+import ThemeSettings from './ThemeSettings';
 
 const Header = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
+  const { customBranding } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showThemeSettings, setShowThemeSettings] = useState(false);
 
   // Fetch unread notifications count
   const { data: notificationsData } = useQuery({
@@ -76,6 +81,15 @@ const Header = ({ onMenuClick }) => {
 
         {/* Right side */}
         <div className="ml-4 flex items-center md:ml-6 space-x-4">
+          {/* Theme Settings Button */}
+          <button
+            onClick={() => setShowThemeSettings(true)}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Theme Settings"
+          >
+            <SwatchIcon className="h-5 w-5" />
+          </button>
+
           {/* Notifications */}
           <NotificationDropdown 
             unreadCount={notificationsData?.unread_count || 0}
@@ -154,6 +168,12 @@ const Header = ({ onMenuClick }) => {
           </Menu>
         </div>
       </div>
+
+      {/* Theme Settings Modal */}
+      <ThemeSettings
+        isOpen={showThemeSettings}
+        onClose={() => setShowThemeSettings(false)}
+      />
     </div>
   );
 };
