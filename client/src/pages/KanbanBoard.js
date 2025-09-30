@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
+import QuickActionMenu from '../components/QuickActionMenu';
 import { 
   ArrowLeftIcon,
   PlusIcon,
@@ -59,6 +60,46 @@ const KanbanBoard = () => {
   const filterButtonRef = useRef(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, task: null });
+  const [hoveredTask, setHoveredTask] = useState(null);
+  const [showQuickMenu, setShowQuickMenu] = useState(false);
+  const [quickMenuPosition, setQuickMenuPosition] = useState({ top: 0, left: 0 });
+  const [quickMenuTask, setQuickMenuTask] = useState(null);
+  const taskCardRefs = useRef({});
+
+  // Keyboard shortcuts for hovered task
+  useEffect(() => {
+    if (!hoveredTask) return;
+
+    const handleKeyPress = (e) => {
+      // Don't trigger if typing in an input
+      if (
+        e.target.tagName === 'INPUT' ||
+        e.target.tagName === 'TEXTAREA' ||
+        e.target.isContentEditable
+      ) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+      const cardRef = taskCardRefs.current[hoveredTask.id];
+
+      if (key === 'm' || key === 'd' || key === 't') {
+        e.preventDefault();
+        if (cardRef) {
+          const rect = cardRef.getBoundingClientRect();
+          setQuickMenuPosition({
+            top: rect.bottom + 8,
+            left: rect.left,
+          });
+          setQuickMenuTask(hoveredTask);
+          setShowQuickMenu(key);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [hoveredTask]);
 
   // Close filter dropdown when clicking outside
   useEffect(() => {
@@ -708,6 +749,58 @@ const KanbanBoard = () => {
     handlePrepareTasksForChat([task.id]);
   };
 
+  // Quick menu handlers
+  const handleQuickAssign = (user) => {
+    if (!quickMenuTask) return;
+    
+    // Update task with new assignee
+    const updatedColumns = kanbanData.columns.map(col => ({
+      ...col,
+      tasks: col.tasks.map(t => 
+        t.id === quickMenuTask.id 
+          ? { ...t, assignee_id: user.id, assignee_name: `${user.first_name} ${user.last_name}` }
+          : t
+      )
+    }));
+    
+    setKanbanData({ ...kanbanData, columns: updatedColumns });
+    toast.success(`Assigned to ${user.first_name} ${user.last_name}`);
+  };
+
+  const handleQuickDueDate = (date) => {
+    if (!quickMenuTask) return;
+    
+    // Update task with new due date
+    const updatedColumns = kanbanData.columns.map(col => ({
+      ...col,
+      tasks: col.tasks.map(t => 
+        t.id === quickMenuTask.id 
+          ? { ...t, due_date: date }
+          : t
+      )
+    }));
+    
+    setKanbanData({ ...kanbanData, columns: updatedColumns });
+    toast.success('Due date updated');
+  };
+
+  const handleQuickTags = (tags) => {
+    if (!quickMenuTask) return;
+    
+    // Update task with new tags
+    const updatedColumns = kanbanData.columns.map(col => ({
+      ...col,
+      tasks: col.tasks.map(t => 
+        t.id === quickMenuTask.id 
+          ? { ...t, tags }
+          : t
+      )
+    }));
+    
+    setKanbanData({ ...kanbanData, columns: updatedColumns });
+    toast.success('Tags updated');
+  };
+
   const handleBulkDueDate = (dueDate) => {
     if (!dueDate) return;
     
@@ -1029,19 +1122,30 @@ const KanbanBoard = () => {
                 {column.tasks.map((task) => (
                   <div
                     key={task.id}
+                    ref={(el) => taskCardRefs.current[task.id] = el}
                     data-task-id={task.id}
                     draggable
                     onDragStart={(e) => handleTaskDragStart(e, task)}
                     onDragEnd={handleTaskDragEnd}
                     onContextMenu={(e) => handleContextMenu(e, task)}
-                    className={`bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-md hover:shadow-lg cursor-move group transition-all duration-200 ${
+                    onMouseEnter={() => setHoveredTask(task)}
+                    onMouseLeave={() => setHoveredTask(null)}
+                    className={`relative bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-md hover:shadow-lg cursor-move group transition-all duration-200 ${
                       task.type === 'bug' 
                         ? 'border-2 border-red-400 bg-red-50/90' 
-                        : 'border border-white/40'
+                        : hoveredTask?.id === task.id 
+                          ? 'border-2 border-primary-500' 
+                          : 'border border-white/40'
                     } ${
                       selectedTasks.has(task.id) ? 'ring-2 ring-primary-500 bg-primary-50/90' : ''
                     } ${draggedTask?.id === task.id ? 'opacity-30' : 'opacity-100'}`}
                   >
+                    {/* Keyboard Hint Badge */}
+                    {hoveredTask?.id === task.id && (
+                      <div className="absolute -top-2 -right-2 bg-primary-600 text-white text-xs px-2 py-1 rounded-full shadow-lg animate-pulse z-10">
+                        M · D · T
+                      </div>
+                    )}
                     {/* Task Header with Checkbox and Actions */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center space-x-2">
@@ -1307,6 +1411,33 @@ const KanbanBoard = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Quick Action Menu */}
+      {showQuickMenu && quickMenuTask && (
+        <QuickActionMenu
+          task={quickMenuTask}
+          position={quickMenuPosition}
+          onAssign={handleQuickAssign}
+          onDueDate={handleQuickDueDate}
+          onTags={handleQuickTags}
+          onClose={() => {
+            setShowQuickMenu(false);
+            setQuickMenuTask(null);
+          }}
+          teamMembers={[
+            { id: 1, first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+            { id: 2, first_name: 'Jane', last_name: 'Smith', email: 'jane@example.com' },
+            { id: 3, first_name: 'Mike', last_name: 'Johnson', email: 'mike@example.com' },
+          ]}
+          availableTags={[
+            { id: 1, name: 'Frontend', color: '#3b82f6' },
+            { id: 2, name: 'Backend', color: '#10b981' },
+            { id: 3, name: 'Design', color: '#f59e0b' },
+            { id: 4, name: 'Bug', color: '#ef4444' },
+            { id: 5, name: 'Feature', color: '#8b5cf6' },
+          ]}
+        />
       )}
     </div>
   );
