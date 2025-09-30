@@ -65,6 +65,7 @@ const KanbanBoard = () => {
   const [quickMenuPosition, setQuickMenuPosition] = useState({ top: 0, left: 0 });
   const [quickMenuTask, setQuickMenuTask] = useState(null);
   const taskCardRefs = useRef({});
+  const scrollContainerRef = useRef(null);
 
   // Keyboard shortcuts for hovered task
   useEffect(() => {
@@ -87,10 +88,31 @@ const KanbanBoard = () => {
         e.preventDefault();
         if (cardRef) {
           const rect = cardRef.getBoundingClientRect();
-          setQuickMenuPosition({
-            top: rect.bottom + 8,
-            left: rect.left,
-          });
+          const menuWidth = 320;
+          const windowWidth = window.innerWidth;
+          const windowHeight = window.innerHeight;
+          
+          // Try to position beside the card (to the right)
+          let left = rect.right + 8;
+          let top = rect.top;
+          
+          // If menu would go off-screen to the right, position to the left
+          if (left + menuWidth > windowWidth) {
+            left = rect.left - menuWidth - 8;
+          }
+          
+          // If still off-screen to the left, position below
+          if (left < 0) {
+            left = rect.left;
+            top = rect.bottom + 8;
+          }
+          
+          // Ensure menu doesn't go off bottom of screen
+          if (top + 400 > windowHeight) {
+            top = Math.max(8, windowHeight - 408);
+          }
+          
+          setQuickMenuPosition({ top, left });
           setQuickMenuTask(hoveredTask);
           // Directly open the specific menu based on key pressed
           if (key === 'm') {
@@ -107,6 +129,63 @@ const KanbanBoard = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [hoveredTask]);
+
+  // Update menu position on scroll
+  useEffect(() => {
+    if (!showQuickMenu || !quickMenuTask) return;
+
+    const updateMenuPosition = () => {
+      const cardRef = taskCardRefs.current[quickMenuTask.id];
+      if (cardRef) {
+        const rect = cardRef.getBoundingClientRect();
+        const menuWidth = 320;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        // Try to position beside the card (to the right)
+        let left = rect.right + 8;
+        let top = rect.top;
+        
+        // If menu would go off-screen to the right, position to the left
+        if (left + menuWidth > windowWidth) {
+          left = rect.left - menuWidth - 8;
+        }
+        
+        // If still off-screen to the left, position below
+        if (left < 0) {
+          left = rect.left;
+          top = rect.bottom + 8;
+        }
+        
+        // Ensure menu doesn't go off bottom of screen
+        if (top + 400 > windowHeight) {
+          top = Math.max(8, windowHeight - 408);
+        }
+        
+        setQuickMenuPosition({ top, left });
+      }
+    };
+
+    // Update on scroll
+    const handleScroll = () => {
+      updateMenuPosition();
+    };
+
+    // Find all scrollable containers
+    const scrollContainers = document.querySelectorAll('.overflow-y-auto, .overflow-auto');
+    scrollContainers.forEach(container => {
+      container.addEventListener('scroll', handleScroll);
+    });
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      scrollContainers.forEach(container => {
+        container.removeEventListener('scroll', handleScroll);
+      });
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [showQuickMenu, quickMenuTask]);
 
   // Close filter dropdown when clicking outside
   useEffect(() => {

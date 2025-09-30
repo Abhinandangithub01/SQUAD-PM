@@ -29,11 +29,17 @@ const QuickActionMenu = ({
   const [selectedDate, setSelectedDate] = useState(task.due_date || '');
   const [selectedTags, setSelectedTags] = useState(task.tags || []);
   const menuRef = useRef(null);
+  const [menuPosition, setMenuPosition] = useState(position);
 
   const bgColor = isDarkMode() ? 'var(--color-surface)' : '#ffffff';
   const borderColor = isDarkMode() ? 'var(--color-border)' : '#e5e7eb';
   const textColor = isDarkMode() ? 'var(--color-text)' : '#111827';
   const textSecondary = isDarkMode() ? 'var(--color-text-secondary)' : '#6b7280';
+
+  // Update position when prop changes
+  useEffect(() => {
+    setMenuPosition(position);
+  }, [position]);
 
   // Close on click outside
   useEffect(() => {
@@ -86,8 +92,8 @@ const QuickActionMenu = ({
       style={{
         backgroundColor: bgColor,
         borderColor: '#3b82f6',
-        top: `${position.top}px`,
-        left: `${position.left}px`,
+        top: `${menuPosition.top}px`,
+        left: `${menuPosition.left}px`,
         minWidth: '280px',
         maxWidth: '320px',
       }}
