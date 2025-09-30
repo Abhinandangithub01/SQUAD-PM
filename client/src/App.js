@@ -25,7 +25,7 @@ const Projects = lazy(() => import('./pages/Projects'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const KanbanBoard = lazy(() => import('./pages/KanbanBoard'));
 const ListView = lazy(() => import('./pages/ListView'));
-const GanttChart = lazy(() => import('./components/GanttChart'));
+const GanttChart = lazy(() => import('./components/EnhancedGanttChart'));
 const Files = lazy(() => import('./pages/Files'));
 const Chat = lazy(() => import('./pages/Chat'));
 const Analytics = lazy(() => import('./pages/Analytics'));
