@@ -297,6 +297,23 @@
   z-index: 20;
 }
 
+/* Modal overlay styles */
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 99999 !important;
+  pointer-events: auto !important;
+}
+
+.modal-content {
+  position: relative !important;
+  z-index: 100000 !important;
+  pointer-events: auto !important;
+}
+
 /* Print styles */
 @media print {
   .no-print {

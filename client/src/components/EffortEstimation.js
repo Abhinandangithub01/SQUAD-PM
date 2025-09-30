@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ChartBarIcon,
-  ClockIcon,
-  ScaleIcon,
-  InformationCircleIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
 const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
   const [showEstimationModal, setShowEstimationModal] = useState(false);
@@ -107,13 +107,13 @@ const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
       </div>
 
       {/* Estimation Modal */}
-      {showEstimationModal && (
+      {showEstimationModal && createPortal(
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4"
+          className="modal-overlay bg-black bg-opacity-50 flex items-center justify-center p-4"
           onClick={() => setShowEstimationModal(false)}
         >
           <div 
-            className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative"
+            className="modal-content bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -300,7 +300,8 @@ const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
