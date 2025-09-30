@@ -3,8 +3,10 @@ import { createPortal } from 'react-dom';
 import {
   ChartBarIcon,
   XMarkIcon,
+  ScaleIcon,
+  ClockIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
-import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
 const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
   const [showEstimationModal, setShowEstimationModal] = useState(false);
