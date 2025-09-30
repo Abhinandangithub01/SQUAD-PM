@@ -87,31 +87,45 @@ export const themes = {
   dark: {
     name: 'Dark Mode',
     primary: {
-      50: '#1e293b',
-      100: '#334155',
-      200: '#475569',
-      300: '#64748b',
-      400: '#94a3b8',
-      500: '#cbd5e1',
-      600: '#e2e8f0',
-      700: '#f1f5f9',
-      800: '#f8fafc',
-      900: '#ffffff',
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6',
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a',
     },
     accent: '#10b981',
     background: '#0f172a',
     surface: '#1e293b',
-    text: '#f8fafc',
-    textSecondary: '#cbd5e1',
+    surfaceHover: '#334155',
+    border: '#334155',
+    borderLight: '#475569',
+    text: '#f1f5f9',
+    textSecondary: '#94a3b8',
+    textMuted: '#64748b',
+    success: '#10b981',
+    warning: '#f59e0b',
+    error: '#ef4444',
+    info: '#3b82f6',
+    cardBg: '#1e293b',
+    cardBorder: '#334155',
+    inputBg: '#0f172a',
+    inputBorder: '#334155',
+    sidebarBg: '#0c1420',
+    headerBg: '#1e293b',
   },
   midnight: {
     name: 'Midnight Blue',
     primary: {
-      50: '#0c1426',
-      100: '#1e293b',
-      200: '#334155',
-      300: '#475569',
-      400: '#64748b',
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
       500: '#3b82f6',
       600: '#2563eb',
       700: '#1d4ed8',
@@ -121,8 +135,22 @@ export const themes = {
     accent: '#06b6d4',
     background: '#020617',
     surface: '#0f172a',
+    surfaceHover: '#1e293b',
+    border: '#1e293b',
+    borderLight: '#334155',
     text: '#f8fafc',
     textSecondary: '#cbd5e1',
+    textMuted: '#64748b',
+    success: '#10b981',
+    warning: '#f59e0b',
+    error: '#ef4444',
+    info: '#3b82f6',
+    cardBg: '#0f172a',
+    cardBorder: '#1e293b',
+    inputBg: '#020617',
+    inputBorder: '#1e293b',
+    sidebarBg: '#000000',
+    headerBg: '#0f172a',
   }
 };
 
@@ -160,20 +188,46 @@ export const ThemeProvider = ({ children }) => {
     const theme = themes[currentTheme];
     const root = document.documentElement;
 
-    // Apply CSS custom properties
+    // Apply CSS custom properties for primary colors
     Object.entries(theme.primary).forEach(([key, value]) => {
       root.style.setProperty(`--color-primary-${key}`, value);
     });
 
+    // Apply all theme colors
     root.style.setProperty('--color-accent', theme.accent);
     root.style.setProperty('--color-background', theme.background);
     root.style.setProperty('--color-surface', theme.surface);
+    root.style.setProperty('--color-surface-hover', theme.surfaceHover || theme.surface);
+    root.style.setProperty('--color-border', theme.border || '#e5e7eb');
+    root.style.setProperty('--color-border-light', theme.borderLight || '#f3f4f6');
     root.style.setProperty('--color-text', theme.text);
     root.style.setProperty('--color-text-secondary', theme.textSecondary);
+    root.style.setProperty('--color-text-muted', theme.textMuted || theme.textSecondary);
+    
+    // Status colors
+    root.style.setProperty('--color-success', theme.success || '#10b981');
+    root.style.setProperty('--color-warning', theme.warning || '#f59e0b');
+    root.style.setProperty('--color-error', theme.error || '#ef4444');
+    root.style.setProperty('--color-info', theme.info || '#3b82f6');
+    
+    // Component-specific colors
+    root.style.setProperty('--color-card-bg', theme.cardBg || theme.surface);
+    root.style.setProperty('--color-card-border', theme.cardBorder || theme.border || '#e5e7eb');
+    root.style.setProperty('--color-input-bg', theme.inputBg || theme.background);
+    root.style.setProperty('--color-input-border', theme.inputBorder || theme.border || '#e5e7eb');
+    root.style.setProperty('--color-sidebar-bg', theme.sidebarBg || theme.surface);
+    root.style.setProperty('--color-header-bg', theme.headerBg || theme.surface);
 
-    // Update body background
+    // Update body background and text
     document.body.style.backgroundColor = theme.background;
     document.body.style.color = theme.text;
+    
+    // Add dark mode class to body
+    if (isDarkMode()) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
 
     // Save to localStorage
     localStorage.setItem('app-theme', currentTheme);

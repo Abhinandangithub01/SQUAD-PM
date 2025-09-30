@@ -314,6 +314,131 @@
   pointer-events: auto !important;
 }
 
+/* Dark Mode Styles */
+.dark-mode {
+  color-scheme: dark;
+}
+
+/* Dark mode component overrides */
+.dark-mode .bg-white {
+  background-color: var(--color-surface) !important;
+}
+
+.dark-mode .bg-gray-50 {
+  background-color: var(--color-surface) !important;
+}
+
+.dark-mode .bg-gray-100 {
+  background-color: var(--color-surface-hover) !important;
+}
+
+.dark-mode .text-gray-900 {
+  color: var(--color-text) !important;
+}
+
+.dark-mode .text-gray-700 {
+  color: var(--color-text) !important;
+}
+
+.dark-mode .text-gray-600 {
+  color: var(--color-text-secondary) !important;
+}
+
+.dark-mode .text-gray-500 {
+  color: var(--color-text-muted) !important;
+}
+
+.dark-mode .border-gray-200 {
+  border-color: var(--color-border) !important;
+}
+
+.dark-mode .border-gray-300 {
+  border-color: var(--color-border-light) !important;
+}
+
+/* Dark mode card styles */
+.dark-mode .shadow,
+.dark-mode .shadow-sm,
+.dark-mode .shadow-md,
+.dark-mode .shadow-lg {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Dark mode input styles */
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background-color: var(--color-input-bg) !important;
+  border-color: var(--color-input-border) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+  color: var(--color-text-muted) !important;
+}
+
+/* Dark mode button styles */
+.dark-mode button:not(.bg-primary-600):not(.bg-green-600):not(.bg-red-600):not(.bg-blue-600) {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.dark-mode button:hover:not(.bg-primary-600):not(.bg-green-600):not(.bg-red-600):not(.bg-blue-600) {
+  background-color: var(--color-border);
+}
+
+/* Dark mode modal styles */
+.dark-mode .modal-content,
+.dark-mode .modal-overlay {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+}
+
+/* Dark mode dropdown styles */
+.dark-mode [role="menu"],
+.dark-mode .dropdown-menu {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Dark mode table styles */
+.dark-mode table {
+  color: var(--color-text);
+}
+
+.dark-mode th {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.dark-mode td {
+  border-color: var(--color-border);
+}
+
+.dark-mode tr:hover {
+  background-color: var(--color-surface-hover);
+}
+
+/* Dark mode scrollbar */
+.dark-mode ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 6px;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
 /* Print styles */
 @media print {
   .no-print {
