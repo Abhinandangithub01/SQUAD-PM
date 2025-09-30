@@ -516,7 +516,13 @@ const EnhancedGanttChart = () => {
                 <MantineProvider>
                   <DatePicker
                     value={editingTask.start_date ? new Date(editingTask.start_date) : null}
-                    onChange={(date) => handleDateEdit('start_date', date ? date.toISOString().split('T')[0] : '')}
+                    onChange={(date) => {
+                      if (date instanceof Date && !isNaN(date)) {
+                        handleDateEdit('start_date', date.toISOString().split('T')[0]);
+                      } else if (date === null) {
+                        handleDateEdit('start_date', '');
+                      }
+                    }}
                     placeholder="Select start date"
                     size="sm"
                     styles={{
@@ -538,7 +544,13 @@ const EnhancedGanttChart = () => {
                 <MantineProvider>
                   <DatePicker
                     value={editingTask.due_date ? new Date(editingTask.due_date) : null}
-                    onChange={(date) => handleDateEdit('due_date', date ? date.toISOString().split('T')[0] : '')}
+                    onChange={(date) => {
+                      if (date instanceof Date && !isNaN(date)) {
+                        handleDateEdit('due_date', date.toISOString().split('T')[0]);
+                      } else if (date === null) {
+                        handleDateEdit('due_date', '');
+                      }
+                    }}
                     placeholder="Select due date"
                     size="sm"
                     minDate={editingTask.start_date ? new Date(editingTask.start_date) : undefined}

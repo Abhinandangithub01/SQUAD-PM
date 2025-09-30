@@ -682,7 +682,13 @@ const TaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
                             <MantineProvider>
                               <DatePicker
                                 value={watch('due_date') ? new Date(watch('due_date')) : null}
-                                onChange={(date) => setValue('due_date', date ? date.toISOString().split('T')[0] : '')}
+                                onChange={(date) => {
+                                  if (date instanceof Date && !isNaN(date)) {
+                                    setValue('due_date', date.toISOString().split('T')[0]);
+                                  } else if (date === null) {
+                                    setValue('due_date', '');
+                                  }
+                                }}
                                 placeholder="Select due date"
                                 size="sm"
                                 styles={{
@@ -734,7 +740,13 @@ const TaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
                             <MantineProvider>
                               <DatePicker
                                 defaultValue={task.due_date ? new Date(task.due_date) : null}
-                                onChange={(date) => handleQuickUpdate('due_date', date ? date.toISOString().split('T')[0] : '')}
+                                onChange={(date) => {
+                                  if (date instanceof Date && !isNaN(date)) {
+                                    handleQuickUpdate('due_date', date.toISOString().split('T')[0]);
+                                  } else if (date === null) {
+                                    handleQuickUpdate('due_date', '');
+                                  }
+                                }}
                                 placeholder="Select due date"
                                 size="sm"
                                 autoFocus
