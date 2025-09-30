@@ -32,19 +32,32 @@ const DoubleNavbar = ({ activeTab, onTabChange, children, userRole }) => {
 
   return (
     <MantineProvider>
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: isDarkMode() ? '#1A1B1E' : '#F8F9FA' }}>
         {/* Settings Navigation - Single Column */}
         <div
           style={{
-            width: '220px',
-            borderRight: `1px solid ${isDarkMode() ? '#2C2E33' : '#e9ecef'}`,
-            backgroundColor: isDarkMode() ? '#25262B' : '#fff',
+            width: '240px',
+            borderRight: `1px solid ${isDarkMode() ? '#2C2E33' : '#DEE2E6'}`,
+            backgroundColor: isDarkMode() ? '#25262B' : '#ffffff',
             display: 'flex',
             flexDirection: 'column',
           }}
         >
+              {/* Header */}
+              <div style={{
+                padding: rem(20),
+                borderBottom: `1px solid ${isDarkMode() ? '#2C2E33' : '#DEE2E6'}`,
+              }}>
+                <Text size="lg" fw={600} style={{ color: isDarkMode() ? '#ffffff' : '#212529' }}>
+                  Settings
+                </Text>
+                <Text size="xs" style={{ color: isDarkMode() ? '#909296' : '#868E96', marginTop: rem(4) }}>
+                  Manage your preferences
+                </Text>
+              </div>
+
               <ScrollArea style={{ flex: 1 }}>
-                <div style={{ padding: rem(12) }}>
+                <div style={{ padding: rem(16) }}>
                   {visibleTabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -55,25 +68,30 @@ const DoubleNavbar = ({ activeTab, onTabChange, children, userRole }) => {
                         onClick={() => handleTabClick(tab)}
                         style={{
                           width: '100%',
-                          padding: `${rem(10)} ${rem(12)}`,
-                          borderRadius: rem(8),
-                          marginBottom: rem(4),
+                          padding: `${rem(12)} ${rem(14)}`,
+                          borderRadius: rem(10),
+                          marginBottom: rem(6),
                           backgroundColor: isActive
-                            ? (isDarkMode() ? '#2C2E33' : '#f1f3f5')
+                            ? (isDarkMode() ? '#2C2E33' : '#E7F5FF')
                             : 'transparent',
-                          transition: 'background-color 150ms ease',
+                          transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
+                          border: isActive 
+                            ? `1px solid ${isDarkMode() ? '#4C6EF5' : '#74C0FC'}`
+                            : '1px solid transparent',
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive) {
-                            e.currentTarget.style.backgroundColor = isDarkMode() ? '#2C2E33' : '#f8f9fa';
+                            e.currentTarget.style.backgroundColor = isDarkMode() ? '#2C2E33' : '#F1F3F5';
+                            e.currentTarget.style.transform = 'translateX(4px)';
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive) {
                             e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateX(0)';
                           }
                         }}
                       >
@@ -109,12 +127,15 @@ const DoubleNavbar = ({ activeTab, onTabChange, children, userRole }) => {
         <div
           style={{
             flex: 1,
-            backgroundColor: isDarkMode() ? '#1A1B1E' : '#f8f9fa',
+            backgroundColor: isDarkMode() ? '#1A1B1E' : '#F8F9FA',
             minHeight: '100vh',
-            padding: rem(24),
+            padding: rem(32),
+            overflowY: 'auto',
           }}
         >
-          {children}
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            {children}
+          </div>
         </div>
       </div>
     </MantineProvider>

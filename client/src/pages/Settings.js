@@ -55,13 +55,11 @@ const Settings = () => {
         onTabChange={setActiveTab}
         userRole={user?.role}
       >
-        <div className="card" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {tab === 'profile' && <ProfileSettings />}
-          {tab === 'users' && user?.role === 'admin' && <UsersSettings />}
-          {tab === 'notifications' && <NotificationSettings />}
-          {tab === 'security' && <SecuritySettings />}
-          {tab === 'preferences' && <PreferencesSettings />}
-        </div>
+        {tab === 'profile' && <ProfileSettings />}
+        {tab === 'users' && user?.role === 'admin' && <UsersSettings />}
+        {tab === 'notifications' && <NotificationSettings />}
+        {tab === 'security' && <SecuritySettings />}
+        {tab === 'preferences' && <PreferencesSettings />}
       </DoubleNavbar>
     </Suspense>
   );
@@ -320,10 +318,12 @@ const UsersSettings = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-2">User Management</h2>
-        <p className="text-sm text-gray-600">
+    <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#212529', marginBottom: '8px' }}>
+          User Management
+        </h2>
+        <p style={{ fontSize: '14px', color: '#868E96' }}>
           Manage team members, roles, and permissions
         </p>
       </div>

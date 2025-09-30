@@ -61,26 +61,29 @@ const MantineSidebar = ({ children, onNotificationClick }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: rem(12),
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                padding: rem(16),
+                backgroundColor: isDarkMode() ? '#1A1B1E' : '#4C6EF5',
+                borderBottom: `1px solid ${isDarkMode() ? '#2C2E33' : 'rgba(255,255,255,0.2)'}`,
               }}
             >
               <div
                 style={{
-                  height: rem(32),
-                  width: rem(32),
-                  backgroundColor: '#ffffff',
-                  borderRadius: rem(8),
+                  height: rem(36),
+                  width: rem(36),
+                  backgroundColor: isDarkMode() ? '#4C6EF5' : '#ffffff',
+                  borderRadius: rem(10),
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  transition: 'transform 200ms ease',
+                  boxShadow: isDarkMode() ? '0 2px 8px rgba(76, 110, 245, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.08)',
                 }}
               >
                 <svg
-                  style={{ height: rem(20), width: rem(20), color: '#667eea' }}
+                  style={{ 
+                    height: rem(22), 
+                    width: rem(22), 
+                    color: isDarkMode() ? '#ffffff' : '#4C6EF5'
+                  }}
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -91,9 +94,9 @@ const MantineSidebar = ({ children, onNotificationClick }) => {
                 size="xs"
                 fw={700}
                 style={{
-                  color: '#ffffff',
-                  marginTop: rem(4),
-                  letterSpacing: '0.5px',
+                  color: isDarkMode() ? '#C1C2C5' : '#ffffff',
+                  marginTop: rem(6),
+                  letterSpacing: '1px',
                 }}
               >
                 SQUAD
@@ -118,22 +121,27 @@ const MantineSidebar = ({ children, onNotificationClick }) => {
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
-                          padding: `${rem(12)} ${rem(8)}`,
-                          borderRadius: rem(8),
+                          padding: `${rem(10)} ${rem(8)}`,
+                          borderRadius: rem(12),
                           backgroundColor: isActive
-                            ? (isDarkMode() ? '#2C2E33' : '#EDF2FF')
+                            ? (isDarkMode() ? '#2C2E33' : '#E7F5FF')
                             : 'transparent',
                           cursor: 'pointer',
-                          transition: 'all 150ms ease',
+                          transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                          border: isActive 
+                            ? `1px solid ${isDarkMode() ? '#4C6EF5' : '#74C0FC'}`
+                            : '1px solid transparent',
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive) {
-                            e.currentTarget.style.backgroundColor = isDarkMode() ? '#25262B' : '#F8F9FA';
+                            e.currentTarget.style.backgroundColor = isDarkMode() ? '#25262B' : '#F1F3F5';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive) {
                             e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateY(0)';
                           }
                         }}
                       >
