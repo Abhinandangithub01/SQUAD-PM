@@ -108,8 +108,14 @@ const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
 
       {/* Estimation Modal */}
       {showEstimationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4"
+          onClick={() => setShowEstimationModal(false)}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center">
@@ -118,9 +124,11 @@ const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
               </h2>
               <button
                 onClick={() => setShowEstimationModal(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                ×
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
 
@@ -206,20 +214,24 @@ const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
                       onClick={() => setEstimation(prev => ({ ...prev, complexity: option.value }))}
                       className={`w-full p-3 rounded-lg border-2 text-left transition-colors ${
                         estimation.complexity === option.value
-                          ? `border-${option.color}-500 bg-${option.color}-50`
+                          ? 'border-blue-500 bg-blue-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className={`font-medium text-${option.color}-700`}>
+                          <div className="font-medium text-gray-900">
                             {option.label}
                           </div>
                           <div className="text-sm text-gray-600">
                             {option.description}
                           </div>
                         </div>
-                        <div className={`w-3 h-3 rounded-full bg-${option.color}-500`}></div>
+                        <div className={`w-3 h-3 rounded-full ${
+                          option.color === 'green' ? 'bg-green-500' :
+                          option.color === 'yellow' ? 'bg-yellow-500' :
+                          option.color === 'red' ? 'bg-red-500' : 'bg-gray-500'
+                        }`}></div>
                       </div>
                     </button>
                   ))}
@@ -238,7 +250,7 @@ const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
                       onClick={() => setEstimation(prev => ({ ...prev, priority: option.value }))}
                       className={`p-3 rounded-lg border-2 font-medium transition-colors ${
                         estimation.priority === option.value
-                          ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+                          ? 'border-primary-500 bg-primary-50 text-primary-700'
                           : 'border-gray-200 hover:border-gray-300 text-gray-700'
                       }`}
                     >
