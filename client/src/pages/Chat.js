@@ -16,14 +16,14 @@ import {
   VideoCameraIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
-import { Menu } from '@headlessui/react';
 import api from '../utils/api';
 import { useSocket } from '../contexts/SocketContext';
 import { formatChatTime, truncateText } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
-import CreateChannelModal from '../components/CreateChannelModal';
+import CreateTaskModal from '../components/CreateTaskModal';
 import CallModal from '../components/CallModal';
+import FloatingCallWidget from '../components/FloatingCallWidget';
 import toast from 'react-hot-toast';
 
 const Chat = () => {
@@ -37,6 +37,8 @@ const Chat = () => {
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' or 'dms'
   const [showCallModal, setShowCallModal] = useState(false);
   const [callTarget, setCallTarget] = useState(null);
+  const [showFloatingCall, setShowFloatingCall] = useState(false);
+  const [activeCallData, setActiveCallData] = useState(null);
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
   const { socket, joinChannel, leaveChannel, sendMessage } = useSocket();
@@ -154,14 +156,69 @@ const Chat = () => {
   };
 
   const startCall = (targetUser, channelId = null) => {
-    setCallTarget(targetUser);
-    setShowCallModal(true);
+    if (!targetUser) {
+      toast.error('No user selected for call');
+      return;
+    }
+    
+    setActiveCallData({
+      participantName: `${targetUser.first_name} ${targetUser.last_name}`,
+      participantId: targetUser.id,
+      channelId: channelId,
+      status: 'Connecting...',
+      type: 'direct'
+    });
+    setShowFloatingCall(true);
+    toast.success(`Starting call with ${targetUser.first_name} ${targetUser.last_name}`);
   };
 
   const startChannelCall = (channel) => {
     // For channel calls, we can implement a group call or select a specific user
+    if (!channel) {
+      toast.error('No channel selected for call');
+      return;
+    }
+    
+    setActiveCallData({
+      participantName: channel.name,
+      participantId: channel.id,
+      channelId: channel.id,
+      status: 'Connecting to channel...',
+      type: 'channel'
+    });
+    setShowFloatingCall(true);
     toast.success(`Starting call for ${channel.name}`);
-    // You can implement group calling logic here
+  };
+
+  // Call control handlers
+  const handleEndCall = () => {
+    setShowFloatingCall(false);
+    setActiveCallData(null);
+    toast.success('Call ended');
+  };
+
+  const handleToggleMute = (isMuted) => {
+    toast.info(isMuted ? 'Microphone muted' : 'Microphone unmuted');
+  };
+
+  const handleToggleVideo = (isVideoOn) => {
+    toast.info(isVideoOn ? 'Video turned on' : 'Video turned off');
+  };
+
+  const handleToggleScreenShare = (isSharing) => {
+    toast.info(isSharing ? 'Screen sharing started' : 'Screen sharing stopped');
+  };
+
+  const handleToggleSpeaker = (isSpeakerOn) => {
+    toast.info(isSpeakerOn ? 'Speaker turned on' : 'Speaker turned off');
+  };
+
+  const handleOpenChat = () => {
+    toast.info('Opening chat...');
+  };
+
+  const handleOpenSettings = () => {
+    toast.info('Opening call settings...');
   };
 
   const filteredUsers = usersData?.users?.filter(user => 
@@ -438,6 +495,20 @@ const Chat = () => {
         isOpen={showCallModal}
         onClose={() => setShowCallModal(false)}
         targetUser={callTarget}
+      />
+
+      {/* Floating Call Widget */}
+      <FloatingCallWidget
+        isVisible={showFloatingCall}
+        onClose={() => setShowFloatingCall(false)}
+        callData={activeCallData}
+        onEndCall={handleEndCall}
+        onToggleMute={handleToggleMute}
+        onToggleVideo={handleToggleVideo}
+        onToggleScreenShare={handleToggleScreenShare}
+        onToggleSpeaker={handleToggleSpeaker}
+        onOpenChat={handleOpenChat}
+        onOpenSettings={handleOpenSettings}
       />
     </div>
   );
