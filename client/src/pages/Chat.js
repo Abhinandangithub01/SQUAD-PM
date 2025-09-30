@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Fragment } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -24,6 +24,8 @@ import Avatar from '../components/Avatar';
 import CreateTaskModal from '../components/CreateTaskModal';
 import CallModal from '../components/CallModal';
 import FloatingCallWidget from '../components/FloatingCallWidget';
+import CreateChannelModal from '../components/CreateChannelModal';
+import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 
 const Chat = () => {
@@ -407,6 +409,42 @@ const Chat = () => {
                       <Menu.Button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
                         <EllipsisVerticalIcon className="h-5 w-5" />
                       </Menu.Button>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <Menu.Item>
+                            {({ active }) => (
+                              <button
+                                className={`${
+                                  active ? 'bg-gray-100' : ''
+                                } block w-full px-4 py-2 text-left text-sm text-gray-700`}
+                                onClick={() => toast.info('Channel info')}
+                              >
+                                Channel Info
+                              </button>
+                            )}
+                          </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
+                              <button
+                                className={`${
+                                  active ? 'bg-gray-100' : ''
+                                } block w-full px-4 py-2 text-left text-sm text-gray-700`}
+                                onClick={() => toast.info('Mute notifications')}
+                              >
+                                Mute Notifications
+                              </button>
+                            )}
+                          </Menu.Item>
+                        </Menu.Items>
+                      </Transition>
                     </Menu>
                   </div>
                 </div>
