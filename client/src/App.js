@@ -1,30 +1,37 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+
+// Import contexts
 import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TimeTrackingProvider } from './contexts/TimeTrackingContext';
+
+// Import essential components (not lazy loaded)
 import ProtectedRoute from './components/ProtectedRoute';
-import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Projects from './pages/Projects';
-import ProjectDetail from './pages/ProjectDetail';
-import KanbanBoard from './pages/KanbanBoard';
-import ListView from './pages/ListView';
-import Files from './pages/Files';
-import Chat from './pages/Chat';
-import Analytics from './pages/Analytics';
-import Settings from './pages/Settings';
-import MarketingKanban from './pages/MarketingKanban';
-import MarketingList from './pages/MarketingList';
-import SalesKanban from './pages/SalesKanban';
-import SalesList from './pages/SalesList';
-import FeatureDemo from './components/FeatureDemo';
+import LoadingSpinner from './components/LoadingSpinner';
+import ErrorBoundary from './components/ErrorBoundary';
+
+// Lazy load pages for better performance
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Projects = lazy(() => import('./pages/Projects'));
+const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
+const KanbanBoard = lazy(() => import('./pages/KanbanBoard'));
+const ListView = lazy(() => import('./pages/ListView'));
+const Files = lazy(() => import('./pages/Files'));
+const Chat = lazy(() => import('./pages/Chat'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Settings = lazy(() => import('./pages/Settings'));
+const MarketingKanban = lazy(() => import('./pages/MarketingKanban'));
+const MarketingList = lazy(() => import('./pages/MarketingList'));
+const SalesKanban = lazy(() => import('./pages/SalesKanban'));
+const SalesList = lazy(() => import('./pages/SalesList'));
+const FeatureDemo = lazy(() => import('./components/FeatureDemo'));
 
 // Create a client
 const queryClient = new QueryClient({
@@ -40,39 +47,41 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <Router>
           <ThemeProvider>
             <AuthProvider>
               <TimeTrackingProvider>
                 <SocketProvider>
+                  <Router>
               <div className="App">
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#fff',
-                    color: '#374151',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.75rem',
-                    padding: '12px 16px',
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#fff',
+                  color: '#374151',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                  border: '1px solid #e5e7eb',
+                },
+                success: {
+                  iconTheme: {
+                    primary: '#10b981',
+                    secondary: '#fff',
                   },
-                  success: {
-                    iconTheme: {
-                      primary: '#10b981',
-                      secondary: '#fff',
-                    },
+                },
+                error: {
+                  iconTheme: {
+                    primary: '#ef4444',
+                    secondary: '#fff',
                   },
-                  error: {
-                    iconTheme: {
-                      primary: '#ef4444',
-                      secondary: '#fff',
-                    },
-                  },
-                }}
-              />
-              
+                },
+              }}
+            />
+            <Suspense fallback={
+              <div className="flex items-center justify-center min-h-screen">
+                <LoadingSpinner size="lg" />
+              </div>
+            }>
               <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
@@ -121,13 +130,14 @@ function App() {
                 {/* Catch all route */}
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
+            </Suspense>
             </div>
+                  </Router>
                 </SocketProvider>
               </TimeTrackingProvider>
             </AuthProvider>
           </ThemeProvider>
-        </Router>
-    </QueryClientProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }
