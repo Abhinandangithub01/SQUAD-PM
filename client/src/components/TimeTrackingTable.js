@@ -114,6 +114,18 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
       const monthAgo = new Date(today);
       monthAgo.setMonth(monthAgo.getMonth() - 1);
       filtered = filtered.filter(entry => new Date(entry.start_time) >= monthAgo);
+    } else if (filterDate === 'last7days') {
+      const daysAgo = new Date(today);
+      daysAgo.setDate(daysAgo.getDate() - 7);
+      filtered = filtered.filter(entry => new Date(entry.start_time) >= daysAgo);
+    } else if (filterDate === 'last30days') {
+      const daysAgo = new Date(today);
+      daysAgo.setDate(daysAgo.getDate() - 30);
+      filtered = filtered.filter(entry => new Date(entry.start_time) >= daysAgo);
+    } else if (filterDate === 'last90days') {
+      const daysAgo = new Date(today);
+      daysAgo.setDate(daysAgo.getDate() - 90);
+      filtered = filtered.filter(entry => new Date(entry.start_time) >= daysAgo);
     }
 
     // Search filter
@@ -155,14 +167,14 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
   // Calculate statistics
   const stats = useMemo(() => {
     const totalDuration = filteredEntries.reduce((sum, entry) => sum + entry.duration, 0);
-    const billableTime = filteredEntries.filter(e => e.billable).reduce((sum, entry) => sum + entry.duration, 0);
     const completedTasks = filteredEntries.filter(e => e.status === 'completed').length;
+    const inProgressTasks = filteredEntries.filter(e => e.status === 'in_progress').length;
     const uniqueUsers = new Set(filteredEntries.map(e => e.user_id)).size;
 
     return {
       totalDuration,
-      billableTime,
       completedTasks,
+      inProgressTasks,
       totalTasks: filteredEntries.length,
       uniqueUsers,
     };
@@ -182,7 +194,7 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
         totalTime,
         entries: userEntries.length,
         completedTasks,
-        billableTime: userEntries.filter(e => e.billable).reduce((sum, entry) => sum + entry.duration, 0),
+        inProgressTasks: userEntries.filter(e => e.status === 'in_progress').length,
       };
     });
     
@@ -194,9 +206,14 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
   const textColor = isDarkMode() ? 'var(--color-text)' : '#111827';
   const textSecondary = isDarkMode() ? 'var(--color-text-secondary)' : '#6b7280';
   const headerBg = isDarkMode() ? 'var(--color-surface-hover)' : '#f9fafb';
+  
+  // Blue theme colors
+  const primaryBlue = '#3b82f6';
+  const lightBlue = '#dbeafe';
+  const darkBlue = '#1e40af';
 
   const exportToCSV = () => {
-    const headers = ['Date', 'User', 'Project', 'Task', 'Duration', 'Status', 'Billable'];
+    const headers = ['Date', 'User', 'Project', 'Task', 'Duration', 'Status'];
     const rows = filteredEntries.map(entry => [
       new Date(entry.start_time).toLocaleDateString(),
       `${entry.user?.first_name} ${entry.user?.last_name}`,
@@ -204,7 +221,6 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
       entry.task_title,
       formatDuration(entry.duration),
       entry.status,
-      entry.billable ? 'Yes' : 'No',
     ]);
 
     const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
@@ -217,23 +233,23 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div 
-          className="rounded-xl p-6 border shadow-sm hover:shadow-md transition-shadow"
-          style={{ backgroundColor: bgColor, borderColor }}
+          className="rounded-xl p-6 border-2 shadow-sm hover:shadow-lg transition-all duration-200"
+          style={{ backgroundColor: bgColor, borderColor: lightBlue }}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSecondary }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: textSecondary }}>
                 Total Time
               </p>
-              <p className="text-3xl font-bold" style={{ color: textColor }}>
+              <p className="text-3xl font-bold" style={{ color: primaryBlue }}>
                 {formatDuration(stats.totalDuration)}
               </p>
             </div>
-            <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+            <div className="p-4 rounded-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${primaryBlue} 0%, ${darkBlue} 100%)` }}>
               <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -242,40 +258,19 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
         </div>
 
         <div 
-          className="rounded-xl p-6 border shadow-sm hover:shadow-md transition-shadow"
-          style={{ backgroundColor: bgColor, borderColor }}
+          className="rounded-xl p-6 border-2 shadow-sm hover:shadow-lg transition-all duration-200"
+          style={{ backgroundColor: bgColor, borderColor: lightBlue }}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSecondary }}>
-                Billable Time
-              </p>
-              <p className="text-3xl font-bold text-green-600">
-                {formatDuration(stats.billableTime)}
-              </p>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
-              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div 
-          className="rounded-xl p-6 border shadow-sm hover:shadow-md transition-shadow"
-          style={{ backgroundColor: bgColor, borderColor }}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSecondary }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: textSecondary }}>
                 Completed Tasks
               </p>
-              <p className="text-3xl font-bold text-purple-600">
-                {stats.completedTasks}<span className="text-xl text-gray-400">/{stats.totalTasks}</span>
+              <p className="text-3xl font-bold" style={{ color: primaryBlue }}>
+                {stats.completedTasks}<span className="text-xl" style={{ color: textSecondary }}>/{stats.totalTasks}</span>
               </p>
             </div>
-            <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+            <div className="p-4 rounded-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${primaryBlue} 0%, ${darkBlue} 100%)` }}>
               <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -284,19 +279,40 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
         </div>
 
         <div 
-          className="rounded-xl p-6 border shadow-sm hover:shadow-md transition-shadow"
-          style={{ backgroundColor: bgColor, borderColor }}
+          className="rounded-xl p-6 border-2 shadow-sm hover:shadow-lg transition-all duration-200"
+          style={{ backgroundColor: bgColor, borderColor: lightBlue }}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSecondary }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: textSecondary }}>
+                In Progress
+              </p>
+              <p className="text-3xl font-bold" style={{ color: primaryBlue }}>
+                {stats.inProgressTasks}
+              </p>
+            </div>
+            <div className="p-4 rounded-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${primaryBlue} 0%, ${darkBlue} 100%)` }}>
+              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div 
+          className="rounded-xl p-6 border-2 shadow-sm hover:shadow-lg transition-all duration-200"
+          style={{ backgroundColor: bgColor, borderColor: lightBlue }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: textSecondary }}>
                 Active Users
               </p>
-              <p className="text-3xl font-bold text-orange-600">
+              <p className="text-3xl font-bold" style={{ color: primaryBlue }}>
                 {stats.uniqueUsers}
               </p>
             </div>
-            <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+            <div className="p-4 rounded-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${primaryBlue} 0%, ${darkBlue} 100%)` }}>
               <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -307,8 +323,8 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
 
       {/* User Progress Cards (Team View) */}
       {viewMode === 'team' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Object.values(userStats).map(({ user, totalTime, entries, completedTasks, billableTime }) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Object.values(userStats).map(({ user, totalTime, entries, completedTasks, inProgressTasks }) => (
             <div
               key={user.id}
               className="rounded-xl p-5 border shadow-sm hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
@@ -335,43 +351,43 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
-                      <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="p-1.5 rounded-lg" style={{ backgroundColor: lightBlue }}>
+                      <svg className="h-4 w-4" style={{ color: primaryBlue }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <span className="text-xs font-medium" style={{ color: textSecondary }}>Total</span>
                   </div>
-                  <span className="font-bold text-sm" style={{ color: textColor }}>
+                  <span className="font-bold text-sm" style={{ color: primaryBlue }}>
                     {formatDuration(totalTime)}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-green-100 rounded-lg">
-                      <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-medium" style={{ color: textSecondary }}>Billable</span>
-                  </div>
-                  <span className="font-bold text-sm text-green-600">
-                    {formatDuration(billableTime)}
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-purple-100 rounded-lg">
-                      <svg className="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="p-1.5 rounded-lg" style={{ backgroundColor: lightBlue }}>
+                      <svg className="h-4 w-4" style={{ color: primaryBlue }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <span className="text-xs font-medium" style={{ color: textSecondary }}>Done</span>
                   </div>
-                  <span className="font-bold text-sm text-purple-600">
+                  <span className="font-bold text-sm" style={{ color: primaryBlue }}>
                     {completedTasks} tasks
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 rounded-lg" style={{ backgroundColor: lightBlue }}>
+                      <svg className="h-4 w-4" style={{ color: primaryBlue }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <span className="text-xs font-medium" style={{ color: textSecondary }}>In Progress</span>
+                  </div>
+                  <span className="font-bold text-sm" style={{ color: primaryBlue }}>
+                    {inProgressTasks} tasks
                   </span>
                 </div>
               </div>
@@ -382,8 +398,8 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
 
       {/* Filters and Search */}
       <div 
-        className="rounded-lg p-4 border"
-        style={{ backgroundColor: bgColor, borderColor }}
+        className="rounded-xl p-6 border-2 shadow-sm"
+        style={{ backgroundColor: bgColor, borderColor: lightBlue }}
       >
         <div className="flex flex-wrap items-center gap-4">
           {/* Search */}
@@ -431,17 +447,21 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
           <select
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2.5 border-2 rounded-lg focus:ring-2 transition-all"
             style={{ 
               backgroundColor: isDarkMode() ? 'var(--color-input-bg)' : '#ffffff',
-              borderColor,
-              color: textColor
+              borderColor: lightBlue,
+              color: textColor,
+              focusRingColor: primaryBlue
             }}
           >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
+            <option value="all">📅 All Time</option>
+            <option value="today">📅 Today</option>
+            <option value="week">📅 This Week</option>
+            <option value="month">📅 This Month</option>
+            <option value="last7days">📅 Last 7 Days</option>
+            <option value="last30days">📅 Last 30 Days</option>
+            <option value="last90days">📅 Last 90 Days</option>
           </select>
 
           {/* Status Filter */}
@@ -463,10 +483,13 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
           {/* Export Button */}
           <button
             onClick={exportToCSV}
-            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            className="flex items-center space-x-2 px-5 py-2.5 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            style={{
+              background: `linear-gradient(135deg, ${primaryBlue} 0%, ${darkBlue} 100%)`
+            }}
           >
             <ArrowDownTrayIcon className="h-5 w-5" />
-            <span>Export</span>
+            <span>Export CSV</span>
           </button>
         </div>
       </div>
@@ -532,12 +555,6 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
                 >
                   Status
                 </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: textSecondary }}
-                >
-                  Billable
-                </th>
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor }}>
@@ -583,11 +600,13 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      entry.status === 'completed'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span 
+                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                      style={{
+                        backgroundColor: entry.status === 'completed' ? lightBlue : lightBlue,
+                        color: entry.status === 'completed' ? primaryBlue : primaryBlue
+                      }}
+                    >
                       {entry.status === 'completed' ? (
                         <CheckCircleIcon className="h-4 w-4 mr-1" />
                       ) : (
@@ -595,13 +614,6 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
                       )}
                       {entry.status === 'completed' ? 'Completed' : 'In Progress'}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {entry.billable ? (
-                      <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <XCircleIcon className="h-5 w-5 text-gray-400" />
-                    )}
                   </td>
                 </tr>
               ))}

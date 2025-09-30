@@ -23,8 +23,6 @@ import Avatar from './Avatar';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Projects', href: '/projects', icon: FolderIcon },
-  { name: 'Marketing', href: '/marketing/kanban', icon: MegaphoneIcon },
-  { name: 'Sales', href: '/sales/kanban', icon: CurrencyDollarIcon },
   { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },

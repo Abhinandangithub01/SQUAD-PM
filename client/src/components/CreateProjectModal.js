@@ -1,6 +1,6 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, MegaphoneIcon, CurrencyDollarIcon, BriefcaseIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import api from '../utils/api';
@@ -8,10 +8,12 @@ import LoadingSpinner from './LoadingSpinner';
 import toast from 'react-hot-toast';
 
 const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -37,8 +39,46 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
   const handleClose = () => {
     if (!createProjectMutation.isLoading) {
       reset();
+      setSelectedTemplate(null);
       onClose();
     }
+  };
+
+  const projectTemplates = [
+    {
+      id: 'blank',
+      name: 'Blank Project',
+      description: 'Start from scratch with an empty project',
+      icon: RocketLaunchIcon,
+      color: '#3B82F6',
+    },
+    {
+      id: 'marketing',
+      name: 'Marketing Campaign',
+      description: 'Manage marketing campaigns and content',
+      icon: MegaphoneIcon,
+      color: '#F59E0B',
+    },
+    {
+      id: 'sales',
+      name: 'Sales Pipeline',
+      description: 'Track leads and sales opportunities',
+      icon: CurrencyDollarIcon,
+      color: '#10B981',
+    },
+    {
+      id: 'development',
+      name: 'Software Development',
+      description: 'Manage development sprints and tasks',
+      icon: BriefcaseIcon,
+      color: '#8B5CF6',
+    },
+  ];
+
+  const handleTemplateSelect = (template) => {
+    setSelectedTemplate(template.id);
+    setValue('template', template.id);
+    setValue('color', template.color);
   };
 
   const projectColors = [
@@ -80,9 +120,9 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <Dialog.Title as="h3" className="text-lg font-medium text-gray-900">
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <Dialog.Title as="h3" className="text-xl font-semibold text-gray-900">
                     Create New Project
                   </Dialog.Title>
                   <button
@@ -95,7 +135,50 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Project Templates */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Choose a Template
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      {projectTemplates.map((template) => {
+                        const Icon = template.icon;
+                        return (
+                          <button
+                            key={template.id}
+                            type="button"
+                            onClick={() => handleTemplateSelect(template)}
+                            className={`p-4 rounded-lg border-2 text-left transition-all hover:shadow-md ${
+                              selectedTemplate === template.id
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div
+                                className="p-2 rounded-lg"
+                                style={{ backgroundColor: `${template.color}20` }}
+                              >
+                                <Icon
+                                  className="h-6 w-6"
+                                  style={{ color: template.color }}
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900 mb-1">
+                                  {template.name}
+                                </h4>
+                                <p className="text-xs text-gray-500">
+                                  {template.description}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                       Project Name *
