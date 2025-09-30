@@ -24,6 +24,7 @@ const Projects = lazy(() => import('./pages/Projects'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const KanbanBoard = lazy(() => import('./pages/KanbanBoard'));
 const ListView = lazy(() => import('./pages/ListView'));
+const GanttChart = lazy(() => import('./components/GanttChart'));
 const Files = lazy(() => import('./pages/Files'));
 const Chat = lazy(() => import('./pages/Chat'));
 const Analytics = lazy(() => import('./pages/Analytics'));
@@ -102,6 +103,7 @@ function App() {
                   <Route path="projects/:projectId" element={<ProjectDetail />} />
                   <Route path="projects/:projectId/kanban" element={<KanbanBoard />} />
                   <Route path="projects/:projectId/list" element={<ListView />} />
+                  <Route path="projects/:projectId/gantt" element={<GanttChart />} />
                   <Route path="projects/:projectId/files" element={<Files />} />
                   
                   {/* Marketing Routes */}

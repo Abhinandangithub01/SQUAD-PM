@@ -206,7 +206,7 @@ const ProjectDetail = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Link
           to={`/projects/${projectId}/kanban`}
           className="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all duration-200"
@@ -226,6 +226,17 @@ const ProjectDetail = () => {
           <div>
             <p className="font-medium text-gray-900">List View</p>
             <p className="text-sm text-gray-500">Spreadsheet-like view</p>
+          </div>
+        </Link>
+
+        <Link
+          to={`/projects/${projectId}/gantt`}
+          className="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all duration-200"
+        >
+          <ChartBarIcon className="h-8 w-8 text-primary-600 mr-3" />
+          <div>
+            <p className="font-medium text-gray-900">Gantt Chart</p>
+            <p className="text-sm text-gray-500">Timeline view</p>
           </div>
         </Link>
 
