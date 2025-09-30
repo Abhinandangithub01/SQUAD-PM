@@ -8,6 +8,10 @@ import {
   PencilIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { DatePicker } from '@mantine/dates';
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import { useTheme } from '../contexts/ThemeContext';
 import { mockTasks } from '../utils/mockData';
 import LoadingSpinner from './LoadingSpinner';
@@ -509,26 +513,45 @@ const EnhancedGanttChart = () => {
                 <label className="block text-sm font-medium mb-2" style={{ color: textColor }}>
                   Start Date
                 </label>
-                <input
-                  type="date"
-                  value={editingTask.start_date ? new Date(editingTask.start_date).toISOString().split('T')[0] : ''}
-                  onChange={(e) => handleDateEdit('start_date', e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor, color: textColor }}
-                />
+                <MantineProvider>
+                  <DatePicker
+                    value={editingTask.start_date ? new Date(editingTask.start_date) : null}
+                    onChange={(date) => handleDateEdit('start_date', date ? date.toISOString().split('T')[0] : '')}
+                    placeholder="Select start date"
+                    size="sm"
+                    styles={{
+                      input: {
+                        borderColor: borderColor,
+                        color: textColor,
+                        borderRadius: '0.5rem',
+                        padding: '0.5rem 0.75rem',
+                      },
+                    }}
+                  />
+                </MantineProvider>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: textColor }}>
                   Due Date
                 </label>
-                <input
-                  type="date"
-                  value={editingTask.due_date ? new Date(editingTask.due_date).toISOString().split('T')[0] : ''}
-                  onChange={(e) => handleDateEdit('due_date', e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor, color: textColor }}
-                />
+                <MantineProvider>
+                  <DatePicker
+                    value={editingTask.due_date ? new Date(editingTask.due_date) : null}
+                    onChange={(date) => handleDateEdit('due_date', date ? date.toISOString().split('T')[0] : '')}
+                    placeholder="Select due date"
+                    size="sm"
+                    minDate={editingTask.start_date ? new Date(editingTask.start_date) : undefined}
+                    styles={{
+                      input: {
+                        borderColor: borderColor,
+                        color: textColor,
+                        borderRadius: '0.5rem',
+                        padding: '0.5rem 0.75rem',
+                      },
+                    }}
+                  />
+                </MantineProvider>
               </div>
             </div>
 
