@@ -26,6 +26,7 @@ import toast from 'react-hot-toast';
 
 // Lazy load UsersTable to avoid circular dependency
 const UsersTable = lazy(() => import('../components/UsersTable'));
+const AddUserModal = lazy(() => import('../components/AddUserModal'));
 
 const Settings = () => {
   const { tab = 'profile' } = useParams();
@@ -262,6 +263,7 @@ const ProfileSettings = () => {
 
 const UsersSettings = () => {
   const queryClient = useQueryClient();
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Fetch users
   const { data: usersData, isLoading } = useQuery({
@@ -269,6 +271,22 @@ const UsersSettings = () => {
     queryFn: async () => {
       const response = await api.get('/users');
       return response.data;
+    },
+  });
+
+  // Add user mutation
+  const addUserMutation = useMutation({
+    mutationFn: async (userData) => {
+      const response = await api.post('/users', userData);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['users']);
+      toast.success('User added successfully');
+      setShowAddModal(false);
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to add user');
     },
   });
 
@@ -311,9 +329,12 @@ const UsersSettings = () => {
     }
   };
 
+  const handleAddUser = async (userData) => {
+    await addUserMutation.mutateAsync(userData);
+  };
+
   const handleInviteUser = () => {
-    // TODO: Implement invite user modal
-    toast.success('Invite user feature coming soon!');
+    setShowAddModal(true);
   };
 
   if (isLoading) {
@@ -339,6 +360,15 @@ const UsersSettings = () => {
           onUpdateUser={handleUpdateUser}
           onDeleteUser={handleDeleteUser}
           onInviteUser={handleInviteUser}
+        />
+      </Suspense>
+
+      {/* Add User Modal */}
+      <Suspense fallback={null}>
+        <AddUserModal
+          opened={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onSubmit={handleAddUser}
         />
       </Suspense>
     </div>
