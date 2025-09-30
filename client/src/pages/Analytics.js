@@ -28,6 +28,8 @@ import {
 import api from '../utils/api';
 import { formatDate } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
+import TimeTrackingTable from '../components/TimeTrackingTable';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Analytics = () => {
   const { projectId } = useParams();
@@ -375,6 +377,22 @@ const Analytics = () => {
           </div>
         </div>
       )}
+
+      {/* Team Time Tracking Section */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+              <ClockIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Team Time Tracking</h2>
+              <p className="text-sm text-gray-500">Monitor team productivity and time allocation</p>
+            </div>
+          </div>
+        </div>
+        <TimeTrackingTable viewMode="team" />
+      </div>
     </div>
   );
 };

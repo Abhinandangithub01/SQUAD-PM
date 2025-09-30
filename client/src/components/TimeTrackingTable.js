@@ -219,79 +219,87 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
   return (
     <div className="space-y-6">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div 
-          className="rounded-lg p-4 border"
+          className="rounded-xl p-6 border shadow-sm hover:shadow-md transition-shadow"
           style={{ backgroundColor: bgColor, borderColor }}
         >
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{ color: textSecondary }}>
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSecondary }}>
                 Total Time
               </p>
-              <p className="text-2xl font-bold mt-1" style={{ color: textColor }}>
+              <p className="text-3xl font-bold" style={{ color: textColor }}>
                 {formatDuration(stats.totalDuration)}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <ClockIcon className="h-6 w-6 text-blue-600" />
+            <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
           </div>
         </div>
 
         <div 
-          className="rounded-lg p-4 border"
+          className="rounded-xl p-6 border shadow-sm hover:shadow-md transition-shadow"
           style={{ backgroundColor: bgColor, borderColor }}
         >
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{ color: textSecondary }}>
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSecondary }}>
                 Billable Time
               </p>
-              <p className="text-2xl font-bold mt-1" style={{ color: textColor }}>
+              <p className="text-3xl font-bold text-green-600">
                 {formatDuration(stats.billableTime)}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-lg">
-              <ChartBarIcon className="h-6 w-6 text-green-600" />
+            <div className="p-4 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
           </div>
         </div>
 
         <div 
-          className="rounded-lg p-4 border"
+          className="rounded-xl p-6 border shadow-sm hover:shadow-md transition-shadow"
           style={{ backgroundColor: bgColor, borderColor }}
         >
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{ color: textSecondary }}>
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSecondary }}>
                 Completed Tasks
               </p>
-              <p className="text-2xl font-bold mt-1" style={{ color: textColor }}>
-                {stats.completedTasks}/{stats.totalTasks}
+              <p className="text-3xl font-bold text-purple-600">
+                {stats.completedTasks}<span className="text-xl text-gray-400">/{stats.totalTasks}</span>
               </p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <CheckCircleIcon className="h-6 w-6 text-purple-600" />
+            <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
           </div>
         </div>
 
         <div 
-          className="rounded-lg p-4 border"
+          className="rounded-xl p-6 border shadow-sm hover:shadow-md transition-shadow"
           style={{ backgroundColor: bgColor, borderColor }}
         >
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{ color: textSecondary }}>
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSecondary }}>
                 Active Users
               </p>
-              <p className="text-2xl font-bold mt-1" style={{ color: textColor }}>
+              <p className="text-3xl font-bold text-orange-600">
                 {stats.uniqueUsers}
               </p>
             </div>
-            <div className="p-3 bg-orange-100 rounded-lg">
-              <UserIcon className="h-6 w-6 text-orange-600" />
+            <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
             </div>
           </div>
         </div>
@@ -299,41 +307,70 @@ const TimeTrackingTable = ({ viewMode = 'team' }) => {
 
       {/* User Progress Cards (Team View) */}
       {viewMode === 'team' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.values(userStats).map(({ user, totalTime, entries, completedTasks, billableTime }) => (
             <div
               key={user.id}
-              className="rounded-lg p-4 border"
+              className="rounded-xl p-5 border shadow-sm hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
               style={{ backgroundColor: bgColor, borderColor }}
             >
-              <div className="flex items-center space-x-3 mb-3">
-                <Avatar user={user} size="md" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="relative">
+                  <Avatar user={user} size="lg" />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate" style={{ color: textColor }}>
+                  <p className="font-semibold text-base truncate" style={{ color: textColor }}>
                     {user.first_name} {user.last_name}
                   </p>
-                  <p className="text-sm truncate" style={{ color: textSecondary }}>
+                  <p className="text-xs truncate flex items-center" style={{ color: textSecondary }}>
+                    <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
                     {entries} entries
                   </p>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: textSecondary }}>Total Time</span>
-                  <span className="font-medium" style={{ color: textColor }}>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="text-xs font-medium" style={{ color: textSecondary }}>Total</span>
+                  </div>
+                  <span className="font-bold text-sm" style={{ color: textColor }}>
                     {formatDuration(totalTime)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: textSecondary }}>Billable</span>
-                  <span className="font-medium text-green-600">
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 bg-green-100 rounded-lg">
+                      <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="text-xs font-medium" style={{ color: textSecondary }}>Billable</span>
+                  </div>
+                  <span className="font-bold text-sm text-green-600">
                     {formatDuration(billableTime)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: textSecondary }}>Completed</span>
-                  <span className="font-medium text-blue-600">
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 bg-purple-100 rounded-lg">
+                      <svg className="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="text-xs font-medium" style={{ color: textSecondary }}>Done</span>
+                  </div>
+                  <span className="font-bold text-sm text-purple-600">
                     {completedTasks} tasks
                   </span>
                 </div>
