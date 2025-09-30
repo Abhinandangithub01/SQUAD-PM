@@ -5,6 +5,10 @@ import {
   TagIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { DatePicker } from '@mantine/dates';
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import { useTheme } from '../contexts/ThemeContext';
 import Avatar from './Avatar';
 
@@ -191,74 +195,91 @@ const QuickActionMenu = ({
 
       {/* Due Date Menu */}
       {activeMenu === 'duedate' && (
-        <div className="p-3">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold" style={{ color: textColor }}>
-              Set Due Date
-            </h3>
+        <MantineProvider>
+          <div className="p-3">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold" style={{ color: textColor }}>
+                Set Due Date
+              </h3>
+              <button
+                onClick={() => setActiveMenu(null)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <XMarkIcon className="h-4 w-4" style={{ color: textSecondary }} />
+              </button>
+            </div>
+            
+            {/* Mantine DatePicker */}
+            <div className="mb-3">
+              <DatePicker
+                value={selectedDate ? new Date(selectedDate) : null}
+                onChange={(date) => {
+                  if (date instanceof Date && !isNaN(date)) {
+                    setSelectedDate(date.toISOString());
+                  } else if (date === null) {
+                    setSelectedDate('');
+                  }
+                }}
+                placeholder="Pick a date"
+                size="sm"
+                styles={{
+                  input: {
+                    borderColor: borderColor,
+                    color: textColor,
+                  },
+                }}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  const today = new Date();
+                  setSelectedDate(today.toISOString());
+                }}
+                className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
+                style={{ borderColor, color: textColor }}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => {
+                  const tomorrow = new Date();
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  setSelectedDate(tomorrow.toISOString());
+                }}
+                className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
+                style={{ borderColor, color: textColor }}
+              >
+                Tomorrow
+              </button>
+              <button
+                onClick={() => {
+                  const nextWeek = new Date();
+                  nextWeek.setDate(nextWeek.getDate() + 7);
+                  setSelectedDate(nextWeek.toISOString());
+                }}
+                className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
+                style={{ borderColor, color: textColor }}
+              >
+                Next Week
+              </button>
+              <button
+                onClick={() => setSelectedDate('')}
+                className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
+                style={{ borderColor, color: textColor }}
+              >
+                Clear
+              </button>
+            </div>
             <button
-              onClick={() => setActiveMenu(null)}
-              className="p-1 hover:bg-gray-100 rounded"
+              onClick={handleSaveDueDate}
+              className="w-full mt-3 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
             >
-              <XMarkIcon className="h-4 w-4" style={{ color: textSecondary }} />
+              Save
             </button>
           </div>
-          <input
-            type="date"
-            value={selectedDate ? new Date(selectedDate).toISOString().split('T')[0] : ''}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg mb-3 text-sm"
-            style={{ borderColor, color: textColor }}
-            autoFocus
-          />
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => {
-                const today = new Date();
-                setSelectedDate(today.toISOString());
-              }}
-              className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
-              style={{ borderColor, color: textColor }}
-            >
-              Today
-            </button>
-            <button
-              onClick={() => {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                setSelectedDate(tomorrow.toISOString());
-              }}
-              className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
-              style={{ borderColor, color: textColor }}
-            >
-              Tomorrow
-            </button>
-            <button
-              onClick={() => {
-                const nextWeek = new Date();
-                nextWeek.setDate(nextWeek.getDate() + 7);
-                setSelectedDate(nextWeek.toISOString());
-              }}
-              className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
-              style={{ borderColor, color: textColor }}
-            >
-              Next Week
-            </button>
-            <button
-              onClick={() => setSelectedDate('')}
-              className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
-              style={{ borderColor, color: textColor }}
-            >
-              Clear
-            </button>
-          </div>
-          <button
-            onClick={handleSaveDueDate}
-            className="w-full mt-3 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
-          >
-            Save
-          </button>
-        </div>
+        </MantineProvider>
       )}
 
       {/* Tags Menu */}
