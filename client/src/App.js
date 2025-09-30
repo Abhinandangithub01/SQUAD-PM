@@ -8,6 +8,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TimeTrackingProvider } from './contexts/TimeTrackingContext';
+import { DashboardProvider } from './contexts/DashboardContext';
 
 // Import essential components (not lazy loaded)
 import ProtectedRoute from './components/ProtectedRoute';
@@ -36,6 +37,7 @@ const SalesList = lazy(() => import('./pages/SalesList'));
 const FeatureDemo = lazy(() => import('./components/FeatureDemo'));
 const Automation = lazy(() => import('./pages/Automation'));
 const DashboardBuilder = lazy(() => import('./pages/DashboardBuilder'));
+const CustomDashboard = lazy(() => import('./pages/CustomDashboard'));
 
 // Create a client
 const queryClient = new QueryClient({
@@ -54,7 +56,8 @@ function App() {
           <ThemeProvider>
             <AuthProvider>
               <TimeTrackingProvider>
-                <SocketProvider>
+                <DashboardProvider>
+                  <SocketProvider>
                   <Router>
               <div className="App">
             <Toaster
@@ -130,6 +133,9 @@ function App() {
                   {/* Dashboard Builder Route */}
                   <Route path="dashboard-builder" element={<DashboardBuilder />} />
                   
+                  {/* Custom Dashboard Route */}
+                  <Route path="custom-dashboard" element={<CustomDashboard />} />
+                  
                   {/* Settings Routes */}
                   <Route path="settings" element={<Settings />} />
                   <Route path="settings/:tab" element={<Settings />} />
@@ -146,6 +152,7 @@ function App() {
             </div>
                   </Router>
                 </SocketProvider>
+                </DashboardProvider>
               </TimeTrackingProvider>
             </AuthProvider>
           </ThemeProvider>
