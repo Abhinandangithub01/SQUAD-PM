@@ -105,3 +105,12 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# AWS Amplify
+amplify/
+.amplifyrc
+amplify-backup/
+amplify-meta.json
+
+# Vercel (not used)
+.vercel
