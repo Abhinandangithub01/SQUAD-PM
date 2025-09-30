@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -23,6 +23,9 @@ import { formatDate, getRoleColor, getRoleLabel } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
 import toast from 'react-hot-toast';
+
+// Lazy load UsersTable to avoid circular dependency
+const UsersTable = lazy(() => import('../components/UsersTable'));
 
 const Settings = () => {
   const { tab = 'profile' } = useParams();
@@ -258,27 +261,21 @@ const ProfileSettings = () => {
 };
 
 const UsersSettings = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
   const queryClient = useQueryClient();
 
   // Fetch users
   const { data: usersData, isLoading } = useQuery({
-    queryKey: ['users', 'admin', searchQuery, roleFilter],
+    queryKey: ['users', 'admin'],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchQuery) params.append('search', searchQuery);
-      if (roleFilter) params.append('role', roleFilter);
-      
-      const response = await api.get(`/users?${params.toString()}`);
+      const response = await api.get('/users');
       return response.data;
     },
   });
 
   // Update user mutation
   const updateUserMutation = useMutation({
-    mutationFn: async ({ userId, updates }) => {
-      const response = await api.put(`/users/${userId}`, updates);
+    mutationFn: async (user) => {
+      const response = await api.put(`/users/${user.id}`, user);
       return response.data;
     },
     onSuccess: () => {
@@ -290,170 +287,61 @@ const UsersSettings = () => {
     },
   });
 
-  // Deactivate user mutation
-  const deactivateUserMutation = useMutation({
-    mutationFn: async (userId) => {
-      await api.delete(`/users/${userId}`);
+  // Delete user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (user) => {
+      await api.delete(`/users/${user.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['users']);
-      toast.success('User deactivated successfully');
+      toast.success('User deleted successfully');
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to deactivate user');
+      toast.error(error.response?.data?.message || 'Failed to delete user');
     },
   });
 
-  const handleUpdateUser = (userId, updates) => {
-    updateUserMutation.mutate({ userId, updates });
+  const handleUpdateUser = (user) => {
+    updateUserMutation.mutate(user);
   };
 
-  const handleDeactivateUser = (userId, userName) => {
-    if (window.confirm(`Are you sure you want to deactivate ${userName}?`)) {
-      deactivateUserMutation.mutate(userId);
+  const handleDeleteUser = (user) => {
+    if (window.confirm(`Are you sure you want to delete ${user.first_name} ${user.last_name}?`)) {
+      deleteUserMutation.mutate(user);
     }
   };
 
+  const handleInviteUser = () => {
+    // TODO: Implement invite user modal
+    toast.success('Invite user feature coming soon!');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-medium text-gray-900">User Management</h2>
-        <button className="btn-primary">
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Invite User
-        </button>
+      <div className="mb-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-2">User Management</h2>
+        <p className="text-sm text-gray-600">
+          Manage team members, roles, and permissions
+        </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="input"
-          />
-        </div>
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          className="input"
-        >
-          <option value="">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="project_manager">Project Manager</option>
-          <option value="member">Member</option>
-          <option value="viewer">Viewer</option>
-        </select>
-      </div>
-
-      {/* Users Table */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <LoadingSpinner size="lg" />
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Projects
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tasks
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {usersData?.users?.map((user) => (
-                <UserRow
-                  key={user.id}
-                  user={user}
-                  onUpdateRole={(role) => handleUpdateUser(user.id, { role })}
-                  onToggleStatus={() => handleUpdateUser(user.id, { is_active: !user.is_active })}
-                  onDeactivate={() => handleDeactivateUser(user.id, `${user.first_name} ${user.last_name}`)}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <Suspense fallback={<LoadingSpinner size="lg" />}>
+        <UsersTable
+          users={usersData?.users || []}
+          onUpdateUser={handleUpdateUser}
+          onDeleteUser={handleDeleteUser}
+          onInviteUser={handleInviteUser}
+        />
+      </Suspense>
     </div>
-  );
-};
-
-const UserRow = ({ user, onUpdateRole, onToggleStatus, onDeactivate }) => {
-  return (
-    <tr>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center">
-          <Avatar user={user} size="sm" />
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">
-              {user.first_name} {user.last_name}
-            </div>
-            <div className="text-sm text-gray-500">{user.email}</div>
-          </div>
-        </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <select
-          value={user.role}
-          onChange={(e) => onUpdateRole(e.target.value)}
-          className="text-sm border-gray-300 rounded-md"
-        >
-          <option value="admin">Admin</option>
-          <option value="project_manager">Project Manager</option>
-          <option value="member">Member</option>
-          <option value="viewer">Viewer</option>
-        </select>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        {user.project_count || 0}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        {user.assigned_tasks || 0}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`badge ${
-          user.is_active 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
-        }`}>
-          {user.is_active ? 'Active' : 'Inactive'}
-        </span>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={onToggleStatus}
-            className="text-primary-600 hover:text-primary-900"
-          >
-            {user.is_active ? 'Deactivate' : 'Activate'}
-          </button>
-          <button
-            onClick={onDeactivate}
-            className="text-red-600 hover:text-red-900"
-          >
-            <TrashIcon className="h-4 w-4" />
-          </button>
-        </div>
-      </td>
-    </tr>
   );
 };
 
