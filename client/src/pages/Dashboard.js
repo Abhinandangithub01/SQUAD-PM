@@ -19,6 +19,7 @@ import {
   ArrowPathIcon,
   ClipboardDocumentListIcon,
   ArrowRightIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import api from '../utils/api';
 import { mockActivity, mockProjects, mockTasks } from '../utils/mockData';
@@ -94,6 +95,21 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header with Customize Button */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening today.</p>
+        </div>
+        <Link
+          to="/custom-dashboard"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+        >
+          <Cog6ToothIcon className="h-5 w-5" />
+          <span>Customize Dashboard</span>
+        </Link>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="card p-6">
