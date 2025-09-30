@@ -14,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
+import VersionInfo from './components/VersionInfo';
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
@@ -131,6 +132,7 @@ function App() {
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </Suspense>
+            <VersionInfo />
             </div>
                   </Router>
                 </SocketProvider>
