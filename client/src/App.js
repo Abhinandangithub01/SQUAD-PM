@@ -34,6 +34,8 @@ const MarketingList = lazy(() => import('./pages/MarketingList'));
 const SalesKanban = lazy(() => import('./pages/SalesKanban'));
 const SalesList = lazy(() => import('./pages/SalesList'));
 const FeatureDemo = lazy(() => import('./components/FeatureDemo'));
+const Automation = lazy(() => import('./pages/Automation'));
+const DashboardBuilder = lazy(() => import('./pages/DashboardBuilder'));
 
 // Create a client
 const queryClient = new QueryClient({
@@ -121,6 +123,12 @@ function App() {
                   {/* Analytics Routes */}
                   <Route path="analytics" element={<Analytics />} />
                   <Route path="analytics/project/:projectId" element={<Analytics />} />
+                  
+                  {/* Automation Routes */}
+                  <Route path="automation" element={<Automation />} />
+                  
+                  {/* Dashboard Builder Route */}
+                  <Route path="dashboard-builder" element={<DashboardBuilder />} />
                   
                   {/* Settings Routes */}
                   <Route path="settings" element={<Settings />} />

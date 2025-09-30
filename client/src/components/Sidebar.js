@@ -8,11 +8,10 @@ import {
   ChatBubbleLeftRightIcon,
   ChartBarIcon,
   Cog6ToothIcon,
-  MegaphoneIcon,
-  CurrencyDollarIcon,
+  BellIcon,
+  BoltIcon,
   ViewColumnsIcon,
   ListBulletIcon,
-  BellIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -25,6 +24,7 @@ const navigation = [
   { name: 'Projects', href: '/projects', icon: FolderIcon },
   { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+  { name: 'Automation', href: '/automation', icon: BoltIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 
@@ -58,7 +58,7 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
           </svg>
         </div>
         <div className="mt-1 text-center">
-          <h1 className="text-white text-sm font-bold">Hub</h1>
+          <h1 className="text-white text-sm font-bold">SQUAD</h1>
         </div>
       </div>
 
