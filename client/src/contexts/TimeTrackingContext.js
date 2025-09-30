@@ -141,13 +141,16 @@ export const TimeTrackingProvider = ({ children }) => {
     
     const now = new Date();
     const start = new Date(activeTimer.startTime);
-    return Math.floor((now - start) / 1000);
+    return now - start; // Return milliseconds
   };
 
-  const formatDuration = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+  const formatDuration = (milliseconds) => {
+    // Convert milliseconds to seconds
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
 
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
