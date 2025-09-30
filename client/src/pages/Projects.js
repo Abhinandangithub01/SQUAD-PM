@@ -93,24 +93,24 @@ const Projects = () => {
       </div>
 
       {/* Filters and View Toggle - Single Row */}
-      <div className="flex items-center gap-4">
-        {/* Search */}
-        <div className="flex-1 relative">
+      <div className="flex items-center gap-3">
+        {/* Search - 50% width */}
+        <div className="relative" style={{ width: '50%' }}>
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
             placeholder="Search projects..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input pl-10"
+            className="input pl-10 w-full"
           />
         </div>
 
-        {/* Status Filter */}
+        {/* Status Filter - Reduced width */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="input min-w-[140px]"
+          className="input w-32"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -119,13 +119,13 @@ const Projects = () => {
         </select>
 
         {/* Filters Button */}
-        <button className="btn-outline">
+        <button className="btn-outline whitespace-nowrap">
           <FunnelIcon className="h-4 w-4 mr-2" />
           Filters
         </button>
 
         {/* View Toggle */}
-        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden ml-auto">
           <button
             onClick={() => setViewMode('card')}
             className={`px-3 py-2 transition-colors ${
