@@ -24,9 +24,10 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
 import toast from 'react-hot-toast';
 
-// Lazy load UsersTable to avoid circular dependency
+// Lazy load components to avoid circular dependency
 const UsersTable = lazy(() => import('../components/UsersTable'));
 const AddUserModal = lazy(() => import('../components/AddUserModal'));
+const DoubleNavbar = lazy(() => import('../components/DoubleNavbar'));
 
 const Settings = () => {
   const { tab = 'profile' } = useParams();
@@ -48,48 +49,21 @@ const Settings = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-1">
-          Manage your account settings and preferences
-        </p>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar */}
-        <div className="lg:w-64">
-          <nav className="space-y-1">
-            {visibleTabs.map((tabItem) => (
-              <button
-                key={tabItem.id}
-                onClick={() => setActiveTab(tabItem.id)}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 ${
-                  tab === tabItem.id
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                }`}
-              >
-                <tabItem.icon className="mr-3 h-5 w-5" />
-                {tabItem.name}
-              </button>
-            ))}
-          </nav>
+    <Suspense fallback={<LoadingSpinner size="lg" />}>
+      <DoubleNavbar
+        activeTab={tab}
+        onTabChange={setActiveTab}
+        userRole={user?.role}
+      >
+        <div className="card" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          {tab === 'profile' && <ProfileSettings />}
+          {tab === 'users' && user?.role === 'admin' && <UsersSettings />}
+          {tab === 'notifications' && <NotificationSettings />}
+          {tab === 'security' && <SecuritySettings />}
+          {tab === 'preferences' && <PreferencesSettings />}
         </div>
-
-        {/* Content */}
-        <div className="flex-1">
-          <div className="card">
-            {tab === 'profile' && <ProfileSettings />}
-            {tab === 'users' && user?.role === 'admin' && <UsersSettings />}
-            {tab === 'notifications' && <NotificationSettings />}
-            {tab === 'security' && <SecuritySettings />}
-            {tab === 'preferences' && <PreferencesSettings />}
-          </div>
-        </div>
-      </div>
-    </div>
+      </DoubleNavbar>
+    </Suspense>
   );
 };
 
