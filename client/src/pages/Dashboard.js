@@ -27,6 +27,7 @@ import { formatRelativeTime, getPriorityColor, getStatusColor } from '../utils/h
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
 import TimeTrackingWidget from '../components/TimeTrackingWidget';
+import TimeTrackingTable from '../components/TimeTrackingTable';
 import MilestoneCelebration from '../components/MilestoneCelebration';
 
 const Dashboard = () => {
@@ -300,6 +301,14 @@ const Dashboard = () => {
 
           {/* Time Tracking Widget */}
           <TimeTrackingWidget />
+
+          {/* Interactive Time Tracking Table */}
+          <div className="card p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              📊 Team Time Tracking
+            </h2>
+            <TimeTrackingTable viewMode="team" />
+          </div>
 
           {/* Milestone Celebration Demo */}
           <div className="card p-6">
