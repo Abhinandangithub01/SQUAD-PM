@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import NotificationPanel from './NotificationPanel';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const { isDarkMode } = useTheme();
 
   const handleNotificationClick = () => {
     setNotificationPanelOpen(true);
@@ -16,7 +18,10 @@ const Layout = () => {
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-50">
+    <div 
+      className="h-screen flex overflow-hidden"
+      style={{ backgroundColor: isDarkMode() ? 'var(--color-background)' : '#f9fafb' }}
+    >
       {/* Sidebar */}
       <Sidebar 
         open={sidebarOpen} 

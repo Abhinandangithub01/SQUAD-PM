@@ -15,6 +15,7 @@ import {
   BellIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useQuery } from '@tanstack/react-query';
 import api from '../utils/api';
 import Avatar from './Avatar';
@@ -31,6 +32,7 @@ const navigation = [
 
 const Sidebar = ({ open, setOpen, onNotificationClick }) => {
   const { user } = useAuth();
+  const { isDarkMode } = useTheme();
   const location = useLocation();
 
   // Fetch unread notifications count
@@ -43,6 +45,10 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
+  const bgColor = isDarkMode() ? 'var(--color-sidebar-bg)' : '#ffffff';
+  const borderColor = isDarkMode() ? 'var(--color-border)' : '#e5e7eb';
+  const textColor = isDarkMode() ? 'var(--color-text)' : '#374151';
+  const hoverBg = isDarkMode() ? 'var(--color-surface-hover)' : '#f3f4f6';
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -59,7 +65,7 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-2 py-4 bg-white overflow-y-auto">
+      <nav className="flex-1 px-2 py-4 overflow-y-auto" style={{ backgroundColor: bgColor }}>
         {/* Navigation Links */}
         <div className="space-y-3">
           {navigation.map((item) => (
@@ -69,8 +75,22 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
               className={({ isActive }) =>
                 isActive
                   ? 'flex flex-col items-center px-2 py-3 text-xs font-medium rounded-lg bg-primary-100 text-primary-700'
-                  : 'flex flex-col items-center px-2 py-3 text-xs font-medium rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  : 'flex flex-col items-center px-2 py-3 text-xs font-medium rounded-lg hover:text-gray-900'
               }
+              style={({ isActive }) => ({
+                color: isActive ? undefined : textColor,
+                backgroundColor: isActive ? undefined : 'transparent'
+              })}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.classList.contains('bg-primary-100')) {
+                  e.currentTarget.style.backgroundColor = hoverBg;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.currentTarget.classList.contains('bg-primary-100')) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
               onClick={() => setOpen(false)}
             >
               <item.icon className="h-6 w-6 mb-1" />
@@ -79,10 +99,13 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
           ))}
           
           {/* Notifications */}
-          <div className="pt-2 border-t border-gray-200">
+          <div className="pt-2" style={{ borderTop: `1px solid ${borderColor}` }}>
             <button 
               onClick={onNotificationClick}
-              className="flex flex-col items-center px-2 py-3 text-xs font-medium rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 w-full relative"
+              className="flex flex-col items-center px-2 py-3 text-xs font-medium rounded-lg w-full relative"
+              style={{ color: textColor }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverBg}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <div className="relative">
                 <BellIcon className="h-6 w-6 mb-1" />
@@ -99,13 +122,19 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
       </nav>
 
       {/* User Profile */}
-      <div className="flex-shrink-0 flex flex-col items-center border-t border-gray-200 p-3 bg-white">
+      <div 
+        className="flex-shrink-0 flex flex-col items-center p-3" 
+        style={{ 
+          borderTop: `1px solid ${borderColor}`,
+          backgroundColor: bgColor
+        }}
+      >
         <Avatar
           user={user}
           size="sm"
         />
         <div className="mt-2 text-center">
-          <p className="text-xs font-medium text-gray-900 truncate">
+          <p className="text-xs font-medium truncate" style={{ color: textColor }}>
             {user?.first_name}
           </p>
         </div>
