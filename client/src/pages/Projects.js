@@ -10,6 +10,8 @@ import {
   UsersIcon,
   CalendarIcon,
   ChartBarIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
 import api from '../utils/api';
@@ -23,6 +25,7 @@ const Projects = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [viewMode, setViewMode] = useState('card'); // 'card' or 'list'
   const queryClient = useQueryClient();
 
   // Fetch projects
@@ -89,8 +92,9 @@ const Projects = () => {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Filters and View Toggle - Single Row */}
+      <div className="flex items-center gap-4">
+        {/* Search */}
         <div className="flex-1 relative">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
@@ -101,27 +105,56 @@ const Projects = () => {
             className="input pl-10"
           />
         </div>
-        <div className="flex items-center space-x-4">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="input"
+
+        {/* Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="input min-w-[140px]"
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+          <option value="archived">Archived</option>
+        </select>
+
+        {/* Filters Button */}
+        <button className="btn-outline">
+          <FunnelIcon className="h-4 w-4 mr-2" />
+          Filters
+        </button>
+
+        {/* View Toggle */}
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+          <button
+            onClick={() => setViewMode('card')}
+            className={`px-3 py-2 transition-colors ${
+              viewMode === 'card'
+                ? 'bg-primary-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+            title="Card View"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="completed">Completed</option>
-            <option value="archived">Archived</option>
-          </select>
-          <button className="btn-outline">
-            <FunnelIcon className="h-4 w-4 mr-2" />
-            Filters
+            <Squares2X2Icon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`px-3 py-2 transition-colors ${
+              viewMode === 'list'
+                ? 'bg-primary-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+            title="List View"
+          >
+            <ListBulletIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
 
-      {/* Projects Grid */}
+      {/* Projects Display */}
       {filteredProjects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        viewMode === 'card' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
             <ProjectCard
               key={project.id}
@@ -130,6 +163,40 @@ const Projects = () => {
             />
           ))}
         </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Project
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Progress
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Team
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Updated
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredProjects.map((project) => (
+                  <ProjectRow
+                    key={project.id}
+                    project={project}
+                    onDelete={handleDeleteProject}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
       ) : (
         <div className="text-center py-12">
           <FolderIcon className="mx-auto h-12 w-12 text-gray-300" />
@@ -306,6 +373,95 @@ const ProjectCard = ({ project, onDelete }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+const ProjectRow = ({ project, onDelete }) => {
+  const completionRate = project.task_count > 0 
+    ? Math.round((project.completed_tasks / project.task_count) * 100)
+    : 0;
+
+  return (
+    <tr className="hover:bg-gray-50">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center">
+          <div 
+            className="w-3 h-3 rounded-full flex-shrink-0 mr-3"
+            style={{ backgroundColor: project.color }}
+          />
+          <div>
+            <Link
+              to={`/projects/${project.id}`}
+              className="text-sm font-medium text-gray-900 hover:text-primary-600"
+            >
+              {project.name}
+            </Link>
+            <div className="text-xs text-gray-500 mt-1">{project.description}</div>
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center">
+          <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
+            <div 
+              className="bg-primary-500 h-2 rounded-full"
+              style={{ width: `${completionRate}%` }}
+            />
+          </div>
+          <span className="text-sm text-gray-900 font-medium">{completionRate}%</span>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center text-sm text-gray-900">
+          <UsersIcon className="h-4 w-4 mr-2 text-gray-400" />
+          {project.member_count} members
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {formatDate(project.updated_at, 'MMM dd, yyyy')}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex items-center justify-end space-x-2">
+          <Link
+            to={`/projects/${project.id}/kanban`}
+            className="text-primary-600 hover:text-primary-900"
+          >
+            Kanban
+          </Link>
+          <Link
+            to={`/projects/${project.id}/list`}
+            className="text-primary-600 hover:text-primary-900"
+          >
+            List
+          </Link>
+          <Menu as="div" className="relative inline-block text-left">
+            <Menu.Button className="p-1 rounded-full text-gray-400 hover:text-gray-600">
+              <EllipsisVerticalIcon className="h-5 w-5" />
+            </Menu.Button>
+            <Menu.Items className="dropdown-menu">
+              <Menu.Item>
+                <Link to={`/projects/${project.id}`} className="dropdown-item">
+                  View Details
+                </Link>
+              </Menu.Item>
+              {(project.user_role === 'owner' || project.user_role === 'admin') && (
+                <>
+                  <div className="border-t border-gray-100 my-1" />
+                  <Menu.Item>
+                    <button
+                      onClick={() => onDelete(project.id)}
+                      className="dropdown-item text-red-600 hover:bg-red-50"
+                    >
+                      Delete Project
+                    </button>
+                  </Menu.Item>
+                </>
+              )}
+            </Menu.Items>
+          </Menu>
+        </div>
+      </td>
+    </tr>
   );
 };
 
