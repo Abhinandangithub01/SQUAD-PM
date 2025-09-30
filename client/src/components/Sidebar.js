@@ -72,12 +72,13 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
               to={item.href}
               className={({ isActive }) =>
                 isActive
-                  ? 'flex flex-col items-center px-2 py-3 text-xs font-medium rounded-lg bg-primary-100 text-primary-700'
-                  : 'flex flex-col items-center px-2 py-3 text-xs font-medium rounded-lg hover:text-gray-900'
+                  ? 'flex flex-col items-center px-2 py-3 font-medium rounded-lg bg-primary-100 text-primary-700'
+                  : 'flex flex-col items-center px-2 py-3 font-medium rounded-lg hover:text-gray-900'
               }
               style={({ isActive }) => ({
                 color: isActive ? undefined : textColor,
-                backgroundColor: isActive ? undefined : 'transparent'
+                backgroundColor: isActive ? undefined : 'transparent',
+                fontSize: '11px'
               })}
               onMouseEnter={(e) => {
                 if (!e.currentTarget.classList.contains('bg-primary-100')) {
@@ -100,8 +101,8 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
           <div className="pt-2" style={{ borderTop: `1px solid ${borderColor}` }}>
             <button 
               onClick={onNotificationClick}
-              className="flex flex-col items-center px-2 py-3 text-xs font-medium rounded-lg w-full relative"
-              style={{ color: textColor }}
+              className="flex flex-col items-center px-2 py-3 font-medium rounded-lg w-full relative"
+              style={{ color: textColor, fontSize: '11px' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverBg}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
