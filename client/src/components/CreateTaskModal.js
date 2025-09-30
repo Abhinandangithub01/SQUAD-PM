@@ -1,8 +1,12 @@
 import React, { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, UserPlusIcon } from '@heroicons/react/24/outline';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { DatePicker } from '@mantine/dates';
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import api from '../utils/api';
 import LoadingSpinner from './LoadingSpinner';
 import Avatar from './Avatar';
@@ -16,11 +20,13 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm({
     defaultValues: {
       priority: 'medium',
       tags: [],
+      due_date: null,
     },
   });
 
@@ -181,12 +187,30 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
                       <label htmlFor="due_date" className="block text-sm font-medium text-gray-700">
                         Due Date
                       </label>
-                      <input
-                        {...register('due_date')}
-                        type="date"
-                        className="mt-1 input"
-                        min={new Date().toISOString().split('T')[0]}
-                      />
+                      <MantineProvider>
+                        <Controller
+                          name="due_date"
+                          control={control}
+                          render={({ field }) => (
+                            <DatePicker
+                              {...field}
+                              value={field.value ? new Date(field.value) : null}
+                              onChange={(date) => field.onChange(date ? date.toISOString() : null)}
+                              placeholder="Select due date"
+                              minDate={new Date()}
+                              size="sm"
+                              className="mt-1"
+                              styles={{
+                                input: {
+                                  borderColor: '#d1d5db',
+                                  borderRadius: '0.375rem',
+                                  padding: '0.5rem 0.75rem',
+                                },
+                              }}
+                            />
+                          )}
+                        />
+                      </MantineProvider>
                     </div>
                   </div>
 

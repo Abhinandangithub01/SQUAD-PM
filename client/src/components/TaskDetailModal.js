@@ -19,6 +19,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
+import { DatePicker } from '@mantine/dates';
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import api from '../utils/api';
 import { formatDateTime, getPriorityColor, getStatusColor } from '../utils/helpers';
 import { mockMilestones } from '../utils/mockData';
@@ -675,12 +679,21 @@ const TaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
                         {isEditing ? (
                           <div className="space-y-2">
-                            <input
-                              type="date"
-                              value={watch('due_date') || ''}
-                              onChange={(e) => setValue('due_date', e.target.value)}
-                              className="input w-full"
-                            />
+                            <MantineProvider>
+                              <DatePicker
+                                value={watch('due_date') ? new Date(watch('due_date')) : null}
+                                onChange={(date) => setValue('due_date', date ? date.toISOString().split('T')[0] : '')}
+                                placeholder="Select due date"
+                                size="sm"
+                                styles={{
+                                  input: {
+                                    borderColor: '#d1d5db',
+                                    borderRadius: '0.375rem',
+                                    padding: '0.5rem 0.75rem',
+                                  },
+                                }}
+                              />
+                            </MantineProvider>
                             <div className="flex space-x-2">
                               <button
                                 type="button"
@@ -718,13 +731,22 @@ const TaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
                           </div>
                         ) : quickEditField === 'due_date' ? (
                           <div className="space-y-2">
-                            <input
-                              type="date"
-                              defaultValue={task.due_date ? task.due_date.split('T')[0] : ''}
-                              onChange={(e) => handleQuickUpdate('due_date', e.target.value)}
-                              className="input w-full"
-                              autoFocus
-                            />
+                            <MantineProvider>
+                              <DatePicker
+                                defaultValue={task.due_date ? new Date(task.due_date) : null}
+                                onChange={(date) => handleQuickUpdate('due_date', date ? date.toISOString().split('T')[0] : '')}
+                                placeholder="Select due date"
+                                size="sm"
+                                autoFocus
+                                styles={{
+                                  input: {
+                                    borderColor: '#d1d5db',
+                                    borderRadius: '0.375rem',
+                                    padding: '0.5rem 0.75rem',
+                                  },
+                                }}
+                              />
+                            </MantineProvider>
                             <div className="flex space-x-1">
                               <button
                                 type="button"
