@@ -17,9 +17,10 @@ const QuickActionMenu = ({
   onClose,
   teamMembers = [],
   availableTags = [],
+  initialMenu = null, // 'assign', 'duedate', 'tags', or null
 }) => {
   const { isDarkMode } = useTheme();
-  const [activeMenu, setActiveMenu] = useState(null);
+  const [activeMenu, setActiveMenu] = useState(initialMenu);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(task.due_date || '');
   const [selectedTags, setSelectedTags] = useState(task.tags || []);

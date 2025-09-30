@@ -92,7 +92,14 @@ const KanbanBoard = () => {
             left: rect.left,
           });
           setQuickMenuTask(hoveredTask);
-          setShowQuickMenu(key);
+          // Directly open the specific menu based on key pressed
+          if (key === 'm') {
+            setShowQuickMenu('assign');
+          } else if (key === 'd') {
+            setShowQuickMenu('duedate');
+          } else if (key === 't') {
+            setShowQuickMenu('tags');
+          }
         }
       }
     };
@@ -1140,12 +1147,6 @@ const KanbanBoard = () => {
                       selectedTasks.has(task.id) ? 'ring-2 ring-primary-500 bg-primary-50/90' : ''
                     } ${draggedTask?.id === task.id ? 'opacity-30' : 'opacity-100'}`}
                   >
-                    {/* Keyboard Hint Badge */}
-                    {hoveredTask?.id === task.id && (
-                      <div className="absolute -top-2 -right-2 bg-primary-600 text-white text-xs px-2 py-1 rounded-full shadow-lg animate-pulse z-10">
-                        M · D · T
-                      </div>
-                    )}
                     {/* Task Header with Checkbox and Actions */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center space-x-2">
@@ -1418,6 +1419,7 @@ const KanbanBoard = () => {
         <QuickActionMenu
           task={quickMenuTask}
           position={quickMenuPosition}
+          initialMenu={showQuickMenu}
           onAssign={handleQuickAssign}
           onDueDate={handleQuickDueDate}
           onTags={handleQuickTags}
