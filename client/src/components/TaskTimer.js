@@ -96,7 +96,10 @@ const TaskTimer = ({ task, size = 'md', showStats = true }) => {
       <div className="flex items-center space-x-1">
         {!isActiveForThisTask ? (
           <button
-            onClick={handleStart}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStart();
+            }}
             disabled={!!activeTimer}
             className={`${classes.button} ${
               activeTimer && !isActiveForThisTask
@@ -110,14 +113,20 @@ const TaskTimer = ({ task, size = 'md', showStats = true }) => {
         ) : (
           <>
             <button
-              onClick={handlePause}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePause();
+              }}
               className={`${classes.button} text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 rounded-lg transition-colors`}
               title="Pause timer"
             >
               <PauseIcon className={classes.icon} />
             </button>
             <button
-              onClick={handleStop}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStop();
+              }}
               className={`${classes.button} text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors`}
               title="Stop timer"
             >

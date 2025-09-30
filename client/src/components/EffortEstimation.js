@@ -78,7 +78,10 @@ const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
       {/* Estimation Display/Trigger */}
       <div 
         className={`flex items-center space-x-2 cursor-pointer ${sizeClasses[size]}`}
-        onClick={() => setShowEstimationModal(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowEstimationModal(true);
+        }}
       >
         {task?.story_points > 0 && (
           <div className="flex items-center space-x-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
@@ -101,7 +104,13 @@ const EffortEstimation = ({ task, onUpdate, size = 'md' }) => {
         )}
 
         {(!task?.story_points && !task?.estimated_hours) && (
-          <button className="flex items-center space-x-1 text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowEstimationModal(true);
+            }}
+            className="flex items-center space-x-1 text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100"
+          >
             <ChartBarIcon className="h-4 w-4" />
             <span>Estimate</span>
           </button>
