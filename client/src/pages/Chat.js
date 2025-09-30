@@ -229,8 +229,8 @@ const Chat = () => {
   ) || [];
 
   return (
-    <div className="h-full flex bg-white p-6">
-      <div className="flex-1 flex bg-white rounded-xl shadow-soft overflow-hidden">
+    <div className="h-screen flex bg-white">
+      <div className="flex-1 flex bg-white overflow-hidden">
         {/* Sidebar */}
         <div className="w-80 border-r border-gray-200 flex flex-col">
           {/* Header */}
