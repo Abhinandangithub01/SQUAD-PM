@@ -4,8 +4,8 @@ frontend:
     preBuild:
       commands:
         - cd client
-        - ls -la amplify_outputs.json || echo "amplify_outputs.json not found"
         - rm -rf amplify node_modules
+        - cp amplify_outputs.json src/amplify_outputs.json
         - npm ci
     build:
       commands:
