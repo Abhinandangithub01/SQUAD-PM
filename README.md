@@ -1,117 +1,106 @@
-# 🚀 Project Management System
+# 🚀 SQUAD PM - Project Management System
 
-A comprehensive full-stack project management application with real-time collaboration, audio/video calling, and screen sharing capabilities.
+A modern, production-ready project management application built with React and AWS Amplify.
 
 ## ✨ Features
 
-- **📊 Dashboard**: Activity stream, notifications, quick actions
-- **📋 Task Management**: Projects, Kanban boards, List view with drag-and-drop
-- **💬 Real-time Chat**: Channels and direct messages with live updates
-- **📞 Audio/Video Calls**: WebRTC-based calling with screen sharing
-- **📁 File Management**: Upload, organize, and link files to tasks
+- **📊 Dashboard**: Real-time activity stream and notifications
+- **📋 Task Management**: Kanban boards, List view with drag-and-drop
+- **💬 Team Collaboration**: Real-time chat and messaging
+- **📁 File Management**: Secure file uploads with S3
 - **📈 Analytics**: Project insights and performance metrics
-- **👥 Team Collaboration**: Role-based permissions and user management
-- **🎯 Marketing & Sales**: Dedicated Kanban boards for different teams
+- **👥 User Management**: Role-based permissions (Admin, Manager, Member, Viewer)
+- **🎯 Project Tracking**: Milestones, subtasks, and progress monitoring
 
-## Tech Stack
+## 🏗️ Tech Stack
 
 ### Frontend
-- **React 18** - Modern React with hooks
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **Socket.io Client** - Real-time communication
-- **WebRTC** - Peer-to-peer audio/video calls
-- **Heroicons** - Beautiful SVG icons
-- **React Query** - Server state management
-- **React Hook Form** - Form handling
+- **React 18** with Hooks
+- **Tailwind CSS** for styling
+- **React Router** for navigation
+- **React Query** for data fetching
+- **AWS Amplify** for backend integration
+- **Heroicons** for icons
 
-### Backend
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web application framework
-- **Socket.io** - Real-time WebSocket communication
-- **WebRTC Signaling** - Call setup and management
-- **JWT Authentication** - Secure user authentication
-- **Multer** - File upload handling
+### Backend (AWS)
+- **AWS Cognito** - User authentication
+- **AWS AppSync** - GraphQL API
+- **Amazon DynamoDB** - NoSQL database
+- **Amazon S3** - File storage
+- **AWS Amplify Hosting** - Frontend deployment
 
-## Quick Start
+## 🚀 Live Demo
 
-1. **Install dependencies**:
+**Production URL:** https://main.d8tv3j2hk2i9r.amplifyapp.com
+
+## 📦 Local Development
+
+1. **Clone the repository**:
    ```bash
-   npm run install-all
+   git clone https://github.com/Abhinandangithub01/SQUAD-PM.git
+   cd SQUAD-PM
    ```
 
-2. **Set up PostgreSQL database**:
-   - Create a database named `project_management`
-   - Update database credentials in `server/.env`
-
-3. **Run the application**:
+2. **Install dependencies**:
    ```bash
-   npm run dev
+   cd client
+   npm install
    ```
 
-4. **Access the application**:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
+3. **Configure AWS Amplify** (if running locally):
+   ```bash
+   npx ampx sandbox
+   ```
 
-## Project Structure
+4. **Start development server**:
+   ```bash
+   npm start
+   ```
+
+## 📁 Project Structure
 
 ```
-├── client/                 # React frontend
+SQUAD-PM/
+├── client/                    # React frontend
+│   ├── amplify/              # AWS Amplify backend configuration
+│   │   ├── auth/            # Cognito authentication setup
+│   │   ├── data/            # DynamoDB schema & GraphQL API
+│   │   └── storage/         # S3 file storage config
 │   ├── src/
-│   │   ├── components/     # Reusable components
-│   │   ├── pages/         # Page components
-│   │   ├── hooks/         # Custom hooks
-│   │   ├── utils/         # Utility functions
-│   │   └── styles/        # CSS files
-├── server/                # Node.js backend
-│   ├── controllers/       # Route controllers
-│   ├── models/           # Database models
-│   ├── middleware/       # Custom middleware
-│   ├── routes/           # API routes
-│   └── utils/            # Utility functions
-└── database/             # Database schema and seeds
+│   │   ├── components/      # Reusable UI components
+│   │   ├── pages/          # Page components
+│   │   ├── contexts/       # React contexts (Auth, Theme, etc.)
+│   │   ├── services/       # API services
+│   │   └── utils/          # Helper functions
+│   └── amplify_outputs.json # AWS backend configuration
+└── server/                   # Legacy Express backend (optional)
 ```
-
-## 📞 Audio/Video Calling Features
-
-### Call Capabilities
-- **Audio Calls** - High-quality peer-to-peer audio communication
-- **Video Calls** - Enable/disable camera during calls
-- **Screen Sharing** - Share your screen with call participants
-- **Call Controls** - Mute, video toggle, screen share, end call
-- **Direct Messages** - Call any team member directly
-- **Channel Calls** - Start calls from any project channel
-
-### How to Use Calls
-1. **Direct Calls**: Go to Chat → DMs tab → Click phone icon next to any user
-2. **Channel Calls**: In any channel, click the phone icon in the header
-3. **During Calls**: Use controls to mute, enable video, or share screen
-4. **Accept/Reject**: Answer incoming calls with green/red buttons
-
-### Technical Implementation
-- **WebRTC** - Direct peer-to-peer connections (no external servers)
-- **Socket.io Signaling** - Call setup and management
-- **Zero Cost** - No API fees or usage limits
-- **Self-Hosted** - Complete control over your communication
-
-## 🔐 Default Users
-
-- **Admin**: admin@example.com / password123
-- **Manager**: manager@example.com / password123
-- **Member**: member@example.com / password123
-
-## 🌍 Environment Variables
-
-Create `.env` files in both `server/` and `client/` directories with the required environment variables (see `.env.example` files).
 
 ## 🚀 Deployment
 
-This application can be deployed to:
-- **AWS Amplify** (Frontend) + Lambda (Backend)
-- **Vercel/Netlify** (Frontend) + Any Node.js hosting (Backend)
-- **Docker** containers for full-stack deployment
-- **Traditional VPS** with Node.js and PostgreSQL
+**Production:** Deployed on AWS Amplify
+- **Frontend:** https://main.d8tv3j2hk2i9r.amplifyapp.com
+- **Backend:** AWS AppSync GraphQL API
+- **Auth:** AWS Cognito
+- **Database:** Amazon DynamoDB
+- **Storage:** Amazon S3
 
-## 📝 License
+### Deploy Your Own
 
-This project is open source and available under the MIT License.
+1. Fork this repository
+2. Connect to AWS Amplify
+3. Deploy backend: `npx ampx sandbox`
+4. Push to GitHub - auto-deploys!
+
+## 📄 License
+
+MIT License - feel free to use this project for your own purposes.
+
+## 👨‍💻 Author
+
+**Abhinandan**
+- GitHub: [@Abhinandangithub01](https://github.com/Abhinandangithub01)
+
+---
+
+**Built with ❤️ using React and AWS Amplify**
