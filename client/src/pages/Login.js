@@ -33,15 +33,20 @@ const Login = () => {
   const onSubmit = async (data) => {
     const result = await login(data.email, data.password);
     
+    console.log('Login result:', result); // Debug log
+    
     if (result.success) {
       toast.success('Welcome back!');
       navigate(from, { replace: true });
     } else {
       // Check if user is not confirmed (multiple error message formats)
-      const errorMsg = result.error?.toLowerCase() || '';
-      if (errorMsg.includes('not confirmed') || errorMsg.includes('user is not confirmed')) {
+      const errorMsg = (result.error || '').toLowerCase();
+      console.log('Error message:', errorMsg); // Debug log
+      
+      if (errorMsg.includes('not confirmed') || errorMsg.includes('confirmed')) {
+        console.log('Setting unverified email:', data.email); // Debug log
         setUnverifiedEmail(data.email);
-        toast.error('Your account is not verified. Click the button below to verify.');
+        toast.error('⚠️ Account not verified! See below to verify.');
       } else {
         toast.error(result.error);
       }
