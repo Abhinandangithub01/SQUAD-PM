@@ -35,7 +35,13 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
   
   .btn-primary {
@@ -67,11 +73,24 @@
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-soft border border-gray-200;
+    @apply bg-white rounded-xl border border-gray-200;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
   }
   
   .input {
     @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
+    padding: 12px 16px;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
   
   .input-error {
@@ -131,11 +150,18 @@
   }
   
   .kanban-column {
-    @apply bg-gray-100 rounded-lg p-4 min-h-[500px] w-80 flex-shrink-0;
+    @apply bg-gray-50 rounded-xl p-4 min-h-[500px] w-80 flex-shrink-0;
+    border: 1px solid #E5E7EB;
   }
   
   .kanban-card {
-    @apply card p-4 mb-3 cursor-pointer hover:shadow-medium transition-shadow duration-200;
+    @apply card p-4 mb-3 cursor-pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  
+  .kanban-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
   }
   
   .chat-message {
