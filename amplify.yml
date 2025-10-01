@@ -15,8 +15,3 @@ frontend:
   cache:
     paths:
       - client/node_modules/**/*
-backend:
-  phases:
-    build:
-      commands:
-        - echo "No backend build required"
