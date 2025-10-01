@@ -49,8 +49,11 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="mx-auto h-12 w-12 bg-primary-600 rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-xl">PM</span>
+          <div className="mx-auto flex flex-col items-center">
+            <div className="h-16 w-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-2xl">SQ</span>
+            </div>
+            <h1 className="mt-4 text-2xl font-bold text-gray-900">SQUAD PM</h1>
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
             Sign in to your account
@@ -163,26 +166,6 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Demo credentials */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 className="text-sm font-medium text-blue-900 mb-2">🎉 Demo Mode - Try All Features!</h3>
-            <div className="text-xs text-blue-700 space-y-1">
-              <p><strong>Quick Demo:</strong> Use any email/password to explore</p>
-              <p><strong>Features:</strong> Dashboard, Kanban, Chat, Analytics, Files</p>
-              <p><strong>Note:</strong> All data is simulated for demonstration</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                document.querySelector('input[type="email"]').value = 'demo@projecthub.com';
-                document.querySelector('input[type="password"]').value = 'demo123';
-                handleSubmit(onSubmit)({ email: 'demo@projecthub.com', password: 'demo123' });
-              }}
-              className="mt-2 w-full btn-primary btn-sm"
-            >
-              🚀 Start Demo Tour
-            </button>
-          </div>
         </form>
       </div>
     </div>
