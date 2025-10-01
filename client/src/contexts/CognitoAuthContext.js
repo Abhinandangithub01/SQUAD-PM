@@ -1,0 +1,297 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { 
+  signIn, 
+  signUp, 
+  signOut, 
+  getCurrentUser,
+  fetchUserAttributes,
+  confirmSignUp,
+  resetPassword,
+  confirmResetPassword,
+  updateUserAttributes
+} from 'aws-amplify/auth';
+import { generateClient } from 'aws-amplify/api';
+import { createUser, getUser } from '../graphql/mutations';
+import { getUser as getUserQuery } from '../graphql/queries';
+import toast from 'react-hot-toast';
+
+const AuthContext = createContext({});
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
+
+export const CognitoAuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const client = generateClient();
+
+  // Check if user is logged in on mount
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    try {
+      setLoading(true);
+      const currentUser = await getCurrentUser();
+      const attributes = await fetchUserAttributes();
+      
+      // Fetch user data from our database
+      const userData = await client.graphql({
+        query: getUserQuery,
+        variables: { id: attributes.sub }
+      });
+
+      if (userData.data.getUser) {
+        setUser(userData.data.getUser);
+        setIsAuthenticated(true);
+      } else {
+        // User exists in Cognito but not in our DB - create user record
+        await createUserRecord(currentUser, attributes);
+      }
+    } catch (error) {
+      console.log('Not authenticated', error);
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createUserRecord = async (cognitoUser, attributes) => {
+    try {
+      const newUser = {
+        id: attributes.sub,
+        cognitoId: attributes.sub,
+        email: attributes.email,
+        firstName: attributes.given_name || '',
+        lastName: attributes.family_name || '',
+        role: 'MEMBER',
+        avatarUrl: null,
+      };
+
+      const result = await client.graphql({
+        query: createUser,
+        variables: { input: newUser }
+      });
+
+      setUser(result.data.createUser);
+      setIsAuthenticated(true);
+      return result.data.createUser;
+    } catch (error) {
+      console.error('Error creating user record:', error);
+      throw error;
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      setLoading(true);
+      const { isSignedIn, nextStep } = await signIn({ 
+        username: email, 
+        password 
+      });
+
+      if (isSignedIn) {
+        await checkUser();
+        toast.success('Logged in successfully!');
+        return { success: true };
+      } else if (nextStep.signInStep === 'CONFIRM_SIGN_UP') {
+        return { 
+          success: false, 
+          requiresConfirmation: true,
+          message: 'Please confirm your email first'
+        };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Login failed');
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async ({ email, password, firstName, lastName }) => {
+    try {
+      setLoading(true);
+      const { isSignUpComplete, userId, nextStep } = await signUp({
+        username: email,
+        password,
+        options: {
+          userAttributes: {
+            email,
+            given_name: firstName,
+            family_name: lastName,
+          },
+          autoSignIn: true
+        }
+      });
+
+      if (nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
+        toast.info('Please check your email for verification code');
+        return {
+          success: true,
+          requiresConfirmation: true,
+          email
+        };
+      }
+
+      if (isSignUpComplete) {
+        toast.success('Account created successfully!');
+        return { success: true };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error(error.message || 'Registration failed');
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmSignUpCode = async (email, code) => {
+    try {
+      setLoading(true);
+      const { isSignUpComplete } = await confirmSignUp({
+        username: email,
+        confirmationCode: code
+      });
+
+      if (isSignUpComplete) {
+        toast.success('Email confirmed! You can now log in.');
+        return { success: true };
+      }
+    } catch (error) {
+      console.error('Confirmation error:', error);
+      toast.error(error.message || 'Confirmation failed');
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      setLoading(true);
+      await signOut();
+      setUser(null);
+      setIsAuthenticated(false);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Logout failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const forgotPassword = async (email) => {
+    try {
+      setLoading(true);
+      await resetPassword({ username: email });
+      toast.info('Password reset code sent to your email');
+      return { success: true };
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      toast.error(error.message || 'Failed to send reset code');
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPasswordWithCode = async (email, code, newPassword) => {
+    try {
+      setLoading(true);
+      await confirmResetPassword({
+        username: email,
+        confirmationCode: code,
+        newPassword
+      });
+      toast.success('Password reset successfully!');
+      return { success: true };
+    } catch (error) {
+      console.error('Reset password error:', error);
+      toast.error(error.message || 'Password reset failed');
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (updates) => {
+    try {
+      setLoading(true);
+      
+      // Update Cognito attributes if email or name changed
+      if (updates.email || updates.firstName || updates.lastName) {
+        const attributes = {};
+        if (updates.email) attributes.email = updates.email;
+        if (updates.firstName) attributes.given_name = updates.firstName;
+        if (updates.lastName) attributes.family_name = updates.lastName;
+        
+        await updateUserAttributes({ userAttributes: attributes });
+      }
+
+      // Update user in our database
+      // This would call your GraphQL mutation
+      
+      await checkUser(); // Refresh user data
+      toast.success('Profile updated successfully!');
+      return { success: true };
+    } catch (error) {
+      console.error('Update profile error:', error);
+      toast.error(error.message || 'Profile update failed');
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const value = {
+    user,
+    loading,
+    isAuthenticated,
+    login,
+    register,
+    logout,
+    confirmSignUpCode,
+    forgotPassword,
+    resetPasswordWithCode,
+    updateProfile,
+    checkUser,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export default AuthContext;
