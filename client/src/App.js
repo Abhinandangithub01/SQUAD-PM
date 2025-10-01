@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
 // Import contexts
-import { AuthProvider } from './contexts/AuthContext';
+import { CognitoAuthProvider } from './contexts/CognitoAuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TimeTrackingProvider } from './contexts/TimeTrackingContext';
@@ -54,7 +54,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
           <ThemeProvider>
-            <AuthProvider>
+            <CognitoAuthProvider>
               <TimeTrackingProvider>
                 <DashboardProvider>
                   <SocketProvider>
@@ -154,7 +154,7 @@ function App() {
                 </SocketProvider>
                 </DashboardProvider>
               </TimeTrackingProvider>
-            </AuthProvider>
+            </CognitoAuthProvider>
           </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>

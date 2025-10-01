@@ -1,0 +1,192 @@
+type UserProfile @model @auth(rules: [{allow: owner, ownerField: "owner"}])
+{
+  email: AWSEmail!
+  firstName: String!
+  lastName: String!
+  role: UserProfileRole
+  avatarUrl: AWSURL
+  projects: [ProjectMember] @hasMany(references: ["userId"])
+  createdTasks: [Task] @hasMany(references: ["createdById"])
+  assignedTasks: [Task] @hasMany(references: ["assignedToId"])
+  comments: [Comment] @hasMany(references: ["userId"])
+  messages: [Message] @hasMany(references: ["userId"])
+  uploadedAttachments: [Attachment] @hasMany(references: ["uploadedById"])
+  activityLogs: [ActivityLog] @hasMany(references: ["userId"])
+  notifications: [Notification] @hasMany(references: ["userId"])
+}
+
+type Project @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: private, operations: [read]}])
+{
+  name: String!
+  description: String
+  color: String
+  status: ProjectStatus
+  startDate: AWSDate
+  endDate: AWSDate
+  ownerId: ID!
+  members: [ProjectMember] @hasMany(references: ["projectId"])
+  tasks: [Task] @hasMany(references: ["projectId"])
+  channels: [Channel] @hasMany(references: ["projectId"])
+  activityLogs: [ActivityLog] @hasMany(references: ["projectId"])
+}
+
+type ProjectMember @model @auth(rules: [{allow: owner, ownerField: "owner"}])
+{
+  projectId: ID!
+  project: Project @belongsTo(references: ["projectId"])
+  userId: ID!
+  user: UserProfile @belongsTo(references: ["userId"])
+  role: ProjectMemberRole
+}
+
+type Task @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: private, operations: [read]}])
+{
+  projectId: ID!
+  project: Project @belongsTo(references: ["projectId"])
+  title: String!
+  description: String
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: AWSDateTime
+  createdById: ID!
+  createdBy: UserProfile @belongsTo(references: ["createdById"])
+  assignedToId: ID
+  assignedTo: UserProfile @belongsTo(references: ["assignedToId"])
+  columnId: String
+  position: Int
+  tags: [String]
+  comments: [Comment] @hasMany(references: ["taskId"])
+  attachments: [Attachment] @hasMany(references: ["taskId"])
+  subtasks: [Subtask] @hasMany(references: ["taskId"])
+}
+
+type Subtask @model @auth(rules: [{allow: owner, ownerField: "owner"}])
+{
+  taskId: ID!
+  task: Task @belongsTo(references: ["taskId"])
+  title: String!
+  completed: Boolean!
+  position: Int
+}
+
+type Comment @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: private, operations: [read]}])
+{
+  taskId: ID!
+  task: Task @belongsTo(references: ["taskId"])
+  userId: ID!
+  user: UserProfile @belongsTo(references: ["userId"])
+  content: String!
+}
+
+type Attachment @model @auth(rules: [{allow: owner, ownerField: "owner"}])
+{
+  taskId: ID!
+  task: Task @belongsTo(references: ["taskId"])
+  fileName: String!
+  fileUrl: AWSURL!
+  fileSize: Int
+  fileType: String
+  uploadedById: ID!
+  uploadedBy: UserProfile @belongsTo(references: ["uploadedById"])
+}
+
+type Channel @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: private, operations: [read]}])
+{
+  name: String!
+  description: String
+  projectId: ID
+  project: Project @belongsTo(references: ["projectId"])
+  type: ChannelType
+  createdById: ID!
+  messages: [Message] @hasMany(references: ["channelId"])
+}
+
+type Message @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: private, operations: [read]}])
+{
+  channelId: ID!
+  channel: Channel @belongsTo(references: ["channelId"])
+  userId: ID!
+  user: UserProfile @belongsTo(references: ["userId"])
+  content: String!
+}
+
+type ActivityLog @model @auth(rules: [{allow: private}])
+{
+  userId: ID!
+  user: UserProfile @belongsTo(references: ["userId"])
+  projectId: ID
+  project: Project @belongsTo(references: ["projectId"])
+  taskId: ID
+  action: String!
+  entityType: String
+  entityName: String
+  fromStatus: String
+  toStatus: String
+}
+
+type Notification @model @auth(rules: [{allow: owner, ownerField: "owner"}])
+{
+  userId: ID!
+  user: UserProfile @belongsTo(references: ["userId"])
+  type: NotificationType
+  title: String!
+  message: String!
+  read: Boolean!
+  linkTo: String
+}
+
+enum UserProfileRole {
+  ADMIN
+  MANAGER
+  MEMBER
+  VIEWER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+  ON_HOLD
+}
+
+enum ProjectMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ChannelType {
+  PROJECT
+  DIRECT
+  GENERAL
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  COMMENT_ADDED
+  MENTION
+  PROJECT_INVITE
+  DEADLINE_REMINDER
+}

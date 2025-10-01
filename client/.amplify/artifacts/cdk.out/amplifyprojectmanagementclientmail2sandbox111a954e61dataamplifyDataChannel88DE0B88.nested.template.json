@@ -1,0 +1,2221 @@
+{
+ "Parameters": {
+  "DynamoDBModelTableReadIOPS": {
+   "Type": "Number",
+   "Default": 5,
+   "Description": "The number of read IOPS the table should support."
+  },
+  "DynamoDBModelTableWriteIOPS": {
+   "Type": "Number",
+   "Default": 5,
+   "Description": "The number of write IOPS the table should support."
+  },
+  "DynamoDBBillingMode": {
+   "Type": "String",
+   "Default": "PAY_PER_REQUEST",
+   "AllowedValues": [
+    "PAY_PER_REQUEST",
+    "PROVISIONED"
+   ],
+   "Description": "Configure @model types to create DynamoDB tables with PAY_PER_REQUEST or PROVISIONED billing modes."
+  },
+  "DynamoDBEnablePointInTimeRecovery": {
+   "Type": "String",
+   "Default": "false",
+   "AllowedValues": [
+    "true",
+    "false"
+   ],
+   "Description": "Whether to enable Point in Time Recovery on the table."
+  },
+  "DynamoDBEnableServerSideEncryption": {
+   "Type": "String",
+   "Default": "true",
+   "AllowedValues": [
+    "true",
+    "false"
+   ],
+   "Description": "Enable server side encryption powered by KMS."
+  },
+  "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataAmplifyTableManagerNestedStackAmplifyTableManagerNestedStackResource3BCA337DOutputsamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataAmplifyTableF6918273": {
+   "Type": "String"
+  },
+  "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId": {
+   "Type": "String"
+  },
+  "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name": {
+   "Type": "String"
+  },
+  "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref": {
+   "Type": "String"
+  },
+  "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref": {
+   "Type": "String"
+  },
+  "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef": {
+   "Type": "String"
+  }
+ },
+ "Conditions": {
+  "HasEnvironmentParameter": {
+   "Fn::Not": [
+    {
+     "Fn::Equals": [
+      "NONE",
+      "NONE"
+     ]
+    }
+   ]
+  },
+  "ShouldUsePayPerRequestBilling": {
+   "Fn::Equals": [
+    {
+     "Ref": "DynamoDBBillingMode"
+    },
+    "PAY_PER_REQUEST"
+   ]
+  },
+  "ShouldUsePointInTimeRecovery": {
+   "Fn::Equals": [
+    {
+     "Ref": "DynamoDBEnablePointInTimeRecovery"
+    },
+    "true"
+   ]
+  },
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-3"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-4"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AWS::Region"
+      },
+      "us-west-2"
+     ]
+    }
+   ]
+  }
+ },
+ "Resources": {
+  "ChannelTable": {
+   "Type": "Custom::AmplifyDynamoDBTable",
+   "Properties": {
+    "ServiceToken": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataAmplifyTableManagerNestedStackAmplifyTableManagerNestedStackResource3BCA337DOutputsamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataAmplifyTableF6918273"
+    },
+    "tableName": {
+     "Fn::Join": [
+      "",
+      [
+       "Channel-",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "-NONE"
+      ]
+     ]
+    },
+    "attributeDefinitions": [
+     {
+      "attributeName": "id",
+      "attributeType": "S"
+     },
+     {
+      "attributeName": "projectId",
+      "attributeType": "S"
+     }
+    ],
+    "keySchema": [
+     {
+      "attributeName": "id",
+      "keyType": "HASH"
+     }
+    ],
+    "globalSecondaryIndexes": [
+     {
+      "indexName": "gsi-Project.channels",
+      "keySchema": [
+       {
+        "attributeName": "projectId",
+        "keyType": "HASH"
+       }
+      ],
+      "projection": {
+       "projectionType": "ALL"
+      },
+      "provisionedThroughput": {
+       "Fn::If": [
+        "ShouldUsePayPerRequestBilling",
+        {
+         "Ref": "AWS::NoValue"
+        },
+        {
+         "ReadCapacityUnits": {
+          "Ref": "DynamoDBModelTableReadIOPS"
+         },
+         "WriteCapacityUnits": {
+          "Ref": "DynamoDBModelTableWriteIOPS"
+         }
+        }
+       ]
+      }
+     }
+    ],
+    "provisionedThroughput": {
+     "Fn::If": [
+      "ShouldUsePayPerRequestBilling",
+      {
+       "Ref": "AWS::NoValue"
+      },
+      {
+       "ReadCapacityUnits": {
+        "Ref": "DynamoDBModelTableReadIOPS"
+       },
+       "WriteCapacityUnits": {
+        "Ref": "DynamoDBModelTableWriteIOPS"
+       }
+      }
+     ]
+    },
+    "sseSpecification": {
+     "sseEnabled": false
+    },
+    "streamSpecification": {
+     "streamViewType": "NEW_AND_OLD_IMAGES"
+    },
+    "deletionProtectionEnabled": false,
+    "allowDestructiveGraphqlSchemaUpdates": true,
+    "replaceTableUponGsiUpdate": true,
+    "pointInTimeRecoverySpecification": {
+     "Fn::If": [
+      "ShouldUsePointInTimeRecovery",
+      {
+       "PointInTimeRecoveryEnabled": true
+      },
+      {
+       "Ref": "AWS::NoValue"
+      }
+     ]
+    },
+    "billingMode": {
+     "Fn::If": [
+      "ShouldUsePayPerRequestBilling",
+      "PAY_PER_REQUEST",
+      {
+       "Ref": "AWS::NoValue"
+      }
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/ChannelTable/Default/Default"
+   }
+  },
+  "ChannelIAMRole8AEA6563": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "dynamodb:BatchGetItem",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:GetItem",
+          "dynamodb:Scan",
+          "dynamodb:Query",
+          "dynamodb:UpdateItem",
+          "dynamodb:ConditionCheckItem",
+          "dynamodb:DescribeTable",
+          "dynamodb:GetRecords",
+          "dynamodb:GetShardIterator"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::Sub": [
+            "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${tablename}",
+            {
+             "tablename": {
+              "Fn::Join": [
+               "",
+               [
+                "Channel-",
+                {
+                 "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+                },
+                "-NONE"
+               ]
+              ]
+             }
+            }
+           ]
+          },
+          {
+           "Fn::Sub": [
+            "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${tablename}/*",
+            {
+             "tablename": {
+              "Fn::Join": [
+               "",
+               [
+                "Channel-",
+                {
+                 "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+                },
+                "-NONE"
+               ]
+              ]
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "DynamoDBAccess"
+     }
+    ],
+    "RoleName": {
+     "Fn::Join": [
+      "",
+      [
+       "ChannelIAMRole0bdd56-",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "-NONE"
+      ]
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "amplifyData"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/ChannelIAMRole/Resource"
+   }
+  },
+  "ChannelDataSource": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DynamoDBConfig": {
+     "AwsRegion": {
+      "Ref": "AWS::Region"
+     },
+     "TableName": {
+      "Fn::Select": [
+       1,
+       {
+        "Fn::Split": [
+         "/",
+         {
+          "Fn::Select": [
+           5,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "ChannelTable",
+               "TableArn"
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "Name": "ChannelTable",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "ChannelIAMRole8AEA6563",
+      "Arn"
+     ]
+    },
+    "Type": "AMAZON_DYNAMODB"
+   },
+   "DependsOn": [
+    "ChannelIAMRole8AEA6563"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/ChannelDataSource/Resource"
+   }
+  },
+  "QuerygetChannelauth0FunctionQuerygetChannelauth0FunctionAppSyncFunction5FDE02BC": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QuerygetChannelauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/ad19b8203207ee9640ec6de0a766ea38d67ea787852a8f5d32b2423f33bdbb9d.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/QuerygetChannelauth0Function/QuerygetChannelauth0Function.AppSyncFunction"
+   }
+  },
+  "QuerygetChannelpostAuth0FunctionQuerygetChannelpostAuth0FunctionAppSyncFunctionDC765A81": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QuerygetChannelpostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/QuerygetChannelpostAuth0Function/QuerygetChannelpostAuth0Function.AppSyncFunction"
+   }
+  },
+  "QueryGetChannelDataResolverFnQueryGetChannelDataResolverFnAppSyncFunction55E50A97": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ChannelDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QueryGetChannelDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/08f4d557693d96c1a4efba0f9dc91330e4b19772fd5477c156468843e3d9cb5e.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/4c6a2d29f01c6091bd1d9afe16e5849d456c96f17c3b215938c8067399532719.vtl"
+    }
+   },
+   "DependsOn": [
+    "ChannelDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/QueryGetChannelDataResolverFn/QueryGetChannelDataResolverFn.AppSyncFunction"
+   }
+  },
+  "GetChannelResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "getChannel",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "QuerygetChannelauth0FunctionQuerygetChannelauth0FunctionAppSyncFunction5FDE02BC",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "QuerygetChannelpostAuth0FunctionQuerygetChannelpostAuth0FunctionAppSyncFunctionDC765A81",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "QueryGetChannelDataResolverFnQueryGetChannelDataResolverFnAppSyncFunction55E50A97",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"getChannel\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "ChannelTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Query"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/queryGetChannelResolver"
+   }
+  },
+  "QuerylistChannelsauth0FunctionQuerylistChannelsauth0FunctionAppSyncFunction0481C31E": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QuerylistChannelsauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/ad19b8203207ee9640ec6de0a766ea38d67ea787852a8f5d32b2423f33bdbb9d.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/QuerylistChannelsauth0Function/QuerylistChannelsauth0Function.AppSyncFunction"
+   }
+  },
+  "QuerylistChannelspostAuth0FunctionQuerylistChannelspostAuth0FunctionAppSyncFunction9C45E6D1": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QuerylistChannelspostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/QuerylistChannelspostAuth0Function/QuerylistChannelspostAuth0Function.AppSyncFunction"
+   }
+  },
+  "QueryListChannelsDataResolverFnQueryListChannelsDataResolverFnAppSyncFunctionD07B1758": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ChannelDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QueryListChannelsDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9fcbe070ecd3023c5bf5b966fa9584757db9762eef123bad0820bd87591b2174.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/cc01911d0269d4080ea57505dc445dfc315ef7ad85d3d9d4ea1357858bff451d.vtl"
+    }
+   },
+   "DependsOn": [
+    "ChannelDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/QueryListChannelsDataResolverFn/QueryListChannelsDataResolverFn.AppSyncFunction"
+   }
+  },
+  "ListChannelResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "listChannels",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "QuerylistChannelsauth0FunctionQuerylistChannelsauth0FunctionAppSyncFunction0481C31E",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "QuerylistChannelspostAuth0FunctionQuerylistChannelspostAuth0FunctionAppSyncFunction9C45E6D1",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "QueryListChannelsDataResolverFnQueryListChannelsDataResolverFnAppSyncFunctionD07B1758",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"listChannels\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "ChannelTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Query"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/queryListChannelsResolver"
+   }
+  },
+  "MutationcreateChannelinit0FunctionMutationcreateChannelinit0FunctionAppSyncFunction4BA0D6ED": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationcreateChannelinit0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a183ddccbd956316c38ef97177b8f088ef0826f62023323f5ae6053d348ccffc.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationcreateChannelinit0Function/MutationcreateChannelinit0Function.AppSyncFunction"
+   }
+  },
+  "MutationcreateChannelauth0FunctionMutationcreateChannelauth0FunctionAppSyncFunction49F917E7": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationcreateChannelauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f7f061afff0b3bcdccf43a078adb2a5d89a2142b1c1dc859e973eaaa8b8815c1.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationcreateChannelauth0Function/MutationcreateChannelauth0Function.AppSyncFunction"
+   }
+  },
+  "MutationcreateChannelpostAuth0FunctionMutationcreateChannelpostAuth0FunctionAppSyncFunctionC08DAE3B": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationcreateChannelpostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationcreateChannelpostAuth0Function/MutationcreateChannelpostAuth0Function.AppSyncFunction"
+   }
+  },
+  "MutationCreateChannelDataResolverFnMutationCreateChannelDataResolverFnAppSyncFunctionD50A6C31": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ChannelDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationCreateChannelDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/7639f07874a7686bf7d1878ebe7a3ee83641f0121a3361344bde85caf006e463.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f4a52b72209a9dfa197b5e7367a5c378c5bb86de6e29ddd9e48b49a3fe54b249.vtl"
+    }
+   },
+   "DependsOn": [
+    "ChannelDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationCreateChannelDataResolverFn/MutationCreateChannelDataResolverFn.AppSyncFunction"
+   }
+  },
+  "CreateChannelResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "createChannel",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationcreateChannelinit0FunctionMutationcreateChannelinit0FunctionAppSyncFunction4BA0D6ED",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationcreateChannelauth0FunctionMutationcreateChannelauth0FunctionAppSyncFunction49F917E7",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationcreateChannelpostAuth0FunctionMutationcreateChannelpostAuth0FunctionAppSyncFunctionC08DAE3B",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationCreateChannelDataResolverFnMutationCreateChannelDataResolverFnAppSyncFunctionD50A6C31",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"createChannel\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "ChannelTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/mutationCreateChannelResolver"
+   }
+  },
+  "MutationupdateChannelinit0FunctionMutationupdateChannelinit0FunctionAppSyncFunction42D92172": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationupdateChannelinit0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/06db846fd14e6fc371f22b12b5545ba8e2dbfeda85d8c8d586c71c282166657b.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationupdateChannelinit0Function/MutationupdateChannelinit0Function.AppSyncFunction"
+   }
+  },
+  "MutationupdateChannelauth0FunctionMutationupdateChannelauth0FunctionAppSyncFunction44CAA80C": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ChannelDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationupdateChannelauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/1f5fed297da9c32ae3af922bf3a38ccf23b956078887d16891ec06c20c64722c.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/4af87256ae9a97e2c611a85f4848fe4cf073ef7ee2680c04a45d9709df2e14ef.vtl"
+    }
+   },
+   "DependsOn": [
+    "ChannelDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationupdateChannelauth0Function/MutationupdateChannelauth0Function.AppSyncFunction"
+   }
+  },
+  "MutationupdateChannelpostAuth0FunctionMutationupdateChannelpostAuth0FunctionAppSyncFunction7DBD4868": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationupdateChannelpostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationupdateChannelpostAuth0Function/MutationupdateChannelpostAuth0Function.AppSyncFunction"
+   }
+  },
+  "MutationUpdateChannelDataResolverFnMutationUpdateChannelDataResolverFnAppSyncFunction4C7857EE": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ChannelDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationUpdateChannelDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/474bf0776ec2164a13191d1a0a9e057154931e4918fea5086f49850d02a5371b.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f4a52b72209a9dfa197b5e7367a5c378c5bb86de6e29ddd9e48b49a3fe54b249.vtl"
+    }
+   },
+   "DependsOn": [
+    "ChannelDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationUpdateChannelDataResolverFn/MutationUpdateChannelDataResolverFn.AppSyncFunction"
+   }
+  },
+  "UpdateChannelResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "updateChannel",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationupdateChannelinit0FunctionMutationupdateChannelinit0FunctionAppSyncFunction42D92172",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationupdateChannelauth0FunctionMutationupdateChannelauth0FunctionAppSyncFunction44CAA80C",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationupdateChannelpostAuth0FunctionMutationupdateChannelpostAuth0FunctionAppSyncFunction7DBD4868",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationUpdateChannelDataResolverFnMutationUpdateChannelDataResolverFnAppSyncFunction4C7857EE",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"updateChannel\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "ChannelTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/mutationUpdateChannelResolver"
+   }
+  },
+  "MutationdeleteChannelauth0FunctionMutationdeleteChannelauth0FunctionAppSyncFunctionBF5D21BD": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ChannelDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationdeleteChannelauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/1f5fed297da9c32ae3af922bf3a38ccf23b956078887d16891ec06c20c64722c.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/867fb7d7eb8e4127b6d0136b82c5c3f74a52eb410297086859986f8e7e4b02aa.vtl"
+    }
+   },
+   "DependsOn": [
+    "ChannelDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationdeleteChannelauth0Function/MutationdeleteChannelauth0Function.AppSyncFunction"
+   }
+  },
+  "MutationdeleteChannelpostAuth0FunctionMutationdeleteChannelpostAuth0FunctionAppSyncFunctionFBB32397": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationdeleteChannelpostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationdeleteChannelpostAuth0Function/MutationdeleteChannelpostAuth0Function.AppSyncFunction"
+   }
+  },
+  "MutationDeleteChannelDataResolverFnMutationDeleteChannelDataResolverFnAppSyncFunctionC6A9B20F": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "ChannelDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationDeleteChannelDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/4f7907d1209a2c9953a0c053df402c634e359546d70c7cc5c2e8e21ea734880f.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f4a52b72209a9dfa197b5e7367a5c378c5bb86de6e29ddd9e48b49a3fe54b249.vtl"
+    }
+   },
+   "DependsOn": [
+    "ChannelDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/MutationDeleteChannelDataResolverFn/MutationDeleteChannelDataResolverFn.AppSyncFunction"
+   }
+  },
+  "DeleteChannelResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "deleteChannel",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationdeleteChannelauth0FunctionMutationdeleteChannelauth0FunctionAppSyncFunctionBF5D21BD",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationdeleteChannelpostAuth0FunctionMutationdeleteChannelpostAuth0FunctionAppSyncFunctionFBB32397",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationDeleteChannelDataResolverFnMutationDeleteChannelDataResolverFnAppSyncFunctionC6A9B20F",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"deleteChannel\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "ChannelTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/mutationDeleteChannelResolver"
+   }
+  },
+  "SubscriptiononCreateChannelauth0FunctionSubscriptiononCreateChannelauth0FunctionAppSyncFunction2EA07D64": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononCreateChannelauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/7313b9d304b42b31f7779d73251565621f911cf233e53cca2c808036bda639cc.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptiononCreateChannelauth0Function/SubscriptiononCreateChannelauth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptiononCreateChannelpostAuth0FunctionSubscriptiononCreateChannelpostAuth0FunctionAppSyncFunction85737808": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononCreateChannelpostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptiononCreateChannelpostAuth0Function/SubscriptiononCreateChannelpostAuth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptionOnCreateChannelDataResolverFnSubscriptionOnCreateChannelDataResolverFnAppSyncFunctionBE1837E5": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptionOnCreateChannelDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/fe3c43ada4b9d681a5e2312663ef7a73386424d73b73e51f8e2e9d4b50f7c502.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/e0cff47fb007f0bbf2a4e43ca256d6aa7ec109821769fd79fa7c5e83f0e7f9fc.vtl"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptionOnCreateChannelDataResolverFn/SubscriptionOnCreateChannelDataResolverFn.AppSyncFunction"
+   }
+  },
+  "SubscriptiononCreateChannelResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "onCreateChannel",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononCreateChannelauth0FunctionSubscriptiononCreateChannelauth0FunctionAppSyncFunction2EA07D64",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononCreateChannelpostAuth0FunctionSubscriptiononCreateChannelpostAuth0FunctionAppSyncFunction85737808",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptionOnCreateChannelDataResolverFnSubscriptionOnCreateChannelDataResolverFnAppSyncFunctionBE1837E5",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onCreateChannel\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Subscription"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/subscriptionOnCreateChannelResolver"
+   }
+  },
+  "SubscriptiononUpdateChannelauth0FunctionSubscriptiononUpdateChannelauth0FunctionAppSyncFunction7EC1F7C7": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononUpdateChannelauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/7313b9d304b42b31f7779d73251565621f911cf233e53cca2c808036bda639cc.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptiononUpdateChannelauth0Function/SubscriptiononUpdateChannelauth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptiononUpdateChannelpostAuth0FunctionSubscriptiononUpdateChannelpostAuth0FunctionAppSyncFunctionEE6620E8": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononUpdateChannelpostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptiononUpdateChannelpostAuth0Function/SubscriptiononUpdateChannelpostAuth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptionOnUpdateChannelDataResolverFnSubscriptionOnUpdateChannelDataResolverFnAppSyncFunction6040D373": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptionOnUpdateChannelDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/fe3c43ada4b9d681a5e2312663ef7a73386424d73b73e51f8e2e9d4b50f7c502.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/e0cff47fb007f0bbf2a4e43ca256d6aa7ec109821769fd79fa7c5e83f0e7f9fc.vtl"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptionOnUpdateChannelDataResolverFn/SubscriptionOnUpdateChannelDataResolverFn.AppSyncFunction"
+   }
+  },
+  "SubscriptiononUpdateChannelResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "onUpdateChannel",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononUpdateChannelauth0FunctionSubscriptiononUpdateChannelauth0FunctionAppSyncFunction7EC1F7C7",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononUpdateChannelpostAuth0FunctionSubscriptiononUpdateChannelpostAuth0FunctionAppSyncFunctionEE6620E8",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptionOnUpdateChannelDataResolverFnSubscriptionOnUpdateChannelDataResolverFnAppSyncFunction6040D373",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onUpdateChannel\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Subscription"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/subscriptionOnUpdateChannelResolver"
+   }
+  },
+  "SubscriptiononDeleteChannelauth0FunctionSubscriptiononDeleteChannelauth0FunctionAppSyncFunction0D21CEE6": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononDeleteChannelauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/7313b9d304b42b31f7779d73251565621f911cf233e53cca2c808036bda639cc.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptiononDeleteChannelauth0Function/SubscriptiononDeleteChannelauth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptiononDeleteChannelpostAuth0FunctionSubscriptiononDeleteChannelpostAuth0FunctionAppSyncFunction8FDCED9F": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononDeleteChannelpostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptiononDeleteChannelpostAuth0Function/SubscriptiononDeleteChannelpostAuth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptionOnDeleteChannelDataResolverFnSubscriptionOnDeleteChannelDataResolverFnAppSyncFunction06B7EEA8": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptionOnDeleteChannelDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/fe3c43ada4b9d681a5e2312663ef7a73386424d73b73e51f8e2e9d4b50f7c502.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/e0cff47fb007f0bbf2a4e43ca256d6aa7ec109821769fd79fa7c5e83f0e7f9fc.vtl"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/SubscriptionOnDeleteChannelDataResolverFn/SubscriptionOnDeleteChannelDataResolverFn.AppSyncFunction"
+   }
+  },
+  "SubscriptiononDeleteChannelResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "onDeleteChannel",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononDeleteChannelauth0FunctionSubscriptiononDeleteChannelauth0FunctionAppSyncFunction0D21CEE6",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononDeleteChannelpostAuth0FunctionSubscriptiononDeleteChannelpostAuth0FunctionAppSyncFunction8FDCED9F",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptionOnDeleteChannelDataResolverFnSubscriptionOnDeleteChannelDataResolverFnAppSyncFunction06B7EEA8",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onDeleteChannel\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Subscription"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/subscriptionOnDeleteChannelResolver"
+   }
+  },
+  "ChannelOwnerDataResolverFnChannelOwnerDataResolverFnAppSyncFunctionD3D95350": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPINONEDS41488826Name"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "ChannelOwnerDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/041534e5fd916595f752318f161512d7c7f83b9f2cf32d0f0be381c12253ff68.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/064303962e481067b44300212516363b99aaee539b6bafaf756fdd83ff0b60f0.vtl"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/ChannelOwnerDataResolverFn/ChannelOwnerDataResolverFn.AppSyncFunction"
+   }
+  },
+  "ChannelownerResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+    },
+    "FieldName": "owner",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "ChannelOwnerDataResolverFnChannelOwnerDataResolverFnAppSyncFunctionD3D95350",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Channel\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"owner\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthauthenticatedUserRole879FA2D5Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthunauthenticatedUserRole38BF9D83Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61authNestedStackauthNestedStackResourceA050BC11Outputsamplifyprojectmanagementclientmail2sandbox111a954e61authamplifyAuthIdentityPool8D360C6ERef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Channel"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/channelOwnerResolver"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WOwW6DMAyGn6X34K30sF1X0I7bBLtXJjEoBRwUO60qxLtP0KnTTr8/+ZP955DvX+F5h1fJrOuzwTcwf5AouVrR9qZo+QsjjqQUVygCO68+sKlIQoqWTJFEw/iHLT9mvMppdjfGMbgGvrEZ6IhCxuMIcxWGux0GWgxOk9zYwlxuetmUqFg/Tv6n98R2LVEEbn2XIm6Nfj8PF4qLkcMJRUgF3tYwcoBjsj3pWmBZ3c+kU1KzrWvFznO3GA6O4CxPlzyH/Qvsd2fxPouJ1Y8E1T1/ADapWCI2AQAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "amplify-projectmanagementclient-mail2-sandbox-111a954e61/data/amplifyData/Channel/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Outputs": {
+  "GetAttChannelTableStreamArn": {
+   "Description": "Your DynamoDB table StreamArn.",
+   "Value": {
+    "Fn::GetAtt": [
+     "ChannelTable",
+     "TableStreamArn"
+    ]
+   },
+   "Export": {
+    "Name": {
+     "Fn::Join": [
+      ":",
+      [
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "GetAtt:ChannelTable:StreamArn"
+      ]
+     ]
+    }
+   }
+  },
+  "GetAttChannelTableName": {
+   "Description": "Your DynamoDB table name.",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "Channel-",
+      {
+       "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+      },
+      "-NONE"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": {
+     "Fn::Join": [
+      ":",
+      [
+       {
+        "Ref": "referencetoamplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataGraphQLAPIB2F0CCA6ApiId"
+       },
+       "GetAtt:ChannelTable:Name"
+      ]
+     ]
+    }
+   }
+  },
+  "amplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataChannelChannelDataSource77B23F32Name": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ChannelDataSource",
+     "Name"
+    ]
+   }
+  },
+  "amplifyprojectmanagementclientmail2sandbox111a954e61dataamplifyDataChannelChannelTableAFC58672TableArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ChannelTable",
+     "TableArn"
+    ]
+   }
+  }
+ }
+}
