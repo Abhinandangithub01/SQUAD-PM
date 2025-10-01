@@ -51,48 +51,22 @@ const ProjectDetail = () => {
   const { data: projectData, isLoading } = useQuery({
     queryKey: ['project', projectId],
     queryFn: async () => {
-      // First try to find in mock data
-      const mockProject = mockProjects.find(project => project.id === projectId);
-      if (mockProject) {
-        return { 
+      try {
+        const response = await api.get(`/projects/${projectId}`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        // Return default project structure
+        return {
           project: {
-            ...mockProject,
-            members: [
-              {
-                id: '1',
-                user_id: '1',
-                first_name: 'Demo',
-                last_name: 'User',
-                email: 'demo@projecthub.com',
-                role: 'owner',
-                joined_at: '2024-08-01T00:00:00Z'
-              },
-              {
-                id: '2',
-                user_id: '2',
-                first_name: 'John',
-                last_name: 'Doe',
-                email: 'john@projecthub.com',
-                role: 'admin',
-                joined_at: '2024-08-02T00:00:00Z'
-              },
-              {
-                id: '3',
-                user_id: '3',
-                first_name: 'Jane',
-                last_name: 'Smith',
-                email: 'jane@projecthub.com',
-                role: 'member',
-                joined_at: '2024-08-03T00:00:00Z'
-              }
-            ]
+            id: projectId,
+            name: `Project ${projectId}`,
+            description: '',
+            status: 'active',
+            members: []
           }
         };
       }
-      
-      // Fallback to API
-      const response = await api.get(`/projects/${projectId}`);
-      return response.data;
     },
     enabled: !!projectId,
   });
@@ -699,7 +673,7 @@ const RecentActivity = ({ projectId }) => {
   const [visibleCount, setVisibleCount] = useState(5);
   
   // Filter activities for this specific project
-  const projectActivities = mockActivity.filter(activity => activity.project_id === projectId);
+  const projectActivities = [];
   
   if (projectActivities.length === 0) {
     return (
@@ -804,10 +778,10 @@ const RecentActivity = ({ projectId }) => {
 // Linked Tasks Panel Component
 const LinkedTasksPanel = ({ projectId, selectedMilestoneId }) => {
   // Get all tasks for the project
-  const projectTasks = mockTasks.filter(task => task.project_id === projectId);
+  const projectTasks = [];
   
   // Get the selected milestone
-  const selectedMilestone = mockMilestones.find(milestone => milestone.id === selectedMilestoneId);
+  const selectedMilestone = null;
   
   // Get tasks for the selected milestone
   const selectedMilestoneTasks = selectedMilestone 
@@ -918,11 +892,11 @@ const MilestonesWithTasks = ({ projectId }) => {
   const [selectedMilestoneId, setSelectedMilestoneId] = useState(null);
   
   // Filter milestones for this project
-  const projectMilestones = mockMilestones.filter(milestone => milestone.project_id === projectId);
+  const projectMilestones = [];
   
   // Calculate milestone progress based on linked tasks
   const calculateMilestoneProgress = (milestoneId) => {
-    const linkedTasks = mockTasks.filter(task => task.milestone_id === milestoneId && task.project_id === projectId);
+    const linkedTasks = [];
     if (linkedTasks.length === 0) return 0;
     
     const completedTasks = linkedTasks.filter(task => task.completed || task.status === 'Done').length;
@@ -933,7 +907,7 @@ const MilestonesWithTasks = ({ projectId }) => {
   const milestonesWithProgress = projectMilestones.map(milestone => ({
     ...milestone,
     progress: calculateMilestoneProgress(milestone.id),
-    linkedTasksCount: mockTasks.filter(task => task.milestone_id === milestone.id && task.project_id === projectId).length
+    linkedTasksCount: 0
   }));
 
   // Set default selected milestone to the first one with tasks
@@ -998,11 +972,11 @@ const ProjectMilestones = ({ projectId, selectedMilestoneId, onMilestoneSelect }
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
   
   // Filter milestones for this project
-  const projectMilestones = mockMilestones.filter(milestone => milestone.project_id === projectId);
+  const projectMilestones = [];
   
   // Calculate milestone progress based on linked tasks
   const calculateMilestoneProgress = (milestoneId) => {
-    const linkedTasks = mockTasks.filter(task => task.milestone_id === milestoneId && task.project_id === projectId);
+    const linkedTasks = [];
     if (linkedTasks.length === 0) return 0;
     
     const completedTasks = linkedTasks.filter(task => task.completed || task.status === 'Done').length;
@@ -1013,7 +987,7 @@ const ProjectMilestones = ({ projectId, selectedMilestoneId, onMilestoneSelect }
   const milestonesWithProgress = projectMilestones.map(milestone => ({
     ...milestone,
     progress: calculateMilestoneProgress(milestone.id),
-    linkedTasksCount: mockTasks.filter(task => task.milestone_id === milestone.id && task.project_id === projectId).length
+    linkedTasksCount: 0
   }));
 
   if (projectMilestones.length === 0) {

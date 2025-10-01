@@ -35,7 +35,8 @@ const EnhancedGanttChart = () => {
   const { data: tasksData, isLoading } = useQuery({
     queryKey: ['tasks', projectId],
     queryFn: async () => {
-      return mockTasks.filter(task => task.project_id === projectId);
+      const response = await api.get(`/projects/${projectId}/tasks`);
+      return response.data;
     },
   });
 

@@ -149,8 +149,7 @@ const TaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
   // Initialize milestone search when task data loads or editing starts
   useEffect(() => {
     if (taskData?.task && isEditing) {
-      const currentMilestone = mockMilestones.find(m => m.id === taskData.task.milestone_id);
-      setMilestoneSearch(currentMilestone ? currentMilestone.title : 'No milestone');
+      setMilestoneSearch('No milestone');
       setValue('milestone_id', taskData.task.milestone_id || '');
     }
   }, [taskData, isEditing, setValue]);
@@ -414,7 +413,7 @@ const TaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
                                   >
                                     No milestone
                                   </div>
-                                  {mockMilestones
+                                  {[]
                                     .filter(milestone => 
                                       milestone.title.toLowerCase().includes(milestoneSearch.toLowerCase()) ||
                                       milestone.description?.toLowerCase().includes(milestoneSearch.toLowerCase())

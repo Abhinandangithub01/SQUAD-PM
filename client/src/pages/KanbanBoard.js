@@ -354,16 +354,7 @@ const KanbanBoard = () => {
   const fetchProjectDetails = async () => {
     console.log('Fetching project details for ID:', projectId);
     
-    // First, try to find the project in mock data
-    const mockProject = mockProjects.find(project => project.id === projectId);
-    
-    if (mockProject) {
-      console.log('Found project in mock data:', mockProject);
-      setProjectName(mockProject.name);
-      return;
-    }
-
-    // Set immediate fallback based on projectId if not found in mock data
+    // Set immediate fallback based on projectId
     if (projectId) {
       let immediateProjectName;
       // If projectId is just a number, make it more meaningful
@@ -376,7 +367,7 @@ const KanbanBoard = () => {
       setProjectName(immediateProjectName);
     }
 
-    // Try API as fallback
+    // Try API
     try {
       const endpoints = [
         `/projects/${projectId}`,
