@@ -4,8 +4,8 @@ frontend:
     preBuild:
       commands:
         - cd client
-        - rm -rf amplify node_modules
-        - npm install --production=false
+        - rm -rf amplify .amplify node_modules package-lock.json
+        - npm install --legacy-peer-deps --omit=optional
     build:
       commands:
         - npm run build
