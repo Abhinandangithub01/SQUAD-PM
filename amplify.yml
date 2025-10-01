@@ -4,9 +4,10 @@ frontend:
     preBuild:
       commands:
         - cd client
-        - rm -rf amplify node_modules
+        - rm -rf node_modules
         - cp amplify_outputs.json src/amplify_outputs.json
         - npm ci
+        - npx @aws-amplify/cli codegen
     build:
       commands:
         - npm run build
