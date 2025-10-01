@@ -9,7 +9,10 @@ import toast from 'react-hot-toast';
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState(null);
-  const { login, isAuthenticated, loading, resendConfirmationCode } = useAuth();
+  const [showVerificationInput, setShowVerificationInput] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const { login, isAuthenticated, loading, resendConfirmationCode, confirmSignUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -51,9 +54,34 @@ const Login = () => {
     const result = await resendConfirmationCode(unverifiedEmail);
     if (result.success) {
       toast.success('Verification code sent! Check your email.');
-      navigate('/verify-email', { state: { email: unverifiedEmail } });
+      setShowVerificationInput(true);
     } else {
       toast.error('Failed to send verification code');
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      toast.error('Please enter a valid 6-digit code');
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const result = await confirmSignUp(unverifiedEmail, verificationCode);
+      
+      if (result.success) {
+        toast.success('Email verified! You can now login.');
+        setUnverifiedEmail(null);
+        setShowVerificationInput(false);
+        setVerificationCode('');
+      } else {
+        toast.error(result.error || 'Verification failed');
+      }
+    } catch (error) {
+      toast.error('Verification failed. Please try again.');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -197,18 +225,54 @@ const Login = () => {
                 </div>
                 <div className="ml-3 flex-1">
                   <h3 className="text-sm font-medium text-red-800">
-                    Account Not Verified
+                    ⚠️ Account Not Verified
                   </h3>
                   <p className="mt-1 text-sm text-red-700">
-                    Your email address has not been verified. Click below to receive a verification code.
+                    Your email <strong>{unverifiedEmail}</strong> has not been verified.
                   </p>
-                  <button
-                    type="button"
-                    onClick={handleResendVerification}
-                    className="mt-3 w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-sm"
-                  >
-                    📧 Verify Account & Send Code
-                  </button>
+                  
+                  {!showVerificationInput ? (
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      className="mt-3 w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-sm"
+                    >
+                      📧 Send Verification Code
+                    </button>
+                  ) : (
+                    <div className="mt-3 space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-red-800 mb-1">
+                          Enter 6-Digit Code
+                        </label>
+                        <input
+                          type="text"
+                          maxLength="6"
+                          value={verificationCode}
+                          onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                          placeholder="000000"
+                          className="w-full px-3 py-2 border border-red-300 rounded-lg text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleVerifyCode}
+                          disabled={isVerifying || verificationCode.length !== 6}
+                          className="flex-1 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {isVerifying ? <LoadingSpinner size="sm" /> : '✓ Verify'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleResendVerification}
+                          className="px-4 py-2 text-sm text-red-700 hover:text-red-800 font-medium"
+                        >
+                          Resend
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
