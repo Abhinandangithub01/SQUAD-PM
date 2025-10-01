@@ -22,7 +22,6 @@ import {
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import api from '../utils/api';
-import { mockActivity, mockProjects, mockTasks } from '../utils/mockData';
 import { useAuth } from '../contexts/AuthContext';
 import { formatRelativeTime, getPriorityColor, getStatusColor } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -46,31 +45,34 @@ const Dashboard = () => {
     team_members: 5,
   };
 
-  // Fetch dashboard data
-  const { data: dashboardData, isLoading } = useQuery({
+  // Fetch dashboard data from real API
+  const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => {
-      // Use mock data first, fallback to API
-      try {
-        return {
-          tasks: mockTasks.slice(0, 5),
-          activity: mockActivity,
-          projects: mockProjects,
-          unread_notifications: 2
-        };
-      } catch (error) {
-        // Fallback to API
-        const response = await api.get('/users/me/dashboard');
-        return response.data;
-      }
+      const response = await api.get('/users/me/dashboard');
+      return response.data;
     },
     refetchInterval: 60000, // Refetch every minute
+    retry: 2,
   });
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load dashboard</h3>
+          <p className="text-sm text-gray-500 mb-4">{error.message}</p>
+          <p className="text-xs text-gray-400">Make sure the backend server is running on port 5000</p>
+        </div>
       </div>
     );
   }
