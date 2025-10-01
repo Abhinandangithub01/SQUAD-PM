@@ -28,7 +28,6 @@ import {
 import { Menu } from '@headlessui/react';
 import api from '../utils/api';
 import { formatDate, getPriorityColor, truncateText } from '../utils/helpers';
-import { mockProjects } from '../utils/mockData';
 import TaskTimer from '../components/TaskTimer';
 import EffortEstimation from '../components/EffortEstimation';
 import CreateTaskModal from '../components/CreateTaskModal';

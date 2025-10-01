@@ -25,7 +25,6 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import api from '../utils/api';
 import { formatDateTime, getPriorityColor, getStatusColor } from '../utils/helpers';
-import { mockMilestones } from '../utils/mockData';
 import LoadingSpinner from './LoadingSpinner';
 import Avatar from './Avatar';
 import RichTextEditor from './RichTextEditor';

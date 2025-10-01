@@ -13,7 +13,6 @@ import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { useTheme } from '../contexts/ThemeContext';
-import { mockTasks } from '../utils/mockData';
 import LoadingSpinner from './LoadingSpinner';
 import Avatar from './Avatar';
 import api from '../utils/api';

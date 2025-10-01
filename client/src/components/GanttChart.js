@@ -9,7 +9,6 @@ import {
   AdjustmentsHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../contexts/ThemeContext';
-import { mockTasks } from '../utils/mockData';
 import LoadingSpinner from './LoadingSpinner';
 import Avatar from './Avatar';
 

@@ -36,8 +36,6 @@ import {
 import { PauseIcon } from '@heroicons/react/24/solid';
 import { Menu } from '@headlessui/react';
 import api from '../utils/api';
-import { mockProjects, mockActivity, mockMilestones, mockTasks } from '../utils/mockData';
-import { mockProjectMembers } from '../utils/mockData';
 import { formatDate, getRoleColor, getRoleLabel } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
