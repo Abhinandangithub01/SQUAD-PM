@@ -66,11 +66,14 @@ export const AuthProvider = ({ children }) => {
 
   // Load user on app start
   useEffect(() => {
-    if (state.token) {
-      loadUser();
-    } else {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
+    const initAuth = async () => {
+      if (state.token) {
+        await loadUser();
+      } else {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    };
+    initAuth();
   }, []);
 
   // Set auth token in axios headers
@@ -90,6 +93,8 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: 'LOAD_USER_SUCCESS', payload: response.data.user });
     } catch (error) {
       console.error('Load user error:', error);
+      // Don't fail silently - clear token and stop loading
+      localStorage.removeItem('token');
       dispatch({ type: 'LOAD_USER_FAIL' });
     }
   };

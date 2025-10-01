@@ -21,10 +21,10 @@ const Login = () => {
   } = useForm();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !loading) {
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, loading, navigate, from]);
 
   const onSubmit = async (data) => {
     const result = await login(data.email, data.password);
