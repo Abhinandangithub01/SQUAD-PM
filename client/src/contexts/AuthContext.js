@@ -1,3 +1,7 @@
+// Re-export from CognitoAuthContext for backward compatibility
+export { useAuth, CognitoAuthProvider as AuthProvider } from './CognitoAuthContext';
+
+// Old Express backend auth context (deprecated)
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import api from '../utils/api';
 
