@@ -8,7 +8,8 @@ import toast from 'react-hot-toast';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isAuthenticated, loading } = useAuth();
+  const [unverifiedEmail, setUnverifiedEmail] = useState(null);
+  const { login, isAuthenticated, loading, resendConfirmationCode } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,7 +34,25 @@ const Login = () => {
       toast.success('Welcome back!');
       navigate(from, { replace: true });
     } else {
-      toast.error(result.error);
+      // Check if user is not confirmed
+      if (result.error && result.error.includes('not confirmed')) {
+        setUnverifiedEmail(data.email);
+        toast.error('Your account is not verified. Please verify your email.');
+      } else {
+        toast.error(result.error);
+      }
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!unverifiedEmail) return;
+    
+    const result = await resendConfirmationCode(unverifiedEmail);
+    if (result.success) {
+      toast.success('Verification code sent! Check your email.');
+      navigate('/verify-email', { state: { email: unverifiedEmail } });
+    } else {
+      toast.error('Failed to send verification code');
     }
   };
 
@@ -165,6 +184,22 @@ const Login = () => {
               )}
             </button>
           </div>
+
+          {/* Verification prompt */}
+          {unverifiedEmail && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800 mb-3">
+                Your account is not verified. Please check your email for the verification code.
+              </p>
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                className="w-full flex justify-center py-2 px-4 border border-yellow-600 text-sm font-medium rounded-lg text-yellow-700 bg-white hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+              >
+                Verify Account & Resend Code
+              </button>
+            </div>
+          )}
 
         </form>
       </div>
