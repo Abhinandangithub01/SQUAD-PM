@@ -10,9 +10,7 @@ import {
   confirmResetPassword,
   updateUserAttributes
 } from 'aws-amplify/auth';
-import { generateClient } from 'aws-amplify/api';
-import { createUser, getUser } from '../graphql/mutations';
-import { getUser as getUserQuery } from '../graphql/queries';
+import { generateClient } from 'aws-amplify/data';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext({});
@@ -42,14 +40,13 @@ export const CognitoAuthProvider = ({ children }) => {
       const currentUser = await getCurrentUser();
       const attributes = await fetchUserAttributes();
       
-      // Fetch user data from our database
-      const userData = await client.graphql({
-        query: getUserQuery,
-        variables: { id: attributes.sub }
+      // Fetch user data from our database using Amplify Data client
+      const { data: users } = await client.models.UserProfile.list({
+        filter: { email: { eq: attributes.email } }
       });
 
-      if (userData.data.getUser) {
-        setUser(userData.data.getUser);
+      if (users && users.length > 0) {
+        setUser(users[0]);
         setIsAuthenticated(true);
       } else {
         // User exists in Cognito but not in our DB - create user record
@@ -67,23 +64,17 @@ export const CognitoAuthProvider = ({ children }) => {
   const createUserRecord = async (cognitoUser, attributes) => {
     try {
       const newUser = {
-        id: attributes.sub,
-        cognitoId: attributes.sub,
         email: attributes.email,
         firstName: attributes.given_name || '',
         lastName: attributes.family_name || '',
         role: 'MEMBER',
-        avatarUrl: null,
       };
 
-      const result = await client.graphql({
-        query: createUser,
-        variables: { input: newUser }
-      });
+      const { data: createdUser } = await client.models.UserProfile.create(newUser);
 
-      setUser(result.data.createUser);
+      setUser(createdUser);
       setIsAuthenticated(true);
-      return result.data.createUser;
+      return createdUser;
     } catch (error) {
       console.error('Error creating user record:', error);
       throw error;
