@@ -4,7 +4,8 @@ frontend:
     preBuild:
       commands:
         - cd client
-        - npm install
+        - rm -rf amplify node_modules
+        - npm install --production=false
     build:
       commands:
         - npm run build
