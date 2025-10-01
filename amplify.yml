@@ -4,7 +4,7 @@ frontend:
     preBuild:
       commands:
         - cd client
-        - rm -rf amplify .amplify node_modules
+        - rm -rf amplify/.amplify amplify/node_modules node_modules
         - npm ci
     build:
       commands:
