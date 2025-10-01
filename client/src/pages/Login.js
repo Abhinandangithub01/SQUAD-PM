@@ -34,10 +34,11 @@ const Login = () => {
       toast.success('Welcome back!');
       navigate(from, { replace: true });
     } else {
-      // Check if user is not confirmed
-      if (result.error && result.error.includes('not confirmed')) {
+      // Check if user is not confirmed (multiple error message formats)
+      const errorMsg = result.error?.toLowerCase() || '';
+      if (errorMsg.includes('not confirmed') || errorMsg.includes('user is not confirmed')) {
         setUnverifiedEmail(data.email);
-        toast.error('Your account is not verified. Please verify your email.');
+        toast.error('Your account is not verified. Click the button below to verify.');
       } else {
         toast.error(result.error);
       }
@@ -187,17 +188,29 @@ const Login = () => {
 
           {/* Verification prompt */}
           {unverifiedEmail && (
-            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800 mb-3">
-                Your account is not verified. Please check your email for the verification code.
-              </p>
-              <button
-                type="button"
-                onClick={handleResendVerification}
-                className="w-full flex justify-center py-2 px-4 border border-yellow-600 text-sm font-medium rounded-lg text-yellow-700 bg-white hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
-              >
-                Verify Account & Resend Code
-              </button>
+            <div className="mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-lg shadow-md">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3 flex-1">
+                  <h3 className="text-sm font-medium text-red-800">
+                    Account Not Verified
+                  </h3>
+                  <p className="mt-1 text-sm text-red-700">
+                    Your email address has not been verified. Click below to receive a verification code.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    className="mt-3 w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-sm"
+                  >
+                    📧 Verify Account & Send Code
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
