@@ -30,8 +30,8 @@ const Register = () => {
     const result = await registerUser({
       email: data.email,
       password: data.password,
-      first_name: data.first_name,
-      last_name: data.last_name,
+      firstName: data.first_name,
+      lastName: data.last_name,
     });
     
     if (result.success) {
