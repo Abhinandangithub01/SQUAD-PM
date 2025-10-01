@@ -6,6 +6,7 @@ import {
   getCurrentUser,
   fetchUserAttributes,
   confirmSignUp,
+  resendSignUpCode,
   resetPassword,
   confirmResetPassword,
   updateUserAttributes
@@ -264,6 +265,16 @@ export const CognitoAuthProvider = ({ children }) => {
     }
   };
 
+  const resendConfirmationCode = async (email) => {
+    try {
+      await resendSignUpCode({ username: email });
+      return { success: true };
+    } catch (error) {
+      console.error('Resend code error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -271,7 +282,8 @@ export const CognitoAuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    confirmSignUpCode,
+    confirmSignUp: confirmSignUpCode,
+    resendConfirmationCode,
     forgotPassword,
     resetPasswordWithCode,
     updateProfile,

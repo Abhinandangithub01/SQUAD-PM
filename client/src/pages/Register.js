@@ -35,8 +35,13 @@ const Register = () => {
     });
     
     if (result.success) {
-      toast.success('Account created successfully! Welcome to ProjectHub!');
-      navigate('/dashboard', { replace: true });
+      if (result.requiresConfirmation) {
+        toast.success('Account created! Please check your email for verification code.');
+        navigate('/verify-email', { state: { email: data.email } });
+      } else {
+        toast.success('Account created successfully!');
+        navigate('/dashboard', { replace: true });
+      }
     } else {
       toast.error(result.error);
     }
