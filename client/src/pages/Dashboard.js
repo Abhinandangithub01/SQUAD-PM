@@ -94,32 +94,79 @@ const Dashboard = () => {
   const activeProjects = projects.filter(p => p.task_count > 0 || p.issue_count > 0).length;
 
   return (
-    <div className="p-6 space-y-6">
+    <div style={{ padding: '32px', backgroundColor: '#F9FAFB', minHeight: '100vh' }}>
       {/* Header with Customize Button */}
-      <div className="flex items-center justify-between mb-4">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening today.</p>
+          <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Dashboard</h1>
+          <p style={{ fontSize: '15px', color: '#6B7280' }}>Welcome back, {user?.first_name}! Here's what's happening today.</p>
         </div>
         <Link
           to="/custom-dashboard"
-          className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 20px',
+            backgroundColor: '#3B82F6',
+            color: '#FFFFFF',
+            borderRadius: '10px',
+            fontWeight: 500,
+            fontSize: '14px',
+            textDecoration: 'none',
+            transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#2563EB';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#3B82F6';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+          }}
         >
-          <Cog6ToothIcon className="h-5 w-5" />
+          <Cog6ToothIcon style={{ height: '18px', width: '18px' }} />
           <span>Customize Dashboard</span>
         </Link>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FolderIcon className="h-8 w-8 text-primary-600" />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+        <div style={{
+          backgroundColor: '#FFFFFF',
+          padding: '24px',
+          borderRadius: '12px',
+          border: '1px solid #E5E7EB',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          transition: 'all 200ms ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+          e.currentTarget.style.transform = 'translateY(0)';
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              backgroundColor: '#EFF6FF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '16px'
+            }}>
+              <FolderIcon style={{ height: '24px', width: '24px', color: '#3B82F6' }} />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Active Projects</p>
-              <p className="text-2xl font-semibold text-gray-900">
+            <div>
+              <p style={{ fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '4px' }}>Active Projects</p>
+              <p style={{ fontSize: '28px', fontWeight: 600, color: '#111827' }}>
                 {activeProjects}/{totalProjects}
               </p>
             </div>
