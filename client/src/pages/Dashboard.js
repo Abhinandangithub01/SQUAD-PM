@@ -21,13 +21,13 @@ import {
   ArrowRightIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
-import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import { formatRelativeTime, getPriorityColor, getStatusColor } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
 import TimeTrackingWidget from '../components/TimeTrackingWidget';
 import MilestoneCelebration from '../components/MilestoneCelebration';
+import amplifyDataService from '../services/amplifyDataService';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -45,12 +45,15 @@ const Dashboard = () => {
     team_members: 5,
   };
 
-  // Fetch dashboard data from real API
+  // Fetch dashboard data from AWS Amplify
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => {
-      const response = await api.get('/users/me/dashboard');
-      return response.data;
+      const result = await amplifyDataService.dashboard.getStats();
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch dashboard data');
+      }
+      return result.data;
     },
     refetchInterval: 60000, // Refetch every minute
     retry: 2,
@@ -71,17 +74,33 @@ const Dashboard = () => {
           <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load dashboard</h3>
           <p className="text-sm text-gray-500 mb-4">{error.message}</p>
-          <p className="text-xs text-gray-400">Make sure the backend server is running on port 5000</p>
+          <p className="text-xs text-gray-400">Unable to fetch data from AWS Amplify</p>
         </div>
       </div>
     );
   }
 
-  const { tasks = [], activity = [], projects = [], unread_notifications = 0 } = dashboardData || {};
+  // Use stats from Amplify
+  const stats = dashboardData || {
+    totalProjects: 0,
+    activeProjects: 0,
+    totalTasks: 0,
+    completedTasks: 0,
+    inProgressTasks: 0,
+    todoTasks: 0,
+    overdueTasks: 0,
+    completionRate: 0,
+  };
 
-  // Calculate stats
-  const totalTasks = tasks.length;
-  const overdueTasks = tasks.filter(task => 
+  const totalTasks = stats.totalTasks;
+  const overdueTasks = stats.overdueTasks;
+  const tasks = []; // Will be populated from recent activity
+  const activity = [];
+  const projects = [];
+  const unread_notifications = 0;
+
+  // Keep old calculation for compatibility
+  const oldOverdueTasks = tasks.filter(task => 
     task.due_date && new Date(task.due_date) < new Date()
   ).length;
   const dueSoonTasks = tasks.filter(task => {
