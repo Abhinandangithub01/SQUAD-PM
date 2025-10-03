@@ -12,7 +12,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   const {
-    register,
+    register: registerField,
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
@@ -78,7 +78,6 @@ const Register = () => {
             </Link>
           </p>
         </div>
-
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -87,29 +86,24 @@ const Register = () => {
                   First name
                 </label>
                 <input
-                  {...register('first_name', {
-                    required: 'First name is required',
-                    minLength: {
-                      value: 2,
-                      message: 'First name must be at least 2 characters',
-                    },
-                  })}
+                  id="first_name"
                   type="text"
-                  autoComplete="given-name"
-                  className={`mt-1 input ${errors.first_name ? 'input-error' : ''}`}
-                  placeholder="John"
+                  {...registerField('first_name', {
+                    required: 'First name is required',
+                  })}
+                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="First name"
                 />
                 {errors.first_name && (
                   <p className="mt-1 text-sm text-red-600">{errors.first_name.message}</p>
                 )}
               </div>
-
               <div>
                 <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
                   Last name
                 </label>
                 <input
-                  {...register('last_name', {
+                  {...registerField('last_name', {
                     required: 'Last name is required',
                     minLength: {
                       value: 2,
@@ -132,7 +126,7 @@ const Register = () => {
                 Email address
               </label>
               <input
-                {...register('email', {
+                {...registerField('email', {
                   required: 'Email is required',
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -155,7 +149,7 @@ const Register = () => {
               </label>
               <div className="mt-1 relative">
                 <input
-                  {...register('password', {
+                  {...registerField('password', {
                     required: 'Password is required',
                     minLength: {
                       value: 6,
@@ -189,7 +183,7 @@ const Register = () => {
                 Confirm password
               </label>
               <input
-                {...register('confirm_password', {
+                {...registerField('confirm_password', {
                   required: 'Please confirm your password',
                   validate: (value) =>
                     value === password || 'Passwords do not match',
@@ -207,7 +201,7 @@ const Register = () => {
 
           <div className="flex items-center">
             <input
-              {...register('terms', {
+              {...registerField('terms', {
                 required: 'You must accept the terms and conditions',
               })}
               id="terms"
