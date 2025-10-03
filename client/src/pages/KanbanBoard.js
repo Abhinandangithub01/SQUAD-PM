@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import QuickActionMenu from '../components/QuickActionMenu';
 import { 
@@ -26,7 +27,7 @@ import {
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
-import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
 import { formatDate, getPriorityColor, truncateText } from '../utils/helpers';
 import TaskTimer from '../components/TaskTimer';
 import EffortEstimation from '../components/EffortEstimation';
@@ -65,6 +66,50 @@ const KanbanBoard = () => {
   const [quickMenuTask, setQuickMenuTask] = useState(null);
   const taskCardRefs = useRef({});
   const scrollContainerRef = useRef(null);
+  const queryClient = useQueryClient();
+
+  // Fetch tasks from Amplify
+  const { data: tasksData, isLoading: tasksLoading } = useQuery({
+    queryKey: ['tasks', projectId],
+    queryFn: async () => {
+      const result = await amplifyDataService.tasks.list({ projectId });
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    enabled: !!projectId,
+  });
+
+  // Transform tasks into kanban columns
+  useEffect(() => {
+    if (tasksData && tasksData.length > 0) {
+      const columns = [
+        { id: 'TODO', name: 'To Do', tasks: [] },
+        { id: 'IN_PROGRESS', name: 'In Progress', tasks: [] },
+        { id: 'DONE', name: 'Done', tasks: [] },
+      ];
+
+      tasksData.forEach(task => {
+        const column = columns.find(col => col.id === task.status);
+        if (column) {
+          column.tasks.push({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            priority: task.priority,
+            status: task.status,
+            dueDate: task.dueDate,
+            assignedTo: task.assignedToId,
+            tags: task.tags || [],
+            type: 'task',
+          });
+        }
+      });
+
+      setKanbanData({ columns });
+    }
+  }, [tasksData]);
 
   // Keyboard shortcuts for hovered task
   useEffect(() => {
