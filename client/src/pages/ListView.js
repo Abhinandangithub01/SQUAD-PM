@@ -13,7 +13,7 @@ import {
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
-import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
 import { formatDate, getPriorityColor, getStatusColor, truncateText } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
@@ -38,11 +38,27 @@ const ListView = () => {
   });
   const queryClient = useQueryClient();
 
+  // Fetch tasks from Amplify
+  const { data: tasksData, isLoading } = useQuery({
+    queryKey: ['tasks', projectId],
+    queryFn: async () => {
+      const result = await amplifyDataService.tasks.list({ projectId });
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    enabled: !!projectId,
+  });
+
   // Update task mutation
   const updateTaskMutation = useMutation({
     mutationFn: async ({ taskId, updates }) => {
-      const response = await api.put(`/tasks/${taskId}`, updates);
-      return response.data;
+      const result = await amplifyDataService.tasks.update(taskId, updates);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['tasks', 'project', projectId]);
@@ -86,20 +102,7 @@ const ListView = () => {
     },
   });
 
-  // Fetch tasks
-  const { data: tasksData, isLoading } = useQuery({
-    queryKey: ['tasks', 'project', projectId, filters],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
-      });
-      
-      const response = await api.get(`/tasks/project/${projectId}?${params.toString()}`);
-      return response.data;
-    },
-    enabled: !!projectId,
-  });
+  // Tasks are already fetched above with Amplify
 
   // Convert to issue mutation
   const convertToIssueMutation = useMutation({

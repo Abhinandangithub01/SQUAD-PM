@@ -16,7 +16,8 @@ import {
   VideoCameraIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
-import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
+import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
 import { formatChatTime, truncateText } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -40,19 +41,20 @@ const Chat = () => {
   const [showCallModal, setShowCallModal] = useState(false);
   const [callTarget, setCallTarget] = useState(null);
   const [showFloatingCall, setShowFloatingCall] = useState(false);
-  const [activeCallData, setActiveCallData] = useState(null);
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
   const { socket, joinChannel, leaveChannel, sendMessage } = useSocket();
+  const { user } = useAuth();
 
   // Fetch channels
-  const { data: channelsData, isLoading: channelsLoading } = useQuery({
-    queryKey: ['chat', 'channels'],
-    queryFn: async () => {
-      const response = await api.get('/chat/channels');
-      return response.data;
-    },
-  });
+  const channelsData = {
+    channels: [
+      { id: 'general', name: 'general', type: 'public', description: 'General discussion' },
+      { id: 'team', name: 'team', type: 'public', description: 'Team updates' },
+      { id: 'random', name: 'random', type: 'public', description: 'Random chat' },
+    ]
+  };
+  const channelsLoading = false;
 
   // Fetch users for DMs
   const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -65,22 +67,31 @@ const Chat = () => {
 
   // Fetch messages for selected channel
   const { data: messagesData, isLoading: messagesLoading } = useQuery({
-    queryKey: ['chat', 'messages', channelId],
+    queryKey: ['messages', selectedChannel?.id],
     queryFn: async () => {
-      const response = await api.get(`/chat/channels/${channelId}/messages`);
-      return response.data;
+      if (!selectedChannel) return [];
+      const result = await amplifyDataService.chat.getMessages(selectedChannel.id);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
-    enabled: !!channelId,
+    enabled: !!selectedChannel,
     refetchInterval: false,
   });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ channelId, content }) => {
-      const response = await api.post(`/chat/channels/${channelId}/messages`, {
-        content,
+    mutationFn: async (messageData) => {
+      const result = await amplifyDataService.chat.sendMessage({
+        ...messageData,
+        channelId: selectedChannel.id,
+        userId: user?.id,
       });
-      return response.data;
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
     onSuccess: (data) => {
       setMessage('');
