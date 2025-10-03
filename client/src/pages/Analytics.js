@@ -53,12 +53,8 @@ const Analytics = () => {
     try {
       // TODO: Implement export with Amplify Data
       console.log('Export functionality - to be implemented');
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `project-${projectId}-tasks.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      // For now, just show a message
+      toast.success('Export feature coming soon!');
     } catch (error) {
       console.error('Export failed:', error);
     }
