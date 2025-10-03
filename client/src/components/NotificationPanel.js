@@ -13,15 +13,62 @@ import {
   SpeakerWaveIcon
 } from '@heroicons/react/24/outline';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
+import { useAuth } from '../contexts/AuthContext';
 import { formatRelativeTime } from '../utils/helpers';
 import LoadingSpinner from './LoadingSpinner';
 
 const NotificationPanel = ({ isOpen, onClose }) => {
   const [showAll, setShowAll] = useState(false);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  // Mock notifications data
+  // Fetch real notifications from Amplify
+  const { data: notificationsData, isLoading } = useQuery({
+    queryKey: ['notifications', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const result = await amplifyDataService.notifications.list(user.id);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    enabled: !!user?.id && isOpen,
+  });
+
+  // Mark as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: async (notificationId) => {
+      const result = await amplifyDataService.notifications.markAsRead(notificationId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['notifications', user?.id]);
+    },
+  });
+
+  // Mark all as read mutation
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => {
+      const result = await amplifyDataService.notifications.markAllAsRead(user?.id);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['notifications', user?.id]);
+    },
+  });
+
+  // Use real notifications or empty array
+  const notifications = notificationsData || [];
+
+  // Mock notifications data (fallback)
   const mockNotifications = [
     {
       id: 1,
@@ -143,7 +190,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     }
   };
 
-  const unreadCount = notificationsData?.unread_count || 0;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <Transition
