@@ -69,7 +69,7 @@ const KanbanBoard = () => {
   const queryClient = useQueryClient();
 
   // Fetch tasks from Amplify
-  const { data: tasksData, isLoading: tasksLoading } = useQuery({
+  const { data: tasksData, isLoading: tasksLoading, refetch } = useQuery({
     queryKey: ['tasks', projectId],
     queryFn: async () => {
       const result = await amplifyDataService.tasks.list({ projectId });
