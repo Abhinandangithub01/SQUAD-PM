@@ -7,7 +7,8 @@ import { DatePicker } from '@mantine/dates';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
-import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
+import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 import Avatar from './Avatar';
 import toast from 'react-hot-toast';
@@ -35,21 +36,26 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
     queryKey: ['users', 'search', assigneeSearch, projectId],
     queryFn: async () => {
       if (assigneeSearch.length < 2) return { users: [] };
-      const response = await api.get(`/users/search?q=${assigneeSearch}&project_id=${projectId}`);
       return response.data;
     },
     enabled: assigneeSearch.length >= 2,
   });
 
+  const { user } = useAuth();
+  
   const createTaskMutation = useMutation({
     mutationFn: async (taskData) => {
-      const response = await api.post('/tasks', {
+      const result = await amplifyDataService.tasks.create({
         ...taskData,
+        createdById: user?.id,
         project_id: projectId,
         column_id: columnId,
         assignee_ids: selectedAssignees.map(user => user.id),
       });
-      return response.data;
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
     onSuccess: (data) => {
       toast.success('Task created successfully!');
