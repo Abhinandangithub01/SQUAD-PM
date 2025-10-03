@@ -30,6 +30,7 @@ import { formatDate } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import TimeTrackingTable from '../components/TimeTrackingTable';
 import { useTheme } from '../contexts/ThemeContext';
+import toast from 'react-hot-toast';
 
 const Analytics = () => {
   const { projectId } = useParams();
