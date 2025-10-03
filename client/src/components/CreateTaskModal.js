@@ -36,7 +36,8 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
     queryKey: ['users', 'search', assigneeSearch, projectId],
     queryFn: async () => {
       if (assigneeSearch.length < 2) return { users: [] };
-      return response.data;
+      // TODO: Implement user search with Amplify
+      return { users: [] };
     },
     enabled: assigneeSearch.length >= 2,
   });

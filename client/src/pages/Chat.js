@@ -41,6 +41,7 @@ const Chat = () => {
   const [showCallModal, setShowCallModal] = useState(false);
   const [callTarget, setCallTarget] = useState(null);
   const [showFloatingCall, setShowFloatingCall] = useState(false);
+  const [activeCallData, setActiveCallData] = useState(null);
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
   const { socket, joinChannel, leaveChannel, sendMessage } = useSocket();
@@ -60,8 +61,8 @@ const Chat = () => {
   const { data: usersData, isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
-      const response = await api.get('/users');
-      return response.data;
+      // TODO: Implement user list with Amplify
+      return { users: [] };
     },
   });
 

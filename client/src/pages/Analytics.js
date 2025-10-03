@@ -51,11 +51,8 @@ const Analytics = () => {
     if (!projectId) return;
     
     try {
-      const response = await api.get(`/analytics/export/${projectId}?type=tasks`, {
-        responseType: 'blob',
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // TODO: Implement export with Amplify Data
+      console.log('Export functionality - to be implemented');
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `project-${projectId}-tasks.csv`);

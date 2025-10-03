@@ -74,8 +74,9 @@ const ListView = () => {
   // Bulk update mutation
   const bulkUpdateMutation = useMutation({
     mutationFn: async ({ taskIds, updates }) => {
-      const response = await api.put('/tasks/bulk', { task_ids: taskIds, updates });
-      return response.data;
+      // TODO: Implement bulk update with Amplify
+      console.log('Bulk update:', taskIds, updates);
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['tasks', 'project', projectId]);
@@ -90,7 +91,11 @@ const ListView = () => {
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId) => {
-      await api.delete(`/tasks/${taskId}`);
+      const result = await amplifyDataService.tasks.delete(taskId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['tasks', 'project', projectId]);
@@ -107,8 +112,9 @@ const ListView = () => {
   // Convert to issue mutation
   const convertToIssueMutation = useMutation({
     mutationFn: async ({ taskId, issueData }) => {
-      const response = await api.post(`/tasks/${taskId}/convert-to-issue`, issueData);
-      return response.data;
+      // TODO: Implement issue conversion with Amplify
+      console.log('Convert to issue:', taskId, issueData);
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['tasks', 'project', projectId]);

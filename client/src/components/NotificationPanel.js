@@ -112,41 +112,8 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     }
   ];
 
-  // Fetch notifications
-  const { data: notificationsData, isLoading } = useQuery({
-    queryKey: ['notifications', showAll ? 'all' : 'unread'],
-    queryFn: async () => {
-      // Use mock data for now
-      return {
-        notifications: showAll ? mockNotifications : mockNotifications.filter(n => !n.is_read),
-        unread_count: mockNotifications.filter(n => !n.is_read).length
-      };
-    },
-    refetchInterval: 30000,
-  });
-
-  // Mark notification as read
-  const markAsReadMutation = useMutation({
-    mutationFn: async (notificationId) => {
-      // Mock implementation
-      console.log('Mark as read:', notificationId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['notifications']);
-    },
-  });
-
-  // Mark all as read
-  const markAllAsReadMutation = useMutation({
-    mutationFn: async () => {
-      // Mock implementation
-      console.log('Mark all as read');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['notifications']);
-    },
-  });
-
+  // Remove duplicate mutations - already defined above
+  
   // Delete notification
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId) => {
@@ -154,7 +121,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
       console.log('Delete notification:', notificationId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['notifications']);
+      queryClient.invalidateQueries(['notifications', user?.id]);
     },
   });
 
