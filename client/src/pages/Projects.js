@@ -14,7 +14,7 @@ import {
   ListBulletIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
-import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
 import { formatDate, getRoleColor, getRoleLabel } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
@@ -28,19 +28,26 @@ const Projects = () => {
   const [viewMode, setViewMode] = useState('card'); // 'card' or 'list'
   const queryClient = useQueryClient();
 
-  // Fetch projects
-  const { data: projectsData, isLoading } = useQuery({
+  // Fetch projects from Amplify
+  const { data: projectsData, isLoading, refetch } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const response = await api.get('/projects');
-      return response.data;
+      const result = await amplifyDataService.projects.list();
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
   });
 
   // Delete project mutation
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId) => {
-      await api.delete(`/projects/${projectId}`);
+      const result = await amplifyDataService.projects.delete(projectId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['projects']);
@@ -52,13 +59,13 @@ const Projects = () => {
   });
 
   const handleDeleteProject = (projectId) => {
-    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete this project?')) {
       deleteProjectMutation.mutate(projectId);
     }
   };
 
   // Filter projects
-  const filteredProjects = projectsData?.projects?.filter(project => {
+  const filteredProjects = projectsData?.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          project.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
