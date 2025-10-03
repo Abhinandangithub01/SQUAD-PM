@@ -21,7 +21,10 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData) => {
-      const result = await amplifyDataService.projects.create(projectData);
+      const result = await amplifyDataService.projects.create({
+        ...projectData,
+        ownerId: user?.username || user?.id || 'anonymous',
+      });
       if (!result.success) {
         throw new Error(result.error);
       }

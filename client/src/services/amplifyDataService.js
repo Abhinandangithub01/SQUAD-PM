@@ -16,15 +16,23 @@ export const projectService = {
   // Create a new project
   async create(projectData) {
     try {
+      // Map status to match schema enum values
+      const statusMap = {
+        'PLANNING': 'ACTIVE',
+        'IN_PROGRESS': 'ACTIVE',
+        'COMPLETED': 'COMPLETED',
+        'ON_HOLD': 'ON_HOLD',
+        'ARCHIVED': 'ARCHIVED',
+      };
+      
       const { data: project, errors } = await client.models.Project.create({
         name: projectData.name,
         description: projectData.description,
-        status: projectData.status || 'PLANNING',
-        priority: projectData.priority || 'MEDIUM',
+        status: statusMap[projectData.status] || 'ACTIVE',
         startDate: projectData.startDate,
         endDate: projectData.endDate,
-        budget: projectData.budget,
         color: projectData.color || '#3B82F6',
+        ownerId: projectData.ownerId || 'anonymous',
       });
 
       if (errors) {
