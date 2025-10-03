@@ -3,12 +3,14 @@ import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, MegaphoneIcon, CurrencyDollarIcon, BriefcaseIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
-import api from '../utils/api';
 import LoadingSpinner from './LoadingSpinner';
 import toast from 'react-hot-toast';
+import amplifyDataService from '../services/amplifyDataService';
+import { useAuth } from '../contexts/AuthContext';
 
 const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const { user } = useAuth();
   const {
     register,
     handleSubmit,
@@ -19,16 +21,19 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData) => {
-      const response = await api.post('/projects', projectData);
-      return response.data;
+      const result = await amplifyDataService.projects.create(projectData);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
     onSuccess: (data) => {
       toast.success('Project created successfully!');
       reset();
-      onSuccess?.(data.project);
+      onSuccess?.(data);
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to create project');
+      toast.error(error.message || 'Failed to create project');
     },
   });
 
