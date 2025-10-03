@@ -20,7 +20,8 @@ import {
   PresentationChartBarIcon,
   ArchiveBoxIcon,
 } from '@heroicons/react/24/outline';
-import api from '../utils/api';
+import { uploadData, getUrl, list, remove } from 'aws-amplify/storage';
+import { useAuth } from '../contexts/AuthContext';
 import { formatFileSize, getFileIcon, formatDate } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Avatar from '../components/Avatar';
@@ -33,50 +34,90 @@ const Files = () => {
   const [selectedFiles, setSelectedFiles] = useState(new Set());
   const queryClient = useQueryClient();
 
-  // Fetch files
-  const { data: filesData, isLoading } = useQuery({
+  const { user } = useAuth();
+
+  // Fetch files from S3
+  const { data: filesData, isLoading, refetch } = useQuery({
     queryKey: ['files', 'project', projectId, searchQuery, typeFilter],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchQuery) params.append('search', searchQuery);
-      if (typeFilter) params.append('type', typeFilter);
-      
-      const response = await api.get(`/files/project/${projectId}?${params.toString()}`);
-      return response.data;
+      try {
+        // List files from S3
+        const result = await list({
+          prefix: `projects/${projectId}/files/`,
+        });
+        
+        // Transform S3 items to file objects
+        const files = await Promise.all(
+          (result.items || []).map(async (item) => {
+            const url = await getUrl({ key: item.key });
+            return {
+              id: item.key,
+              name: item.key.split('/').pop(),
+              size: item.size,
+              type: item.key.split('.').pop(),
+              uploaded_at: item.lastModified,
+              uploaded_by: user?.username,
+              url: url.url.toString(),
+            };
+          })
+        );
+        
+        // Apply filters
+        let filteredFiles = files;
+        if (searchQuery) {
+          filteredFiles = files.filter(f => 
+            f.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+        if (typeFilter) {
+          filteredFiles = filteredFiles.filter(f => f.type === typeFilter);
+        }
+        
+        return { files: filteredFiles };
+      } catch (error) {
+        console.error('Error fetching files:', error);
+        return { files: [] };
+      }
     },
     enabled: !!projectId,
   });
 
-  // Upload files mutation
+  // Upload files mutation to S3
   const uploadFilesMutation = useMutation({
     mutationFn: async (files) => {
       const uploadPromises = files.map(async (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const response = await api.post(`/files/upload/${projectId}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        return response.data;
+        try {
+          // Upload to S3
+          const result = await uploadData({
+            key: `projects/${projectId}/files/${Date.now()}-${file.name}`,
+            data: file,
+            options: {
+              contentType: file.type,
+            }
+          }).result;
+          
+          return result;
+        } catch (error) {
+          console.error('Upload error:', error);
+          throw error;
+        }
       });
       
       return Promise.all(uploadPromises);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['files', 'project', projectId]);
-      toast.success('Files uploaded successfully');
+      refetch(); // Refresh file list
+      toast.success('Files uploaded successfully to S3');
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to upload files');
+      toast.error('Failed to upload files: ' + error.message);
     },
   });
 
-  // Delete file mutation
+  // Delete file mutation from S3
   const deleteFileMutation = useMutation({
-    mutationFn: async (fileId) => {
-      await api.delete(`/files/${fileId}`);
+    mutationFn: async (fileKey) => {
+      await remove({ key: fileKey });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['files', 'project', projectId]);
