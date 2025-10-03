@@ -909,6 +909,34 @@ const KanbanBoard = () => {
     setShowBulkActions(false);
   };
 
+  // Delete task handler
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) {
+      return;
+    }
+    
+    try {
+      const result = await amplifyDataService.tasks.delete(taskId);
+      if (result.success) {
+        // Remove task from kanbanData
+        setKanbanData(prevData => ({
+          ...prevData,
+          columns: prevData.columns.map(col => ({
+            ...col,
+            tasks: col.tasks.filter(t => t.id !== taskId)
+          }))
+        }));
+        toast.success('Task deleted successfully');
+        refetch(); // Refresh tasks from server
+      } else {
+        toast.error('Failed to delete task');
+      }
+    } catch (error) {
+      console.error('Delete task error:', error);
+      toast.error('Failed to delete task');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col p-6 bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Project Header */}

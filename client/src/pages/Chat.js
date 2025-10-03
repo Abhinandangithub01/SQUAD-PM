@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Fragment } from 'react';
+import React, { useState, useRef, useEffect, Fragment } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -66,19 +66,33 @@ const Chat = () => {
     },
   });
 
+  // Auto-select first channel on mount
+  useEffect(() => {
+    if (!selectedChannel && channelsData?.channels?.length > 0) {
+      setSelectedChannel(channelsData.channels[0]);
+    }
+  }, [channelsData, selectedChannel]);
+
   // Fetch messages for selected channel
-  const { data: messagesData, isLoading: messagesLoading } = useQuery({
+  const { data: messagesData, isLoading: messagesLoading, error: messagesError } = useQuery({
     queryKey: ['messages', selectedChannel?.id],
     queryFn: async () => {
       if (!selectedChannel) return [];
-      const result = await amplifyDataService.chat.getMessages(selectedChannel.id);
-      if (!result.success) {
-        throw new Error(result.error);
+      try {
+        const result = await amplifyDataService.chat.getMessages(selectedChannel.id);
+        if (!result.success) {
+          console.error('Failed to fetch messages:', result.error);
+          return []; // Return empty array instead of throwing
+        }
+        return result.data;
+      } catch (error) {
+        console.error('Message fetch error:', error);
+        return []; // Return empty array on error
       }
-      return result.data;
     },
     enabled: !!selectedChannel,
     refetchInterval: false,
+    retry: 1, // Only retry once
   });
 
   // Send message mutation
