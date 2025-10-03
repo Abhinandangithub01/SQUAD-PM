@@ -25,7 +25,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
 import { formatDate } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import TimeTrackingTable from '../components/TimeTrackingTable';
@@ -35,15 +35,15 @@ const Analytics = () => {
   const { projectId } = useParams();
   const [timeRange, setTimeRange] = useState('30d');
 
-  // Fetch analytics data
+  // Fetch analytics data from Amplify
   const { data: analyticsData, isLoading } = useQuery({
     queryKey: ['analytics', projectId ? 'project' : 'dashboard', projectId, timeRange],
     queryFn: async () => {
-      const endpoint = projectId 
-        ? `/analytics/project/${projectId}`
-        : '/analytics/dashboard';
-      const response = await api.get(endpoint);
-      return response.data;
+      const result = await amplifyDataService.dashboard.getStats();
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
     },
   });
 

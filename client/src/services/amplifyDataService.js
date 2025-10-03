@@ -243,20 +243,32 @@ export const dashboardService = {
       const tasks = tasksResult.data || [];
 
       // Calculate statistics
+      const completedTasks = tasks.filter(t => t.status === 'DONE').length;
+      const completionRate = tasks.length > 0 
+        ? Math.round((completedTasks / tasks.length) * 100)
+        : 0;
+
       const stats = {
         totalProjects: projects.length,
         activeProjects: projects.filter(p => p.status === 'IN_PROGRESS').length,
         totalTasks: tasks.length,
-        completedTasks: tasks.filter(t => t.status === 'DONE').length,
+        completedTasks,
         inProgressTasks: tasks.filter(t => t.status === 'IN_PROGRESS').length,
         todoTasks: tasks.filter(t => t.status === 'TODO').length,
         overdueTasks: tasks.filter(t => {
           if (!t.dueDate) return false;
           return new Date(t.dueDate) < new Date() && t.status !== 'DONE';
         }).length,
-        completionRate: tasks.length > 0 
-          ? Math.round((tasks.filter(t => t.status === 'DONE').length / tasks.length) * 100)
-          : 0,
+        completionRate,
+        // Analytics-compatible format
+        overview: {
+          total_projects: projects.length,
+          total_tasks: tasks.length,
+          completed_tasks: completedTasks,
+          total_issues: tasks.filter(t => t.priority === 'HIGH' || t.priority === 'URGENT').length,
+          completion_rate: completionRate,
+          team_members: 0, // Will be populated when we have team data
+        },
       };
 
       return { success: true, data: stats };
@@ -284,8 +296,141 @@ export const dashboardService = {
   },
 };
 
+/**
+ * NOTIFICATION OPERATIONS
+ */
+
+export const notificationService = {
+  // Get all notifications for current user
+  async list(userId) {
+    try {
+      const { data: notifications, errors } = await client.models.Notification.list({
+        filter: { userId: { eq: userId } },
+      });
+
+      if (errors) {
+        console.error('Error fetching notifications:', errors);
+        throw new Error('Failed to fetch notifications');
+      }
+
+      return { success: true, data: notifications };
+    } catch (error) {
+      console.error('Notification list error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Mark notification as read
+  async markAsRead(id) {
+    try {
+      const { data, errors } = await client.models.Notification.update({
+        id,
+        read: true,
+      });
+
+      if (errors) {
+        console.error('Error updating notification:', errors);
+        throw new Error('Failed to update notification');
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Notification update error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Mark all as read
+  async markAllAsRead(userId) {
+    try {
+      const { data: notifications } = await client.models.Notification.list({
+        filter: { userId: { eq: userId }, read: { eq: false } },
+      });
+
+      const updates = (notifications || []).map(notification =>
+        client.models.Notification.update({
+          id: notification.id,
+          read: true,
+        })
+      );
+
+      await Promise.all(updates);
+      return { success: true };
+    } catch (error) {
+      console.error('Mark all read error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+};
+
+/**
+ * MESSAGE/CHAT OPERATIONS
+ */
+
+export const chatService = {
+  // Send a message
+  async sendMessage(messageData) {
+    try {
+      const { data: message, errors } = await client.models.Message.create({
+        content: messageData.content,
+        userId: messageData.userId,
+        projectId: messageData.projectId,
+        channelId: messageData.channelId,
+      });
+
+      if (errors) {
+        console.error('Error sending message:', errors);
+        throw new Error('Failed to send message');
+      }
+
+      return { success: true, data: message };
+    } catch (error) {
+      console.error('Send message error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get messages for a channel
+  async getMessages(channelId) {
+    try {
+      const { data: messages, errors } = await client.models.Message.list({
+        filter: { channelId: { eq: channelId } },
+      });
+
+      if (errors) {
+        console.error('Error fetching messages:', errors);
+        throw new Error('Failed to fetch messages');
+      }
+
+      // Sort by creation date
+      const sortedMessages = (messages || []).sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+
+      return { success: true, data: sortedMessages };
+    } catch (error) {
+      console.error('Get messages error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Subscribe to new messages (real-time)
+  subscribeToMessages(channelId, callback) {
+    const subscription = client.models.Message.onCreate({
+      filter: { channelId: { eq: channelId } },
+    }).subscribe({
+      next: (data) => callback(data),
+      error: (error) => console.error('Subscription error:', error),
+    });
+
+    return subscription;
+  },
+};
+
 export default {
   projects: projectService,
   tasks: taskService,
   dashboard: dashboardService,
+  notifications: notificationService,
+  chat: chatService,
 };
