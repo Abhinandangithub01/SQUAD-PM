@@ -26,7 +26,7 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
   } = useForm({
     defaultValues: {
       priority: 'medium',
-      tags: [],
+      tags: '',
       due_date: null,
     },
   });
@@ -73,7 +73,9 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
   const onSubmit = (data) => {
     const formattedData = {
       ...data,
-      tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
+      tags: typeof data.tags === 'string' 
+        ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) 
+        : (Array.isArray(data.tags) ? data.tags : []),
       due_date: data.due_date || null,
     };
     createTaskMutation.mutate(formattedData);
