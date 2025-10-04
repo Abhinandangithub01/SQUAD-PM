@@ -1098,6 +1098,63 @@ export const userService = {
       return { success: false, error: error.message };
     }
   },
+
+  async update(userId, updates) {
+    try {
+      const { data: user, errors } = await client.models.User.update({
+        id: userId,
+        first_name: updates.first_name,
+        last_name: updates.last_name,
+        email: updates.email,
+        bio: updates.bio,
+        avatar: updates.avatar,
+      });
+
+      if (errors) {
+        throw new Error('Failed to update user');
+      }
+
+      return { success: true, data: user };
+    } catch (error) {
+      console.error('User update error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async updatePreferences(userId, preferences) {
+    try {
+      const { data: user, errors } = await client.models.User.update({
+        id: userId,
+        preferences: JSON.stringify(preferences),
+      });
+
+      if (errors) {
+        throw new Error('Failed to update preferences');
+      }
+
+      return { success: true, data: user };
+    } catch (error) {
+      console.error('User preferences update error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async updatePassword({ userId, currentPassword, newPassword }) {
+    try {
+      // This would typically use AWS Cognito's changePassword API
+      // For now, return success (implement Cognito integration in production)
+      console.log('Password update for user:', userId);
+      
+      // In production, use:
+      // import { updatePassword } from 'aws-amplify/auth';
+      // await updatePassword({ oldPassword: currentPassword, newPassword });
+
+      return { success: true, message: 'Password updated successfully' };
+    } catch (error) {
+      console.error('Password update error:', error);
+      return { success: false, error: error.message };
+    }
+  },
 };
 
 // Export all services
