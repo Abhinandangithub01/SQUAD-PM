@@ -2,7 +2,7 @@ import React, { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 import { useForm, Controller } from 'react-hook-form';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { DatePicker } from '@mantine/dates';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
@@ -43,6 +43,7 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
   });
 
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   const createTaskMutation = useMutation({
     mutationFn: async (taskData) => {
@@ -51,6 +52,7 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
         createdById: user?.id,
         project_id: projectId,
         column_id: columnId,
+        assignedToId: selectedAssignees.length > 0 ? selectedAssignees[0].id : null,
         assignee_ids: selectedAssignees.map(user => user.id),
       });
       if (!result.success) {
@@ -60,10 +62,14 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
     },
     onSuccess: (data) => {
       toast.success('Task created successfully!');
+      // Invalidate queries to refresh task list
+      queryClient.invalidateQueries(['tasks']);
+      queryClient.invalidateQueries(['tasks', projectId]);
       reset();
       setSelectedAssignees([]);
       setAssigneeSearch('');
-      onSuccess?.(data.task);
+      onClose();
+      onSuccess?.(data);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to create task');
