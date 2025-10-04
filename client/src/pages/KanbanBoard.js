@@ -25,7 +25,6 @@ import {
   PaperClipIcon,
   BugAntIcon,
   DocumentTextIcon,
-  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
 import amplifyDataService from '../services/amplifyDataService';
@@ -1262,25 +1261,22 @@ const KanbanBoard = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       >
                         <option value="">All Status</option>
-                        <option value="TODO">To Do</option>
-                        <option value="IN_PROGRESS">In Progress</option>
-                        <option value="DONE">Done</option>
+                        <option value="todo">To Do</option>
+                        <option value="inprogress">In Progress</option>
+                        <option value="done">Done</option>
                       </select>
                     </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Assignee</label>
                       <select 
-                        value={assigneeFilter}
-                        onChange={(e) => setAssigneeFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      >
+                      value={assigneeFilter}
+                      onChange={(e) => setAssigneeFilter(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <option value="">All Assignees</option>
-                        {teamMembers.map((member) => (
-                          <option key={member.id} value={member.id}>
-                            {member.first_name} {member.last_name}
-                          </option>
-                        ))}
+                        <option value="john">John Doe</option>
+                        <option value="jane">Jane Smith</option>
+                        <option value="demo">Demo User</option>
                       </select>
                     </div>
                     
@@ -1289,15 +1285,11 @@ const KanbanBoard = () => {
                       <div className="grid grid-cols-2 gap-2">
                         <input
                           type="date"
-                          value={dueDateFrom}
-                          onChange={(e) => setDueDateFrom(e.target.value)}
                           placeholder="From"
                           className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                         />
                         <input
                           type="date"
-                          value={dueDateTo}
-                          onChange={(e) => setDueDateTo(e.target.value)}
                           placeholder="To"
                           className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                         />
@@ -1306,11 +1298,7 @@ const KanbanBoard = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Due Date Filter</label>
-                      <select 
-                        value={dueDateFilter}
-                        onChange={(e) => setDueDateFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      >
+                      <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <option value="">All Dates</option>
                         <option value="overdue">Overdue</option>
                         <option value="today">Due Today</option>
@@ -1324,11 +1312,7 @@ const KanbanBoard = () => {
                         onClick={() => {
                           setSearchQuery('');
                           setPriorityFilter('');
-                          setStatusFilter('');
-                          setAssigneeFilter('');
-                          setDueDateFilter('');
-                          setDueDateFrom('');
-                          setDueDateTo('');
+                          // Reset other filters here
                         }}
                         className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
                       >
