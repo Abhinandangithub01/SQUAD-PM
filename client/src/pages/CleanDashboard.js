@@ -17,7 +17,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { formatRelativeTime } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
-import Avatar from './Avatar';
+import Avatar from '../components/Avatar';
 import amplifyDataService from '../services/amplifyDataService';
 import toast from 'react-hot-toast';
 

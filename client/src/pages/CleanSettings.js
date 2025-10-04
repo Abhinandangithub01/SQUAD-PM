@@ -18,7 +18,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import amplifyDataService from '../services/amplifyDataService';
 import { uploadData } from 'aws-amplify/storage';
 import toast from 'react-hot-toast';
-import Avatar from './Avatar';
+import Avatar from '../components/Avatar';
 
 const CleanSettings = () => {
   const { user, updateUser } = useAuth();
