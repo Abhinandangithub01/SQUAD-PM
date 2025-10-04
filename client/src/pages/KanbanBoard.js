@@ -25,6 +25,7 @@ import {
   PaperClipIcon,
   BugAntIcon,
   DocumentTextIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
 import amplifyDataService from '../services/amplifyDataService';
@@ -41,6 +42,11 @@ const KanbanBoard = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [assigneeFilter, setAssigneeFilter] = useState('');
+  const [dueDateFilter, setDueDateFilter] = useState('');
+  const [dueDateFrom, setDueDateFrom] = useState('');
+  const [dueDateTo, setDueDateTo] = useState('');
   const [selectedTasks, setSelectedTasks] = useState(new Set());
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [editingColumn, setEditingColumn] = useState(null);
@@ -50,11 +56,7 @@ const KanbanBoard = () => {
   const [dragOverColumn, setDragOverColumn] = useState(null);
   const [showChannelDropdown, setShowChannelDropdown] = useState(false);
   const [pendingChatTasks, setPendingChatTasks] = useState([]);
-  const [chatChannels, setChatChannels] = useState([
-    { id: 'general', name: 'general', icon: 'chat', description: 'General project discussion' },
-    { id: 'team-chat', name: 'team-chat', icon: 'users', description: 'Team discussions' },
-    { id: 'tasks', name: 'tasks', icon: 'clipboard', description: 'Task updates and assignments' }
-  ]);
+  const [chatChannels, setChatChannels] = useState([]);
   const [projectName, setProjectName] = useState('Project Management System');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const filterButtonRef = useRef(null);
@@ -81,16 +83,83 @@ const KanbanBoard = () => {
     enabled: !!projectId,
   });
 
-  // Transform tasks into kanban columns
+  // Transform tasks into kanban columns with filtering
   useEffect(() => {
     if (tasksData && tasksData.length > 0) {
       const columns = [
-        { id: 'TODO', name: 'To Do', tasks: [] },
-        { id: 'IN_PROGRESS', name: 'In Progress', tasks: [] },
-        { id: 'DONE', name: 'Done', tasks: [] },
+        { id: 'TODO', name: 'To Do', color: '#EF4444', tasks: [] },
+        { id: 'IN_PROGRESS', name: 'In Progress', color: '#F59E0B', tasks: [] },
+        { id: 'DONE', name: 'Done', color: '#10B981', tasks: [] },
       ];
 
-      tasksData.forEach(task => {
+      // Apply filters
+      const filteredTasks = tasksData.filter(task => {
+        // Search filter
+        if (searchQuery) {
+          const searchLower = searchQuery.toLowerCase();
+          const matchesSearch = 
+            task.title?.toLowerCase().includes(searchLower) ||
+            task.description?.toLowerCase().includes(searchLower);
+          if (!matchesSearch) return false;
+        }
+
+        // Priority filter
+        if (priorityFilter && task.priority !== priorityFilter) {
+          return false;
+        }
+
+        // Status filter
+        if (statusFilter && task.status !== statusFilter) {
+          return false;
+        }
+
+        // Assignee filter
+        if (assigneeFilter && task.assignedToId !== assigneeFilter) {
+          return false;
+        }
+
+        // Due date filter
+        if (dueDateFilter) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const taskDueDate = task.dueDate ? new Date(task.dueDate) : null;
+
+          if (dueDateFilter === 'overdue') {
+            if (!taskDueDate || taskDueDate >= today) return false;
+          } else if (dueDateFilter === 'today') {
+            if (!taskDueDate) return false;
+            const taskDate = new Date(taskDueDate);
+            taskDate.setHours(0, 0, 0, 0);
+            if (taskDate.getTime() !== today.getTime()) return false;
+          } else if (dueDateFilter === 'week') {
+            if (!taskDueDate) return false;
+            const weekFromNow = new Date(today);
+            weekFromNow.setDate(weekFromNow.getDate() + 7);
+            if (taskDueDate < today || taskDueDate > weekFromNow) return false;
+          } else if (dueDateFilter === 'month') {
+            if (!taskDueDate) return false;
+            const monthFromNow = new Date(today);
+            monthFromNow.setMonth(monthFromNow.getMonth() + 1);
+            if (taskDueDate < today || taskDueDate > monthFromNow) return false;
+          }
+        }
+
+        // Due date range filter
+        if (dueDateFrom && task.dueDate) {
+          const from = new Date(dueDateFrom);
+          const taskDate = new Date(task.dueDate);
+          if (taskDate < from) return false;
+        }
+        if (dueDateTo && task.dueDate) {
+          const to = new Date(dueDateTo);
+          const taskDate = new Date(task.dueDate);
+          if (taskDate > to) return false;
+        }
+
+        return true;
+      });
+
+      filteredTasks.forEach(task => {
         const column = columns.find(col => col.id === task.status);
         if (column) {
           column.tasks.push({
@@ -101,15 +170,18 @@ const KanbanBoard = () => {
             status: task.status,
             dueDate: task.dueDate,
             assignedTo: task.assignedToId,
+            assignee_name: task.assignedTo?.name || '',
             tags: task.tags || [],
             type: 'task',
+            comment_count: 0,
+            attachment_count: 0,
           });
         }
       });
 
       setKanbanData({ columns });
     }
-  }, [tasksData]);
+  }, [tasksData, searchQuery, priorityFilter, statusFilter, assigneeFilter, dueDateFilter, dueDateFrom, dueDateTo]);
 
   // Keyboard shortcuts for hovered task
   useEffect(() => {
@@ -319,81 +391,43 @@ const KanbanBoard = () => {
     toast.success(`Task marked as ${newType === 'bug' ? 'Bug' : 'Task'}`);
   };
 
-  // Mock data for demonstration
+  // Kanban data state
   const [kanbanData, setKanbanData] = useState({
     columns: [
-      {
-        id: 'todo',
-        name: 'To Do',
-        color: '#EF4444',
-        tasks: [
-          {
-            id: 'task-1',
-            title: 'Design new homepage layout',
-            description: 'Create wireframes and mockups for the new homepage design',
-            priority: 'high',
-            type: 'task',
-            assignee_id: 'JD',
-            assignee_name: 'John Doe',
-            due_date: '2024-10-05',
-            comment_count: 2,
-            attachment_count: 5
-          }
-        ]
-      },
-      {
-        id: 'backlog',
-        name: 'Backlog',
-        color: '#6B7280',
-        tasks: [
-          {
-            id: 'task-2',
-            title: 'Research competitor analysis',
-            description: 'Analyze top 5 competitors in our market',
-            priority: 'low',
-            type: 'task',
-            assignee_id: 'SW',
-            assignee_name: 'Sarah Wilson',
-            due_date: '2024-10-10',
-            tags: ['research', 'analysis'],
-            comment_count: 1,
-            attachment_count: 0,
-            created_at: '2024-09-20T14:30:00.000Z',
-            updated_at: '2024-09-20T14:30:00.000Z'
-          },
-          {
-            id: 'task-3',
-            title: 'Fix login authentication bug',
-            description: 'Users are unable to login with social media accounts',
-            priority: 'urgent',
-            type: 'bug',
-            assignee_name: 'JS',
-            due_date: '2024-09-30',
-            comment_count: 3,
-            attachment_count: 1
-          }
-        ]
-      },
-      {
-        id: 'progress',
-        name: 'In Progress',
-        color: '#F59E0B',
-        tasks: []
-      },
-      {
-        id: 'review',
-        name: 'Review',
-        color: '#8B5CF6',
-        tasks: []
-      },
-      {
-        id: 'done',
-        name: 'Done',
-        color: '#10B981',
-        tasks: []
-      }
+      { id: 'TODO', name: 'To Do', color: '#EF4444', tasks: [] },
+      { id: 'IN_PROGRESS', name: 'In Progress', color: '#F59E0B', tasks: [] },
+      { id: 'DONE', name: 'Done', color: '#10B981', tasks: [] },
     ]
   });
+
+  // Fetch team members
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ['teamMembers', projectId],
+    queryFn: async () => {
+      // TODO: Implement team members fetch from Amplify
+      return [];
+    },
+    enabled: !!projectId,
+  });
+
+  // Fetch chat channels
+  useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        // TODO: Fetch from Amplify chat service
+        setChatChannels([
+          { id: 'general', name: 'general', icon: 'chat', description: 'General project discussion' },
+          { id: 'team-chat', name: 'team-chat', icon: 'users', description: 'Team discussions' },
+          { id: 'tasks', name: 'tasks', icon: 'clipboard', description: 'Task updates and assignments' }
+        ]);
+      } catch (error) {
+        console.error('Error fetching channels:', error);
+      }
+    };
+    if (projectId) {
+      fetchChannels();
+    }
+  }, [projectId]);
 
   // Fetch project details
   const fetchProjectDetails = async () => {
@@ -909,6 +943,101 @@ const KanbanBoard = () => {
     setShowBulkActions(false);
   };
 
+  // Bulk assign handler
+  const handleBulkAssign = async (userId, userName) => {
+    if (selectedTasks.size === 0) return;
+    
+    try {
+      // Update all selected tasks
+      const updatedColumns = kanbanData.columns.map(col => ({
+        ...col,
+        tasks: col.tasks.map(task => 
+          selectedTasks.has(task.id)
+            ? { ...task, assignee_id: userId, assignee_name: userName }
+            : task
+        )
+      }));
+      
+      setKanbanData({ ...kanbanData, columns: updatedColumns });
+      toast.success(`${selectedTasks.size} task(s) assigned to ${userName}`);
+      setSelectedTasks(new Set());
+      setShowBulkActions(false);
+    } catch (error) {
+      toast.error('Failed to assign tasks');
+      console.error('Bulk assign error:', error);
+    }
+  };
+
+  // Bulk priority handler
+  const handleBulkPriority = async (priority) => {
+    if (selectedTasks.size === 0) return;
+    
+    try {
+      // Update all selected tasks
+      const updatedColumns = kanbanData.columns.map(col => ({
+        ...col,
+        tasks: col.tasks.map(task => 
+          selectedTasks.has(task.id)
+            ? { ...task, priority }
+            : task
+        )
+      }));
+      
+      setKanbanData({ ...kanbanData, columns: updatedColumns });
+      toast.success(`${selectedTasks.size} task(s) priority set to ${priority}`);
+      setSelectedTasks(new Set());
+      setShowBulkActions(false);
+    } catch (error) {
+      toast.error('Failed to update priority');
+      console.error('Bulk priority error:', error);
+    }
+  };
+
+  // Bulk move handler
+  const handleBulkMove = async (targetColumnId) => {
+    if (selectedTasks.size === 0) return;
+    
+    try {
+      const tasksToMove = [];
+      
+      // Collect all selected tasks
+      kanbanData.columns.forEach(col => {
+        col.tasks.forEach(task => {
+          if (selectedTasks.has(task.id)) {
+            tasksToMove.push(task);
+          }
+        });
+      });
+      
+      // Remove selected tasks from their current columns and add to target column
+      const updatedColumns = kanbanData.columns.map(col => {
+        if (col.id === targetColumnId) {
+          // Add all selected tasks to target column
+          return {
+            ...col,
+            tasks: [...col.tasks.filter(t => !selectedTasks.has(t.id)), ...tasksToMove]
+          };
+        } else {
+          // Remove selected tasks from other columns
+          return {
+            ...col,
+            tasks: col.tasks.filter(t => !selectedTasks.has(t.id))
+          };
+        }
+      });
+      
+      setKanbanData({ ...kanbanData, columns: updatedColumns });
+      
+      const targetColumn = kanbanData.columns.find(col => col.id === targetColumnId);
+      toast.success(`${selectedTasks.size} task(s) moved to ${targetColumn.name}`);
+      setSelectedTasks(new Set());
+      setShowBulkActions(false);
+    } catch (error) {
+      toast.error('Failed to move tasks');
+      console.error('Bulk move error:', error);
+    }
+  };
+
   // Delete task handler
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm('Are you sure you want to delete this task?')) {
@@ -969,18 +1098,89 @@ const KanbanBoard = () => {
             {showBulkActions && (
               <div className="flex items-center space-x-2 ml-4 pl-4 border-l border-gray-200">
                 <span className="text-sm text-gray-600">{selectedTasks.size} task(s) selected</span>
-                <button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
-                  <UserIcon className="h-4 w-4 mr-1" />
-                  Assign
-                </button>
-                <button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
-                  <FlagIcon className="h-4 w-4 mr-1" />
-                  Priority
-                </button>
-                <button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
-                  <ArrowRightIcon className="h-4 w-4 mr-1" />
-                  Move
-                </button>
+                
+                {/* Assign Dropdown */}
+                <Menu as="div" className="relative">
+                  <Menu.Button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                    <UserIcon className="h-4 w-4 mr-1" />
+                    Assign
+                  </Menu.Button>
+                  <Menu.Items className="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                    <div className="py-1 max-h-64 overflow-y-auto">
+                      {teamMembers.length > 0 ? (
+                        teamMembers.map((member) => (
+                          <Menu.Item key={member.id}>
+                            {({ active }) => (
+                              <button
+                                onClick={() => handleBulkAssign(member.id, `${member.first_name} ${member.last_name}`)}
+                                className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-gray-700 w-full text-left`}
+                              >
+                                <UserIcon className="h-4 w-4 mr-2" />
+                                {member.first_name} {member.last_name}
+                              </button>
+                            )}
+                          </Menu.Item>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-sm text-gray-500">No team members available</div>
+                      )}
+                    </div>
+                  </Menu.Items>
+                </Menu>
+                
+                {/* Priority Dropdown */}
+                <Menu as="div" className="relative">
+                  <Menu.Button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                    <FlagIcon className="h-4 w-4 mr-1" />
+                    Priority
+                  </Menu.Button>
+                  <Menu.Items className="absolute left-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                    <div className="py-1">
+                      {['URGENT', 'HIGH', 'MEDIUM', 'LOW'].map((priority) => (
+                        <Menu.Item key={priority}>
+                          {({ active }) => (
+                            <button
+                              onClick={() => handleBulkPriority(priority)}
+                              className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-gray-700 w-full text-left`}
+                            >
+                              <FlagIcon className="h-4 w-4 mr-2" />
+                              {priority}
+                            </button>
+                          )}
+                        </Menu.Item>
+                      ))}
+                    </div>
+                  </Menu.Items>
+                </Menu>
+                
+                {/* Move Dropdown */}
+                <Menu as="div" className="relative">
+                  <Menu.Button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                    <ArrowRightIcon className="h-4 w-4 mr-1" />
+                    Move
+                  </Menu.Button>
+                  <Menu.Items className="absolute left-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                    <div className="py-1">
+                      {kanbanData.columns.map((column) => (
+                        <Menu.Item key={column.id}>
+                          {({ active }) => (
+                            <button
+                              onClick={() => handleBulkMove(column.id)}
+                              className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-gray-700 w-full text-left`}
+                            >
+                              <div 
+                                className="w-3 h-3 rounded-full mr-2"
+                                style={{ backgroundColor: column.color }}
+                              />
+                              {column.name}
+                            </button>
+                          )}
+                        </Menu.Item>
+                      ))}
+                    </div>
+                  </Menu.Items>
+                </Menu>
+                
                 <button 
                   onClick={handleBulkSendToChat}
                   className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors"
@@ -1056,22 +1256,31 @@ const KanbanBoard = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                      <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                      <select 
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      >
                         <option value="">All Status</option>
-                        <option value="todo">To Do</option>
-                        <option value="inprogress">In Progress</option>
-                        <option value="review">Review</option>
-                        <option value="done">Done</option>
+                        <option value="TODO">To Do</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="DONE">Done</option>
                       </select>
                     </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Assignee</label>
-                      <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                      <select 
+                        value={assigneeFilter}
+                        onChange={(e) => setAssigneeFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      >
                         <option value="">All Assignees</option>
-                        <option value="john">John Doe</option>
-                        <option value="jane">Jane Smith</option>
-                        <option value="demo">Demo User</option>
+                        {teamMembers.map((member) => (
+                          <option key={member.id} value={member.id}>
+                            {member.first_name} {member.last_name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     
@@ -1080,11 +1289,15 @@ const KanbanBoard = () => {
                       <div className="grid grid-cols-2 gap-2">
                         <input
                           type="date"
+                          value={dueDateFrom}
+                          onChange={(e) => setDueDateFrom(e.target.value)}
                           placeholder="From"
                           className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                         />
                         <input
                           type="date"
+                          value={dueDateTo}
+                          onChange={(e) => setDueDateTo(e.target.value)}
                           placeholder="To"
                           className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                         />
@@ -1093,7 +1306,11 @@ const KanbanBoard = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Due Date Filter</label>
-                      <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                      <select 
+                        value={dueDateFilter}
+                        onChange={(e) => setDueDateFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      >
                         <option value="">All Dates</option>
                         <option value="overdue">Overdue</option>
                         <option value="today">Due Today</option>
@@ -1107,7 +1324,11 @@ const KanbanBoard = () => {
                         onClick={() => {
                           setSearchQuery('');
                           setPriorityFilter('');
-                          // Reset other filters here
+                          setStatusFilter('');
+                          setAssigneeFilter('');
+                          setDueDateFilter('');
+                          setDueDateFrom('');
+                          setDueDateTo('');
                         }}
                         className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
                       >
@@ -1530,34 +1751,33 @@ const KanbanBoard = () => {
                 </>
               )}
             </button>
+            <div className="border-t border-gray-100 my-1" />
+            <button
+              onClick={() => {
+                handleDeleteTask(contextMenu.task.id);
+                closeContextMenu();
+              }}
+              className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center space-x-2"
+            >
+              <TrashIcon className="h-4 w-4" />
+              <span>Delete Task</span>
+            </button>
           </div>
         </div>
       )}
 
-      {/* Quick Action Menu */}
-      {showQuickMenu && quickMenuTask && (
-        <QuickActionMenu
-          task={quickMenuTask}
-          position={quickMenuPosition}
-          initialMenu={showQuickMenu}
-          onAssign={handleQuickAssign}
-          onDueDate={handleQuickDueDate}
+{{ ... }}
           onTags={handleQuickTags}
           onClose={() => {
             setShowQuickMenu(false);
             setQuickMenuTask(null);
           }}
-          teamMembers={[
-            { id: 1, first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
-            { id: 2, first_name: 'Jane', last_name: 'Smith', email: 'jane@example.com' },
-            { id: 3, first_name: 'Mike', last_name: 'Johnson', email: 'mike@example.com' },
-          ]}
+          teamMembers={teamMembers}
           availableTags={[
             { id: 1, name: 'Frontend', color: '#3b82f6' },
             { id: 2, name: 'Backend', color: '#10b981' },
             { id: 3, name: 'Design', color: '#f59e0b' },
             { id: 4, name: 'Bug', color: '#ef4444' },
-            { id: 5, name: 'Feature', color: '#8b5cf6' },
           ]}
         />
       )}
