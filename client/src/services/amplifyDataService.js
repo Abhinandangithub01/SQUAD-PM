@@ -129,11 +129,13 @@ export const taskService = {
     try {
       const { data: task, errors } = await client.models.Task.create({
         title: taskData.title,
-        description: taskData.description,
+        description: taskData.description || '',
         status: taskData.status || 'TODO',
-        priority: taskData.priority || 'MEDIUM',
-        projectId: taskData.projectId,
-        assignedToId: taskData.assignedToId,
+        priority: taskData.priority ? taskData.priority.toUpperCase() : 'MEDIUM',
+        projectId: taskData.projectId || taskData.project_id,
+        assignedToId: taskData.assignedToId || taskData.assignee_ids?.[0],
+        dueDate: taskData.due_date || taskData.dueDate,
+        tags: taskData.tags || [],
         createdById: taskData.createdById,
         dueDate: taskData.dueDate,
         estimatedHours: taskData.estimatedHours,

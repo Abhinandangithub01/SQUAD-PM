@@ -244,7 +244,7 @@ const Analytics = () => {
           {/* Task Completion Trend */}
           {analyticsData?.task_completion && analyticsData.task_completion.length > 0 && (
             <ChartCard title="Task Completion Trend" bgColor={bgColor} borderColor={borderColor} textColor={textColor}>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={280}>
                 <AreaChart data={analyticsData.task_completion}>
                   <defs>
                     <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
@@ -265,7 +265,7 @@ const Analytics = () => {
           {/* Status Distribution */}
           {analyticsData?.status_distribution && analyticsData.status_distribution.length > 0 && (
             <ChartCard title="Status Distribution" bgColor={bgColor} borderColor={borderColor} textColor={textColor}>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={analyticsData.status_distribution}
@@ -289,7 +289,7 @@ const Analytics = () => {
           {/* Priority Distribution */}
           {analyticsData?.priority_distribution && analyticsData.priority_distribution.length > 0 && (
             <ChartCard title="Priority Distribution" bgColor={bgColor} borderColor={borderColor} textColor={textColor}>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={analyticsData.priority_distribution}>
                   <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
                   <XAxis dataKey="priority" stroke={textSecondary} style={{ fontSize: '10px' }} />
@@ -321,26 +321,26 @@ const Analytics = () => {
 };
 
 const StatCard = ({ title, value, icon: Icon, color, bgColor, borderColor, textColor, textSecondary }) => (
-  <div className="rounded-lg p-2.5 border hover:shadow-sm transition-all" style={{ backgroundColor: bgColor, borderColor }}>
+  <div className="rounded-xl p-5 border hover:shadow-md transition-all" style={{ backgroundColor: bgColor, borderColor }}>
     <div className="flex items-center justify-between">
       <div className="flex-1">
-        <p className="text-[9px] font-medium uppercase tracking-wide mb-1" style={{ color: textSecondary }}>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: textSecondary }}>
           {title}
         </p>
-        <p className="text-lg font-bold" style={{ color }}>
+        <p className="text-3xl font-bold" style={{ color }}>
           {value}
         </p>
       </div>
-      <div className="p-1.5 rounded" style={{ backgroundColor: `${color}15` }}>
-        <Icon className="h-3.5 w-3.5" style={{ color }} />
+      <div className="p-3 rounded-lg" style={{ backgroundColor: `${color}15` }}>
+        <Icon className="h-6 w-6" style={{ color }} />
       </div>
     </div>
   </div>
 );
 
 const ChartCard = ({ title, children, bgColor, borderColor, textColor }) => (
-  <div className="rounded-lg p-3 border hover:shadow-sm transition-shadow" style={{ backgroundColor: bgColor, borderColor }}>
-    <h3 className="text-xs font-semibold mb-2" style={{ color: textColor }}>{title}</h3>
+  <div className="rounded-xl p-6 border hover:shadow-md transition-shadow" style={{ backgroundColor: bgColor, borderColor }}>
+    <h3 className="text-base font-semibold mb-4" style={{ color: textColor }}>{title}</h3>
     {children}
   </div>
 );

@@ -125,9 +125,9 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <Dialog.Title as="h3" className="text-lg font-medium text-gray-900">
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-8 text-left align-middle shadow-2xl transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <Dialog.Title as="h3" className="text-xl font-semibold text-gray-900">
                     Create New Task
                   </Dialog.Title>
                   <button
@@ -140,9 +140,9 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
                       Task Title *
                     </label>
                     <input
@@ -154,7 +154,7 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
                         },
                       })}
                       type="text"
-                      className={`mt-1 input ${errors.title ? 'input-error' : ''}`}
+                      className={`block w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter task title"
                     />
                     {errors.title && (
@@ -163,25 +163,25 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
                   </div>
 
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
                       Description
                     </label>
                     <textarea
                       {...register('description')}
                       rows={3}
-                      className="mt-1 input"
+                      className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Describe the task (optional)"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="priority" className="block text-sm font-semibold text-gray-700 mb-2">
                         Priority
                       </label>
                       <select
                         {...register('priority')}
-                        className="mt-1 input"
+                        className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -191,7 +191,7 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
                     </div>
 
                     <div>
-                      <label htmlFor="due_date" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="due_date" className="block text-sm font-semibold text-gray-700 mb-2">
                         Due Date
                       </label>
                       <MantineProvider>
@@ -222,13 +222,13 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
                   </div>
 
                   <div>
-                    <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="tags" className="block text-sm font-semibold text-gray-700 mb-2">
                       Tags
                     </label>
                     <input
                       {...register('tags')}
                       type="text"
-                      className="mt-1 input"
+                      className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter tags separated by commas"
                     />
                     <p className="mt-1 text-xs text-gray-500">
@@ -238,7 +238,7 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
 
                   {/* Assignees */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Assignees
                     </label>
                     
@@ -270,7 +270,7 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
                         type="text"
                         value={assigneeSearch}
                         onChange={(e) => setAssigneeSearch(e.target.value)}
-                        className="input pr-10"
+                        className="block w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Search team members to assign..."
                       />
                       <UserPlusIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -300,19 +300,19 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
                     )}
                   </div>
 
-                  <div className="flex justify-end space-x-3 pt-4">
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                     <button
                       type="button"
                       onClick={handleClose}
                       disabled={createTaskMutation.isLoading}
-                      className="btn-outline"
+                      className="px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={createTaskMutation.isLoading}
-                      className="btn-primary"
+                      className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 min-w-[120px]"
                     >
                       {createTaskMutation.isLoading ? (
                         <LoadingSpinner size="sm" color="white" />
