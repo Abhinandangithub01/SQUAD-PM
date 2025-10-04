@@ -74,60 +74,27 @@ const TaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
     name: 'checklists'
   });
 
-  // Fetch task details
+  // Fetch task details from Amplify
   const { data: taskData, isLoading } = useQuery({
     queryKey: ['task', taskId],
     queryFn: async () => {
-      // Mock task data for now
-      return {
-        task: {
-          id: taskId,
-          title: 'Design new homepage layout',
-          description: 'Create wireframes and mockups for the new homepage design',
-          status: 'In Progress',
-          priority: 'high',
-          type: 'task', // 'task' or 'bug'
-          project_id: '1',
-          milestone_id: '1', // Linked to Design Phase Complete milestone
-          assignee_ids: ['2'],
-          assignee_names: ['John Doe'],
-          due_date: '2024-10-05T00:00:00Z',
-          created_at: '2024-09-20T00:00:00Z',
-          updated_at: '2024-09-25T00:00:00Z',
-          tags: ['ui', 'design', 'homepage'],
-          checklists: [
-            {
-              name: 'Design Tasks',
-              items: [
-                { text: 'Create wireframes', completed: true },
-                { text: 'Design mockups', completed: false },
-                { text: 'Get feedback', completed: false }
-              ]
-            }
-          ],
-          comments: [
-            {
-              id: '1',
-              content: 'Looking good so far!',
-              author: 'Jane Smith',
-              created_at: '2024-09-24T10:00:00Z'
-            }
-          ]
-        }
-      };
+      const result = await amplifyDataService.tasks.get(taskId);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch task');
+      }
+      return { task: result.data };
     },
     enabled: !!taskId && isOpen,
   });
 
-  // Mock users data
-  const usersData = {
-    users: [
-      { id: '1', first_name: 'Demo', last_name: 'User', email: 'demo@example.com' },
-      { id: '2', first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
-      { id: '3', first_name: 'Jane', last_name: 'Smith', email: 'jane@example.com' },
-      { id: '4', first_name: 'Sarah', last_name: 'Wilson', email: 'sarah@example.com' }
-    ]
-  };
+  // Fetch real users data from Amplify
+  const { data: usersData } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const result = await amplifyDataService.users.list();
+      return { users: result.success ? result.data : [] };
+    },
+  });
 
   // Initialize form when task data is loaded
   useEffect(() => {
@@ -154,11 +121,14 @@ const TaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
     }
   }, [taskData, isEditing, setValue]);
 
-  // Update task mutation
+  // Update task mutation with real Amplify
   const updateTaskMutation = useMutation({
     mutationFn: async (updates) => {
-      // Mock update
-      return { task: { ...taskData.task, ...updates } };
+      const result = await amplifyDataService.tasks.update(taskId, updates);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update task');
+      }
+      return { task: result.data };
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['task', taskId]);

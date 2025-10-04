@@ -24,8 +24,8 @@ const GanttChart = () => {
   const { data: tasksData, isLoading } = useQuery({
     queryKey: ['tasks', projectId],
     queryFn: async () => {
-      // Mock data for now
-      return mockTasks.filter(task => task.project_id === projectId);
+      const result = await amplifyDataService.tasks.list({ projectId });
+      return result.success ? result.data : [];
     },
   });
 

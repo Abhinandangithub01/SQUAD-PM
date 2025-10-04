@@ -73,16 +73,8 @@ const RealTimeWidget = ({ widget, textColor, textSecondary }) => {
     const value = getValue();
     if (Array.isArray(value)) return value;
     
-    // Mock data for demonstration
-    return [
-      { name: 'Mon', value: 12 },
-      { name: 'Tue', value: 19 },
-      { name: 'Wed', value: 15 },
-      { name: 'Thu', value: 25 },
-      { name: 'Fri', value: 22 },
-      { name: 'Sat', value: 18 },
-      { name: 'Sun', value: 20 },
-    ];
+    // Return empty array if no data
+    return [];
   };
 
   const colorHex = getColorHex(widget.color);

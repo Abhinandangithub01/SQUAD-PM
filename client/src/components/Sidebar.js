@@ -37,8 +37,8 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
   const { data: notificationsData } = useQuery({
     queryKey: ['notifications', 'unread'],
     queryFn: async () => {
-      // Mock data for now
-      return { unread_count: 3 };
+      const result = await amplifyDataService.notifications.getUnreadCount();
+      return { unread_count: result.success ? result.data : 0 };
     },
     refetchInterval: 30000, // Refetch every 30 seconds
   });

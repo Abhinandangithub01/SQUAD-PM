@@ -68,57 +68,18 @@ const NotificationPanel = ({ isOpen, onClose }) => {
   // Use real notifications or empty array
   const notifications = notificationsData || [];
 
-  // Mock notifications data (fallback)
-  const mockNotifications = [
-    {
-      id: 1,
-      type: 'task_assigned',
-      title: 'New task assigned',
-      message: 'You have been assigned to "Design new homepage layout"',
-      created_at: '2024-10-05T10:30:00Z',
-      is_read: false
-    },
-    {
-      id: 2,
-      type: 'task_completed',
-      title: 'Task completed',
-      message: 'John Doe completed "Research competitor analysis"',
-      created_at: '2024-10-05T09:15:00Z',
-      is_read: false
-    },
-    {
-      id: 3,
-      type: 'due_soon',
-      title: 'Task due soon',
-      message: '"Fix login authentication bug" is due in 2 hours',
-      created_at: '2024-10-05T08:00:00Z',
-      is_read: true
-    },
-    {
-      id: 4,
-      type: 'project_update',
-      title: 'Project update',
-      message: 'Website Redesign project has been updated',
-      created_at: '2024-10-04T16:45:00Z',
-      is_read: true
-    },
-    {
-      id: 5,
-      type: 'chat_mention',
-      title: 'Mentioned in chat',
-      message: 'You were mentioned in #general channel',
-      created_at: '2024-10-04T14:20:00Z',
-      is_read: false
-    }
-  ];
+  // No mock data - using real notifications only
 
   // Remove duplicate mutations - already defined above
   
   // Delete notification
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId) => {
-      // Mock implementation
-      console.log('Delete notification:', notificationId);
+      const result = await amplifyDataService.notifications.delete(notificationId);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete notification');
+      }
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['notifications', user?.id]);
