@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -10,6 +10,7 @@ import {
   UsersIcon,
   ArrowTrendingUpIcon,
   ArrowDownTrayIcon,
+  BoltIcon,
 } from '@heroicons/react/24/outline';
 import { 
   BarChart, 
@@ -24,6 +25,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  Area,
+  AreaChart,
 } from 'recharts';
 import amplifyDataService from '../services/amplifyDataService';
 import { formatDate } from '../utils/helpers';
@@ -35,18 +38,163 @@ import toast from 'react-hot-toast';
 const Analytics = () => {
   const { projectId } = useParams();
   const [timeRange, setTimeRange] = useState('30d');
+  const { isDarkMode } = useTheme();
 
-  // Fetch analytics data from Amplify
-  const { data: analyticsData, isLoading } = useQuery({
-    queryKey: ['analytics', projectId ? 'project' : 'dashboard', projectId, timeRange],
+  // Fetch real data from Amplify
+  const { data: projects, isLoading: loadingProjects } = useQuery({
+    queryKey: ['projects'],
     queryFn: async () => {
-      const result = await amplifyDataService.dashboard.getStats();
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result.data;
+      const result = await amplifyDataService.projects.list();
+      return result.success ? result.data : [];
     },
   });
+
+  const { data: tasks, isLoading: loadingTasks } = useQuery({
+    queryKey: ['tasks', projectId],
+    queryFn: async () => {
+      const result = await amplifyDataService.tasks.list(projectId ? { projectId } : {});
+      return result.success ? result.data : [];
+    },
+  });
+
+  const isLoading = loadingProjects || loadingTasks;
+
+  // Calculate analytics data from real data
+  const analyticsData = useMemo(() => {
+    if (!projects || !tasks) return null;
+
+    // Filter data based on time range
+    const now = new Date();
+    const filterDate = new Date();
+    
+    switch (timeRange) {
+      case '7d':
+        filterDate.setDate(now.getDate() - 7);
+        break;
+      case '30d':
+        filterDate.setDate(now.getDate() - 30);
+        break;
+      case '90d':
+        filterDate.setDate(now.getDate() - 90);
+        break;
+      case '1y':
+        filterDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        filterDate.setDate(now.getDate() - 30);
+    }
+
+    const filteredTasks = tasks.filter(task => 
+      new Date(task.createdAt) >= filterDate
+    );
+
+    // Calculate overview stats
+    const completedTasks = filteredTasks.filter(t => t.status === 'DONE').length;
+    const totalIssues = filteredTasks.filter(t => 
+      t.priority === 'HIGH' || t.priority === 'URGENT'
+    ).length;
+    const completionRate = filteredTasks.length > 0 
+      ? Math.round((completedTasks / filteredTasks.length) * 100)
+      : 0;
+
+    // Status distribution
+    const statusCounts = filteredTasks.reduce((acc, task) => {
+      const status = task.status || 'TODO';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const statusDistribution = Object.entries(statusCounts).map(([status, count]) => ({
+      status: status.replace('_', ' '),
+      count,
+    }));
+
+    // Priority distribution
+    const priorityCounts = filteredTasks.reduce((acc, task) => {
+      const priority = task.priority || 'MEDIUM';
+      acc[priority] = (acc[priority] || 0) + 1;
+      return acc;
+    }, {});
+
+    const priorityDistribution = Object.entries(priorityCounts).map(([priority, count]) => ({
+      priority: priority.charAt(0) + priority.slice(1).toLowerCase(),
+      count,
+    }));
+
+    // Task completion trend (last 7 days)
+    const completionTrend = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+      
+      const completed = filteredTasks.filter(task => {
+        const updatedAt = new Date(task.updatedAt);
+        return task.status === 'DONE' && 
+               updatedAt >= date && 
+               updatedAt < nextDate;
+      }).length;
+      
+      completionTrend.push({
+        date: date.toISOString(),
+        completed_tasks: completed,
+      });
+    }
+
+    // Project progress
+    const projectProgress = projects.map(project => {
+      const projectTasks = tasks.filter(t => t.projectId === project.id);
+      const projectCompleted = projectTasks.filter(t => t.status === 'DONE').length;
+      const projectIssues = projectTasks.filter(t => 
+        t.priority === 'HIGH' || t.priority === 'URGENT'
+      );
+      const resolvedIssues = projectIssues.filter(t => t.status === 'DONE').length;
+      
+      return {
+        id: project.id,
+        name: project.name,
+        color: project.color || '#3B82F6',
+        total_tasks: projectTasks.length,
+        completed_tasks: projectCompleted,
+        total_issues: projectIssues.length,
+        resolved_issues: resolvedIssues,
+        completion_percentage: projectTasks.length > 0 
+          ? Math.round((projectCompleted / projectTasks.length) * 100)
+          : 0,
+      };
+    });
+
+    // Overdue tasks
+    const overdueTasks = filteredTasks.filter(task => {
+      if (!task.dueDate || task.status === 'DONE') return false;
+      return new Date(task.dueDate) < now;
+    }).map(task => ({
+      id: task.id,
+      title: task.title,
+      type: 'task',
+      due_date: task.dueDate,
+      assignees: task.assignedToId ? ['Assigned'] : [],
+    }));
+
+    return {
+      overview: {
+        total_projects: projects.length,
+        total_tasks: filteredTasks.length,
+        completed_tasks: completedTasks,
+        total_issues: totalIssues,
+        completion_rate: completionRate,
+        team_members: 4, // Mock for now
+      },
+      task_completion: completionTrend,
+      status_distribution: statusDistribution,
+      priority_distribution: priorityDistribution,
+      project_progress: projectProgress,
+      overdue_tasks: overdueTasks,
+    };
+  }, [projects, tasks, timeRange]);
 
   const handleExport = async () => {
     if (!projectId) return;
@@ -71,6 +219,13 @@ const Analytics = () => {
 
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
+  const bgColor = isDarkMode() ? 'var(--color-surface)' : '#ffffff';
+  const borderColor = isDarkMode() ? 'var(--color-border)' : '#e5e7eb';
+  const textColor = isDarkMode() ? 'var(--color-text)' : '#111827';
+  const textSecondary = isDarkMode() ? 'var(--color-text-secondary)' : '#6b7280';
+  const primaryBlue = '#3b82f6';
+  const lightBlue = '#dbeafe';
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -79,16 +234,17 @@ const Analytics = () => {
           {projectId && (
             <Link
               to="/analytics"
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              style={{ color: textSecondary }}
             >
               <ArrowLeftIcon className="h-5 w-5" />
             </Link>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold" style={{ color: textColor }}>
               {projectId ? 'Project Analytics' : 'Analytics Dashboard'}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm" style={{ color: textSecondary }}>
               {projectId 
                 ? 'Detailed insights for this project'
                 : 'Overview of all your projects and tasks'
@@ -101,21 +257,27 @@ const Analytics = () => {
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="input"
+            className="px-4 py-2 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+            style={{ 
+              backgroundColor: bgColor,
+              borderColor: lightBlue,
+              color: textColor
+            }}
           >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-            <option value="1y">Last year</option>
+            <option value="7d">📅 Last 7 days</option>
+            <option value="30d">📅 Last 30 days</option>
+            <option value="90d">📅 Last 90 days</option>
+            <option value="1y">📅 Last year</option>
           </select>
           
           {projectId && (
             <button
               onClick={handleExport}
-              className="btn-outline"
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: primaryBlue, color: '#ffffff' }}
             >
-              <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-              Export Data
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              <span>Export CSV</span>
             </button>
           )}
         </div>
@@ -125,68 +287,107 @@ const Analytics = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title={projectId ? "Total Tasks" : "Total Projects"}
-          value={analyticsData?.overview?.total_projects || analyticsData?.overview?.total_tasks || 0}
+          value={projectId 
+            ? analyticsData?.overview?.total_tasks || 0
+            : analyticsData?.overview?.total_projects || 0
+          }
           icon={projectId ? CheckCircleIcon : ChartBarIcon}
-          color="blue"
+          bgColor={bgColor}
+          borderColor={lightBlue}
+          textColor={textColor}
+          textSecondary={textSecondary}
+          primaryColor={primaryBlue}
         />
         <StatCard
           title={projectId ? "Completed Tasks" : "Total Tasks"}
-          value={analyticsData?.overview?.completed_tasks || analyticsData?.overview?.total_tasks || 0}
-          icon={CheckCircleIcon}
-          color="green"
-        />
-        <StatCard
-          title={projectId ? "Open Issues" : "Total Issues"}
-          value={analyticsData?.overview?.total_issues || 0}
-          icon={ExclamationTriangleIcon}
-          color="red"
-        />
-        <StatCard
-          title={projectId ? "Team Members" : "Completion Rate"}
           value={projectId 
-            ? analyticsData?.overview?.team_members || 0
-            : `${analyticsData?.overview?.completion_rate || 0}%`
+            ? analyticsData?.overview?.completed_tasks || 0
+            : analyticsData?.overview?.total_tasks || 0
           }
-          icon={projectId ? UsersIcon : ArrowTrendingUpIcon}
-          color="purple"
+          icon={CheckCircleIcon}
+          bgColor={bgColor}
+          borderColor={lightBlue}
+          textColor={textColor}
+          textSecondary={textSecondary}
+          primaryColor={primaryBlue}
+        />
+        <StatCard
+          title="In Progress"
+          value={analyticsData?.status_distribution?.find(s => s.status === 'IN PROGRESS')?.count || 0}
+          icon={BoltIcon}
+          bgColor={bgColor}
+          borderColor={lightBlue}
+          textColor={textColor}
+          textSecondary={textSecondary}
+          primaryColor={primaryBlue}
+        />
+        <StatCard
+          title="Active Users"
+          value={analyticsData?.overview?.team_members || 4}
+          icon={UsersIcon}
+          bgColor={bgColor}
+          borderColor={lightBlue}
+          textColor={textColor}
+          textSecondary={textSecondary}
+          primaryColor={primaryBlue}
         />
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Task Completion Trend */}
-        {analyticsData?.task_completion && (
-          <div className="card p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+        {analyticsData?.task_completion && analyticsData.task_completion.length > 0 && (
+          <div 
+            className="rounded-xl p-6 border-2 shadow-sm"
+            style={{ backgroundColor: bgColor, borderColor: lightBlue }}
+          >
+            <h3 className="text-lg font-semibold mb-4" style={{ color: textColor }}>
               Task Completion Trend
             </h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={analyticsData.task_completion}>
-                <CartesianGrid strokeDasharray="3 3" />
+              <AreaChart data={analyticsData.task_completion}>
+                <defs>
+                  <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={primaryBlue} stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor={primaryBlue} stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
                 <XAxis 
                   dataKey="date" 
                   tickFormatter={(value) => formatDate(value, 'MMM dd')}
+                  stroke={textSecondary}
                 />
-                <YAxis />
+                <YAxis stroke={textSecondary} />
                 <Tooltip 
                   labelFormatter={(value) => formatDate(value, 'MMM dd, yyyy')}
+                  contentStyle={{ 
+                    backgroundColor: bgColor, 
+                    borderColor: borderColor,
+                    borderRadius: '8px'
+                  }}
                 />
-                <Line 
+                <Area 
                   type="monotone" 
                   dataKey="completed_tasks" 
-                  stroke="#10B981" 
-                  strokeWidth={2}
+                  stroke={primaryBlue}
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorCompleted)"
                   name="Completed Tasks"
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         )}
 
         {/* Status Distribution */}
-        {analyticsData?.status_distribution && (
-          <div className="card p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+        {analyticsData?.status_distribution && analyticsData.status_distribution.length > 0 && (
+          <div 
+            className="rounded-xl p-6 border-2 shadow-sm"
+            style={{ backgroundColor: bgColor, borderColor: lightBlue }}
+          >
+            <h3 className="text-lg font-semibold mb-4" style={{ color: textColor }}>
               Task Status Distribution
             </h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -196,8 +397,10 @@ const Analytics = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ status, count }) => `${status}: ${count}`}
-                  outerRadius={80}
+                  label={({ status, count, percent }) => 
+                    `${status}: ${count} (${(percent * 100).toFixed(0)}%)`
+                  }
+                  outerRadius={90}
                   fill="#8884d8"
                   dataKey="count"
                 >
@@ -205,34 +408,56 @@ const Analytics = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: bgColor, 
+                    borderColor: borderColor,
+                    borderRadius: '8px'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
         )}
 
         {/* Priority Distribution */}
-        {analyticsData?.priority_distribution && (
-          <div className="card p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+        {analyticsData?.priority_distribution && analyticsData.priority_distribution.length > 0 && (
+          <div 
+            className="rounded-xl p-6 border-2 shadow-sm"
+            style={{ backgroundColor: bgColor, borderColor: lightBlue }}
+          >
+            <h3 className="text-lg font-semibold mb-4" style={{ color: textColor }}>
               Priority Distribution
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={analyticsData.priority_distribution}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="priority" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#3B82F6" />
+                <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
+                <XAxis dataKey="priority" stroke={textSecondary} />
+                <YAxis stroke={textSecondary} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: bgColor, 
+                    borderColor: borderColor,
+                    borderRadius: '8px'
+                  }}
+                />
+                <Bar 
+                  dataKey="count" 
+                  fill={primaryBlue}
+                  radius={[8, 8, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         )}
 
         {/* Project Progress */}
-        {analyticsData?.project_progress && (
-          <div className="card p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+        {analyticsData?.project_progress && analyticsData.project_progress.length > 0 && (
+          <div 
+            className="rounded-xl p-6 border-2 shadow-sm"
+            style={{ backgroundColor: bgColor, borderColor: lightBlue }}
+          >
+            <h3 className="text-lg font-semibold mb-4" style={{ color: textColor }}>
               Project Progress
             </h3>
             <div className="space-y-4">
@@ -244,22 +469,30 @@ const Analytics = () => {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium truncate" style={{ color: textColor }}>
                         {project.name}
                       </p>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm font-bold" style={{ color: primaryBlue }}>
                         {project.completion_percentage || 0}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="w-full rounded-full h-2"
+                      style={{ backgroundColor: isDarkMode() ? '#374151' : '#e5e7eb' }}
+                    >
                       <div 
-                        className="bg-primary-500 h-2 rounded-full"
-                        style={{ width: `${project.completion_percentage || 0}%` }}
+                        className="h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${project.completion_percentage || 0}%`,
+                          backgroundColor: primaryBlue
+                        }}
                       />
                     </div>
-                    <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
-                      <span>{project.completed_tasks}/{project.total_tasks} tasks</span>
-                      <span>{project.resolved_issues}/{project.total_issues} issues</span>
+                    <div className="flex items-center justify-between mt-1 text-xs" style={{ color: textSecondary }}>
+                      <span>✅ {project.completed_tasks}/{project.total_tasks} tasks</span>
+                      {project.total_issues > 0 && (
+                        <span>🔧 {project.resolved_issues}/{project.total_issues} issues</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -269,102 +502,37 @@ const Analytics = () => {
         )}
       </div>
 
-      {/* Team Performance */}
-      {analyticsData?.team_performance && (
-        <div className="card p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Team Performance
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Team Member
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Assigned Tasks
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Completed Tasks
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Completion Rate
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Issues Resolved
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {analyticsData.team_performance.map((member) => (
-                  <tr key={member.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {member.first_name} {member.last_name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {member.assigned_tasks || 0}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {member.completed_tasks || 0}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{ width: `${member.completion_rate || 0}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {member.completion_rate || 0}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {member.resolved_issues || 0}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       {/* Overdue Tasks */}
       {analyticsData?.overdue_tasks && analyticsData.overdue_tasks.length > 0 && (
-        <div className="card p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+        <div 
+          className="rounded-xl p-6 border-2 shadow-sm"
+          style={{ backgroundColor: bgColor, borderColor: '#fecaca' }}
+        >
+          <h3 className="text-lg font-semibold mb-4 flex items-center" style={{ color: textColor }}>
             <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-2" />
             Overdue Tasks ({analyticsData.overdue_tasks.length})
           </h3>
           <div className="space-y-3">
             {analyticsData.overdue_tasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+              <div 
+                key={task.id} 
+                className="flex items-center justify-between p-4 rounded-lg border-l-4"
+                style={{ 
+                  backgroundColor: isDarkMode() ? '#7f1d1d20' : '#fef2f2',
+                  borderLeftColor: '#ef4444'
+                }}
+              >
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{task.title}</p>
+                  <p className="text-sm font-medium" style={{ color: textColor }}>{task.title}</p>
                   <div className="flex items-center space-x-2 mt-1">
-                    <span className={`badge ${
-                      task.type === 'issue' 
-                        ? 'bg-red-100 text-red-800' 
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                       {task.type}
                     </span>
-                    <span className="text-xs text-gray-500">
-                      Due: {formatDate(task.due_date)}
+                    <span className="text-xs" style={{ color: textSecondary }}>
+                      📅 Due: {formatDate(task.due_date)}
                     </span>
                   </div>
-                </div>
-                <div className="text-right">
-                  {task.assignees && task.assignees.length > 0 && (
-                    <p className="text-xs text-gray-500">
-                      Assigned to: {task.assignees.join(', ')}
-                    </p>
-                  )}
                 </div>
               </div>
             ))}
@@ -391,24 +559,23 @@ const Analytics = () => {
   );
 };
 
-const StatCard = ({ title, value, icon: Icon, color }) => {
-  const colorClasses = {
-    blue: 'text-blue-600 bg-blue-100',
-    green: 'text-green-600 bg-green-100',
-    red: 'text-red-600 bg-red-100',
-    purple: 'text-purple-600 bg-purple-100',
-    yellow: 'text-yellow-600 bg-yellow-100',
-  };
-
+const StatCard = ({ title, value, icon: Icon, bgColor, borderColor, textColor, textSecondary, primaryColor }) => {
   return (
-    <div className="card p-6">
-      <div className="flex items-center">
-        <div className={`flex-shrink-0 p-3 rounded-lg ${colorClasses[color]}`}>
-          <Icon className="h-6 w-6" />
+    <div 
+      className="rounded-xl p-6 border-2 shadow-sm hover:shadow-md transition-shadow"
+      style={{ backgroundColor: bgColor, borderColor }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: textSecondary }}>
+            {title}
+          </p>
+          <p className="text-3xl font-bold" style={{ color: primaryColor }}>
+            {value}
+          </p>
         </div>
-        <div className="ml-4">
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
+        <div className="p-4 rounded-xl" style={{ backgroundColor: primaryColor }}>
+          <Icon className="h-8 w-8 text-white" />
         </div>
       </div>
     </div>
