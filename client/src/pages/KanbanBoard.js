@@ -32,7 +32,7 @@ import amplifyDataService from '../services/amplifyDataService';
 import { formatDate, getPriorityColor, truncateText } from '../utils/helpers';
 import TaskTimer from '../components/TaskTimer';
 import EffortEstimation from '../components/EffortEstimation';
-import EnhancedCreateTaskModal from '../components/EnhancedCreateTaskModal';
+import ModernCreateTaskModal from '../components/ModernCreateTaskModal';
 import EnhancedTaskDetailModal from '../components/EnhancedTaskDetailModal';
 import toast from 'react-hot-toast';
 
@@ -1614,7 +1614,7 @@ const KanbanBoard = () => {
       </div>
 
       {/* Modals */}
-      <EnhancedCreateTaskModal
+      <ModernCreateTaskModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         projectId={projectId}

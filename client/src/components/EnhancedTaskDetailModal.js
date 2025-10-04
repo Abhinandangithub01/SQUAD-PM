@@ -125,6 +125,37 @@ const EnhancedTaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
   useEffect(() => {
     if (taskData?.task) {
       const task = taskData.task;
+      
+      // Parse subtasks safely
+      let parsedSubtasks = [{ title: '', completed: false }];
+      if (task.subtasks) {
+        if (Array.isArray(task.subtasks)) {
+          parsedSubtasks = task.subtasks.length > 0 ? task.subtasks : [{ title: '', completed: false }];
+        } else if (typeof task.subtasks === 'string') {
+          try {
+            const parsed = JSON.parse(task.subtasks);
+            parsedSubtasks = Array.isArray(parsed) && parsed.length > 0 ? parsed : [{ title: '', completed: false }];
+          } catch (e) {
+            parsedSubtasks = [{ title: '', completed: false }];
+          }
+        }
+      }
+      
+      // Parse checklists safely
+      let parsedChecklists = [{ name: '', items: [{ text: '', completed: false }] }];
+      if (task.checklists) {
+        if (Array.isArray(task.checklists)) {
+          parsedChecklists = task.checklists.length > 0 ? task.checklists : [{ name: '', items: [{ text: '', completed: false }] }];
+        } else if (typeof task.checklists === 'string') {
+          try {
+            const parsed = JSON.parse(task.checklists);
+            parsedChecklists = Array.isArray(parsed) && parsed.length > 0 ? parsed : [{ name: '', items: [{ text: '', completed: false }] }];
+          } catch (e) {
+            parsedChecklists = [{ name: '', items: [{ text: '', completed: false }] }];
+          }
+        }
+      }
+      
       reset({
         title: task.title,
         status: task.status,
@@ -138,8 +169,8 @@ const EnhancedTaskDetailModal = ({ isOpen, onClose, taskId, onUpdate }) => {
         tags: Array.isArray(task.tags) ? task.tags.join(', ') : '',
         epic_id: task.epic_id || '',
         dependencies: task.dependencies || [],
-        subtasks: task.subtasks || [{ title: '', completed: false }],
-        checklists: task.checklists || [{ name: '', items: [{ text: '', completed: false }] }],
+        subtasks: parsedSubtasks,
+        checklists: parsedChecklists,
         recurring_pattern: task.recurring_pattern || '',
         recurring_interval: task.recurring_interval || 1,
       });
