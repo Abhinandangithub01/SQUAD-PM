@@ -25,6 +25,7 @@ import {
   PaperClipIcon,
   BugAntIcon,
   DocumentTextIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
 import amplifyDataService from '../services/amplifyDataService';
@@ -1750,7 +1751,14 @@ const KanbanBoard = () => {
         </div>
       )}
 
-{{ ... }}
+      {/* Quick Action Menu */}
+      {showQuickMenu && quickMenuTask && (
+        <QuickActionMenu
+          isOpen={showQuickMenu}
+          position={quickMenuPosition}
+          task={quickMenuTask}
+          onAssign={handleQuickAssign}
+          onDueDate={handleQuickDueDate}
           onTags={handleQuickTags}
           onClose={() => {
             setShowQuickMenu(false);

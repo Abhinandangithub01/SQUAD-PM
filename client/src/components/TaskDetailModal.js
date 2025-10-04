@@ -24,6 +24,7 @@ import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
 import { formatDateTime, getPriorityColor, getStatusColor } from '../utils/helpers';
 import LoadingSpinner from './LoadingSpinner';
 import Avatar from './Avatar';
