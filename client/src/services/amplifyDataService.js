@@ -403,16 +403,27 @@ export const chatService = {
   // Send a message
   async sendMessage(messageData) {
     try {
+      // Validate required fields
+      if (!messageData.content || !messageData.content.trim()) {
+        throw new Error('Message content is required');
+      }
+      if (!messageData.channelId) {
+        throw new Error('Channel ID is required');
+      }
+      if (!messageData.userId) {
+        throw new Error('User ID is required');
+      }
+
       const { data: message, errors } = await client.models.Message.create({
-        content: messageData.content,
+        content: messageData.content.trim(),
         userId: messageData.userId,
-        projectId: messageData.projectId,
         channelId: messageData.channelId,
+        // Note: projectId is not in the Message schema
       });
 
       if (errors) {
         console.error('Error sending message:', errors);
-        throw new Error('Failed to send message');
+        throw new Error(errors[0]?.message || 'Failed to send message');
       }
 
       return { success: true, data: message };

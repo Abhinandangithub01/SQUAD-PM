@@ -157,12 +157,15 @@ const Chat = () => {
       if (!selectedChannel || !selectedChannel.id) {
         throw new Error('No channel selected');
       }
+      if (!messageData.content || !messageData.content.trim()) {
+        throw new Error('Message cannot be empty');
+      }
 
       const result = await amplifyDataService.chat.sendMessage({
-        content: messageData.content,
+        content: messageData.content.trim(),
         channelId: selectedChannel.id,
         userId: user.id,
-        projectId: selectedChannel.projectId || null,
+        // Note: projectId is not in Message schema
       });
       
       if (!result.success) {
@@ -173,7 +176,6 @@ const Chat = () => {
     onSuccess: (data) => {
       setMessage('');
       queryClient.invalidateQueries(['messages', selectedChannel?.id]);
-      toast.success('Message sent!');
       
       // Send real-time message via socket
       if (socket && selectedChannel?.id) {
