@@ -141,17 +141,28 @@ export const taskService = {
         throw new Error('Task status is required');
       }
 
-      const { data: task, errors } = await client.models.Task.create({
+      // Build task object with only non-null values for GSI fields
+      const taskInput = {
         title: taskData.title.trim(),
         description: taskData.description?.trim() || '',
         status: taskData.status.toUpperCase(),
         priority: taskData.priority ? taskData.priority.toUpperCase() : 'MEDIUM',
         projectId: taskData.projectId,
-        assignedToId: taskData.assignedToId || null,
-        dueDate: taskData.dueDate || null,
         tags: Array.isArray(taskData.tags) ? taskData.tags : [],
         createdById: taskData.createdById,
-      });
+      };
+
+      // Only add assignedToId if it has a value (GSI requirement)
+      if (taskData.assignedToId && taskData.assignedToId.trim()) {
+        taskInput.assignedToId = taskData.assignedToId.trim();
+      }
+
+      // Only add dueDate if it has a value
+      if (taskData.dueDate) {
+        taskInput.dueDate = taskData.dueDate;
+      }
+
+      const { data: task, errors } = await client.models.Task.create(taskInput);
 
       if (errors) {
         console.error('Error creating task:', errors);

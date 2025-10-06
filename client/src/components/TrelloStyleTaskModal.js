@@ -100,15 +100,24 @@ const TrelloStyleTaskModal = ({ isOpen, onClose, columnId, projectId, onSuccess 
       return;
     }
 
+    // Build task data with only non-empty values
     const taskData = {
       title: title.trim(),
       description: description.trim() || '',
       priority: priority || 'MEDIUM',
-      assignedToId: assignee.trim() || null,
-      dueDate: dueDate || null,
       tags: tags.length > 0 ? tags : [],
       // Note: estimatedHours and checklist will be added when schema is updated
     };
+
+    // Only add assignedToId if it has a value (DynamoDB GSI requirement)
+    if (assignee && assignee.trim()) {
+      taskData.assignedToId = assignee.trim();
+    }
+
+    // Only add dueDate if it has a value
+    if (dueDate) {
+      taskData.dueDate = dueDate;
+    }
 
     createTaskMutation.mutate(taskData);
   };
