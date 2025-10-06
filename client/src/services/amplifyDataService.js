@@ -127,15 +127,29 @@ export const taskService = {
   // Create a new task
   async create(taskData) {
     try {
+      // Validate required fields
+      if (!taskData.title || !taskData.title.trim()) {
+        throw new Error('Task title is required');
+      }
+      if (!taskData.projectId) {
+        throw new Error('Project ID is required');
+      }
+      if (!taskData.createdById) {
+        throw new Error('Created By ID is required');
+      }
+      if (!taskData.status) {
+        throw new Error('Task status is required');
+      }
+
       const { data: task, errors } = await client.models.Task.create({
-        title: taskData.title,
-        description: taskData.description || '',
-        status: taskData.status || 'TODO',
+        title: taskData.title.trim(),
+        description: taskData.description?.trim() || '',
+        status: taskData.status.toUpperCase(),
         priority: taskData.priority ? taskData.priority.toUpperCase() : 'MEDIUM',
-        projectId: taskData.projectId || taskData.project_id,
-        assignedToId: taskData.assignedToId || taskData.assignee_ids?.[0] || null,
+        projectId: taskData.projectId,
+        assignedToId: taskData.assignedToId || null,
         dueDate: taskData.dueDate || null,
-        tags: taskData.tags || [],
+        tags: Array.isArray(taskData.tags) ? taskData.tags : [],
         createdById: taskData.createdById,
       });
 

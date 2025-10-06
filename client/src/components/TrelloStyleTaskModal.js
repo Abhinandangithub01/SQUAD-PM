@@ -12,9 +12,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import amplifyDataService from '../services/amplifyDataService';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const TrelloStyleTaskModal = ({ isOpen, onClose, columnId, projectId, onSuccess }) => {
+  const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assignee, setAssignee] = useState('');
@@ -46,11 +48,15 @@ const TrelloStyleTaskModal = ({ isOpen, onClose, columnId, projectId, onSuccess 
       if (!columnId) {
         throw new Error('Column ID is required');
       }
+      if (!user || !user.id) {
+        throw new Error('User must be logged in to create tasks');
+      }
 
       const result = await amplifyDataService.tasks.create({
         ...taskData,
         projectId: projectId,
         status: columnId,
+        createdById: user.id,
       });
       
       if (!result.success) {
@@ -81,6 +87,16 @@ const TrelloStyleTaskModal = ({ isOpen, onClose, columnId, projectId, onSuccess 
 
     if (!columnId) {
       toast.error('Column ID is required');
+      return;
+    }
+
+    if (!user || !user.id) {
+      toast.error('You must be logged in to create tasks');
+      return;
+    }
+
+    if (!projectId) {
+      toast.error('Project ID is required');
       return;
     }
 
