@@ -665,13 +665,16 @@ const KanbanBoard = () => {
 
     const targetColumn = kanbanData.columns.find(col => col.id === targetColumnId);
     toast.success(`Task "${taskToMove.title}" moved to ${targetColumn.name}`);
+    
+    // Reset drag states immediately to prevent opacity issues
+    setDraggedTask(null);
     setDragOverColumn(null);
     
     // Force cleanup of any stuck styles after state update
     setTimeout(() => {
       const allTaskCards = document.querySelectorAll('[data-task-id]');
       allTaskCards.forEach(card => {
-        card.style.opacity = '';
+        card.style.opacity = '1';
         card.style.transform = '';
         card.classList.remove('opacity-30');
         // Ensure proper background and styling
@@ -680,7 +683,7 @@ const KanbanBoard = () => {
           card.style.filter = '';
         }
       });
-    }, 150);
+    }, 50);
   };
 
   // Column drag handlers
@@ -1495,6 +1498,16 @@ const KanbanBoard = () => {
                           title="Send to Chat"
                         >
                           <PaperAirplaneIcon className="h-3 w-3" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTask(task.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+                          title="Delete Task"
+                        >
+                          <TrashIcon className="h-3 w-3" />
                         </button>
                       </div>
                       <div className="flex items-center space-x-2">
