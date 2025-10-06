@@ -39,9 +39,17 @@ const TrelloStyleTaskModal = ({ isOpen, onClose, columnId, projectId, onSuccess 
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: async (taskData) => {
+      // Ensure we have required fields
+      if (!projectId) {
+        throw new Error('Project ID is required');
+      }
+      if (!columnId) {
+        throw new Error('Column ID is required');
+      }
+
       const result = await amplifyDataService.tasks.create({
         ...taskData,
-        projectId,
+        projectId: projectId,
         status: columnId,
       });
       
@@ -71,14 +79,19 @@ const TrelloStyleTaskModal = ({ isOpen, onClose, columnId, projectId, onSuccess 
       return;
     }
 
+    if (!columnId) {
+      toast.error('Column ID is required');
+      return;
+    }
+
     const taskData = {
       title: title.trim(),
       description: description.trim() || '',
-      priority,
-      assignee: assignee.trim() || '',
-      due_date: dueDate || null,
-      estimated_hours: estimatedHours ? parseFloat(estimatedHours) : null,
-      tags: tags.length > 0 ? tags : null,
+      priority: priority || 'MEDIUM',
+      assignedToId: assignee.trim() || null,
+      dueDate: dueDate || null,
+      estimatedHours: estimatedHours ? parseFloat(estimatedHours) : null,
+      tags: tags.length > 0 ? tags : [],
       checklist: checklist.length > 0 ? JSON.stringify(checklist) : null,
     };
 
