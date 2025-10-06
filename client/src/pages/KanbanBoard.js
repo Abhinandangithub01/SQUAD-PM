@@ -32,14 +32,14 @@ import amplifyDataService from '../services/amplifyDataService';
 import { formatDate, getPriorityColor, truncateText } from '../utils/helpers';
 import TaskTimer from '../components/TaskTimer';
 import EffortEstimation from '../components/EffortEstimation';
-import CleanCreateTaskModal from '../components/CleanCreateTaskModal';
 import CleanTaskDetailModal from '../components/CleanTaskDetailModal';
-import InlineTaskCreator from '../components/InlineTaskCreator';
+import TrelloStyleTaskModal from '../components/TrelloStyleTaskModal';
 import toast from 'react-hot-toast';
 
 const KanbanBoard = () => {
   const { projectId } = useParams();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createModalColumn, setCreateModalColumn] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
@@ -67,7 +67,6 @@ const KanbanBoard = () => {
   const [showQuickMenu, setShowQuickMenu] = useState(false);
   const [quickMenuPosition, setQuickMenuPosition] = useState({ top: 0, left: 0 });
   const [quickMenuTask, setQuickMenuTask] = useState(null);
-  const [showInlineCreator, setShowInlineCreator] = useState(null); // Track which column shows inline creator
   const taskCardRefs = useRef({});
   const scrollContainerRef = useRef(null);
   const queryClient = useQueryClient();
@@ -1603,25 +1602,16 @@ const KanbanBoard = () => {
                 ))}
                 
                 {/* Quick Add Task */}
-                {showInlineCreator === column.id ? (
-                  <InlineTaskCreator
-                    columnId={column.id}
-                    projectId={projectId}
-                    onClose={() => setShowInlineCreator(null)}
-                    onSuccess={() => {
-                      refetch();
-                      setShowInlineCreator(null);
-                    }}
-                  />
-                ) : (
-                  <button
-                    onClick={() => setShowInlineCreator(column.id)}
-                    className="w-full p-4 border-2 border-dashed border-gray-300/60 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 hover:bg-white/40 transition-all duration-200 backdrop-blur-sm"
-                  >
-                    <PlusIcon className="h-5 w-5 mx-auto mb-1" />
-                    <span className="text-sm font-medium">Add a task</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setCreateModalColumn(column.id);
+                    setShowCreateModal(true);
+                  }}
+                  className="w-full p-4 border-2 border-dashed border-gray-300/60 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 hover:bg-white/40 transition-all duration-200 backdrop-blur-sm"
+                >
+                  <PlusIcon className="h-5 w-5 mx-auto mb-1" />
+                  <span className="text-sm font-medium">Add a task</span>
+                </button>
               </div>
             </div>
           ))}
@@ -1640,16 +1630,21 @@ const KanbanBoard = () => {
         </div>
       </div>
 
-      {/* Modals */}
-      <CleanCreateTaskModal
+      {/* Trello-Style Create Task Modal */}
+      <TrelloStyleTaskModal
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          setCreateModalColumn(null);
+        }}
+        columnId={createModalColumn}
         projectId={projectId}
         onSuccess={() => {
           refetch();
         }}
       />
 
+      {/* Task Detail Modal */}
       <CleanTaskDetailModal
         isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
