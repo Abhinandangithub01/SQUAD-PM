@@ -90,9 +90,8 @@ const TrelloStyleTaskModal = ({ isOpen, onClose, columnId, projectId, onSuccess 
       priority: priority || 'MEDIUM',
       assignedToId: assignee.trim() || null,
       dueDate: dueDate || null,
-      estimatedHours: estimatedHours ? parseFloat(estimatedHours) : null,
       tags: tags.length > 0 ? tags : [],
-      checklist: checklist.length > 0 ? JSON.stringify(checklist) : null,
+      // Note: estimatedHours and checklist will be added when schema is updated
     };
 
     createTaskMutation.mutate(taskData);

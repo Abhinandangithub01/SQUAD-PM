@@ -133,13 +133,10 @@ export const taskService = {
         status: taskData.status || 'TODO',
         priority: taskData.priority ? taskData.priority.toUpperCase() : 'MEDIUM',
         projectId: taskData.projectId || taskData.project_id,
-        assignedToId: taskData.assignedToId || taskData.assignee_ids?.[0],
-        dueDate: taskData.due_date || taskData.dueDate,
+        assignedToId: taskData.assignedToId || taskData.assignee_ids?.[0] || null,
+        dueDate: taskData.dueDate || null,
         tags: taskData.tags || [],
         createdById: taskData.createdById,
-        dueDate: taskData.dueDate,
-        estimatedHours: taskData.estimatedHours,
-        tags: taskData.tags || [],
       });
 
       if (errors) {
