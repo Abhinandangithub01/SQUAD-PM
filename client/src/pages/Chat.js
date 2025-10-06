@@ -62,16 +62,38 @@ const Chat = () => {
         if (!result.data || result.data.length === 0) {
           if (user && user.id) {
             const defaultChannels = [
-              { name: 'general', description: 'General discussion', type: 'GENERAL', createdById: user.id },
-              { name: 'team', description: 'Team updates', type: 'GENERAL', createdById: user.id },
-              { name: 'random', description: 'Random chat', type: 'GENERAL', createdById: user.id },
+              { 
+                name: 'general', 
+                description: 'General discussion', 
+                type: 'GENERAL', 
+                createdById: user.id 
+                // projectId omitted - not needed for general channels
+              },
+              { 
+                name: 'team', 
+                description: 'Team updates', 
+                type: 'GENERAL', 
+                createdById: user.id 
+              },
+              { 
+                name: 'random', 
+                description: 'Random chat', 
+                type: 'GENERAL', 
+                createdById: user.id 
+              },
             ];
 
             const createdChannels = [];
             for (const channelData of defaultChannels) {
-              const createResult = await amplifyDataService.chat.getOrCreateChannel(channelData);
-              if (createResult.success) {
-                createdChannels.push(createResult.data);
+              try {
+                const createResult = await amplifyDataService.chat.getOrCreateChannel(channelData);
+                if (createResult.success) {
+                  createdChannels.push(createResult.data);
+                } else {
+                  console.error('Failed to create channel:', channelData.name, createResult.error);
+                }
+              } catch (error) {
+                console.error('Error creating channel:', channelData.name, error);
               }
             }
 

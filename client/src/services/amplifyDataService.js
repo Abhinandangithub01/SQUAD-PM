@@ -449,6 +449,14 @@ export const chatService = {
   // Get or create channel
   async getOrCreateChannel(channelData) {
     try {
+      // Validate required fields
+      if (!channelData.name) {
+        throw new Error('Channel name is required');
+      }
+      if (!channelData.createdById) {
+        throw new Error('Created By ID is required');
+      }
+
       // First try to find existing channel
       const { data: existingChannels } = await client.models.Channel.list({
         filter: { name: { eq: channelData.name } },
@@ -458,18 +466,25 @@ export const chatService = {
         return { success: true, data: existingChannels[0] };
       }
 
-      // Create new channel if doesn't exist
-      const { data: channel, errors } = await client.models.Channel.create({
+      // Build channel input with only non-null values for GSI fields
+      const channelInput = {
         name: channelData.name,
         description: channelData.description || '',
         type: channelData.type || 'GENERAL',
         createdById: channelData.createdById,
-        projectId: channelData.projectId || null,
-      });
+      };
+
+      // Only add projectId if it has a value (GSI requirement)
+      if (channelData.projectId) {
+        channelInput.projectId = channelData.projectId;
+      }
+
+      // Create new channel if doesn't exist
+      const { data: channel, errors } = await client.models.Channel.create(channelInput);
 
       if (errors) {
         console.error('Error creating channel:', errors);
-        throw new Error('Failed to create channel');
+        throw new Error(errors[0]?.message || 'Failed to create channel');
       }
 
       return { success: true, data: channel };
