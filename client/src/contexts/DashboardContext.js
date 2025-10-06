@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../utils/api';
+import amplifyDataService from '../services/amplifyDataService';
+import { useAuth } from './AuthContext';
 
 const DashboardContext = createContext();
 
@@ -13,6 +14,7 @@ export const useDashboard = () => {
 };
 
 export const DashboardProvider = ({ children }) => {
+  const { user } = useAuth();
   const [widgets, setWidgets] = useState(() => {
     const saved = localStorage.getItem('dashboard_widgets');
     return saved ? JSON.parse(saved) : getDefaultWidgets();
@@ -25,52 +27,86 @@ export const DashboardProvider = ({ children }) => {
     localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
   }, [widgets]);
 
-  // Fetch real-time dashboard data
+  // Fetch real-time dashboard data using Amplify
   const { data: dashboardData, refetch } = useQuery({
-    queryKey: ['dashboard-data'],
+    queryKey: ['dashboard-data', user?.id],
     queryFn: async () => {
-      const response = await api.get('/analytics/dashboard');
-      return response.data;
+      if (!user?.id) return null;
+      // Calculate stats from Amplify data
+      const projects = await amplifyDataService.projects.list();
+      const tasks = await amplifyDataService.tasks.list({ createdById: user.id });
+      
+      return {
+        totalProjects: projects.data?.length || 0,
+        activeTasks: tasks.data?.filter(t => t.status !== 'DONE').length || 0,
+        completedTasks: tasks.data?.filter(t => t.status === 'DONE').length || 0,
+      };
     },
+    enabled: !!user?.id,
     refetchInterval: refreshInterval,
   });
 
   // Fetch project statistics
   const { data: projectStats } = useQuery({
-    queryKey: ['project-stats'],
+    queryKey: ['project-stats', user?.id],
     queryFn: async () => {
-      const response = await api.get('/projects/stats');
-      return response.data;
+      if (!user?.id) return null;
+      const result = await amplifyDataService.projects.list();
+      const projects = result.data || [];
+      
+      return {
+        total: projects.length,
+        active: projects.filter(p => p.status === 'ACTIVE').length,
+        completed: projects.filter(p => p.status === 'COMPLETED').length,
+      };
     },
+    enabled: !!user?.id,
     refetchInterval: refreshInterval,
   });
 
   // Fetch task statistics
   const { data: taskStats } = useQuery({
-    queryKey: ['task-stats'],
+    queryKey: ['task-stats', user?.id],
     queryFn: async () => {
-      const response = await api.get('/tasks/stats');
-      return response.data;
+      if (!user?.id) return null;
+      const result = await amplifyDataService.tasks.list({ createdById: user.id });
+      const tasks = result.data || [];
+      
+      return {
+        total: tasks.length,
+        active: tasks.filter(t => t.status !== 'DONE').length,
+        completed: tasks.filter(t => t.status === 'DONE').length,
+        overdue: tasks.filter(t => {
+          if (!t.dueDate || t.status === 'DONE') return false;
+          return new Date(t.dueDate) < new Date();
+        }).length,
+      };
     },
+    enabled: !!user?.id,
     refetchInterval: refreshInterval,
   });
 
-  // Fetch team statistics
+  // Fetch team statistics (placeholder)
   const { data: teamStats } = useQuery({
     queryKey: ['team-stats'],
     queryFn: async () => {
-      const response = await api.get('/users/stats');
-      return response.data;
+      // TODO: Implement team stats from Amplify
+      return {
+        total: 0,
+        active: 0,
+      };
     },
     refetchInterval: refreshInterval,
   });
 
-  // Fetch time tracking data
+  // Fetch time tracking data (placeholder)
   const { data: timeData } = useQuery({
     queryKey: ['time-tracking-stats'],
     queryFn: async () => {
-      const response = await api.get('/time-tracking/stats');
-      return response.data;
+      // TODO: Implement time tracking from Amplify
+      return {
+        totalHours: 0,
+      };
     },
     refetchInterval: refreshInterval,
   });
