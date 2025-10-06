@@ -2,12 +2,15 @@ import React, { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, HashtagIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import api from '../utils/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import amplifyDataService from '../services/amplifyDataService';
+import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 import toast from 'react-hot-toast';
 
 const CreateChannelModal = ({ isOpen, onClose, onSuccess }) => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [channelType, setChannelType] = useState('public');
 
   const {
@@ -17,37 +20,54 @@ const CreateChannelModal = ({ isOpen, onClose, onSuccess }) => {
     formState: { errors },
   } = useForm();
 
-  // Fetch projects for project-based channels
+  // Fetch projects for project-based channels using Amplify
   const { data: projectsData } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const response = await api.get('/projects');
-      return response.data;
+      const result = await amplifyDataService.projects.list();
+      return { projects: result.data || [] };
     },
-    enabled: isOpen,
+    enabled: isOpen && !!user,
   });
 
   const createChannelMutation = useMutation({
     mutationFn: async (channelData) => {
-      const response = await api.post('/chat/channels', channelData);
-      return response.data;
+      if (!user || !user.id) {
+        throw new Error('User must be logged in to create channels');
+      }
+
+      const result = await amplifyDataService.chat.getOrCreateChannel({
+        name: channelData.name,
+        description: channelData.description || '',
+        type: channelData.type === 'public' ? 'GENERAL' : 'PROJECT',
+        createdById: user.id,
+        projectId: channelData.projectId || undefined,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create channel');
+      }
+
+      return result.data;
     },
     onSuccess: (data) => {
       toast.success('Channel created successfully!');
+      queryClient.invalidateQueries(['channels']);
       reset();
       setChannelType('public');
-      onSuccess?.(data.channel);
+      onSuccess?.(data);
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to create channel');
+      toast.error(error.message || 'Failed to create channel');
     },
   });
 
   const onSubmit = (data) => {
     const channelData = {
-      ...data,
+      name: data.name,
+      description: data.description,
       type: channelType,
-      project_id: data.project_id || null,
+      projectId: data.project_id || null,
     };
     createChannelMutation.mutate(channelData);
   };
