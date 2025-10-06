@@ -47,15 +47,46 @@ const Chat = () => {
   const { socket, joinChannel, leaveChannel, sendMessage } = useSocket();
   const { user } = useAuth();
 
-  // Fetch channels
-  const channelsData = {
-    channels: [
-      { id: 'general', name: 'general', type: 'public', description: 'General discussion' },
-      { id: 'team', name: 'team', type: 'public', description: 'Team updates' },
-      { id: 'random', name: 'random', type: 'public', description: 'Random chat' },
-    ]
-  };
-  const channelsLoading = false;
+  // Fetch channels from database
+  const { data: channelsData, isLoading: channelsLoading } = useQuery({
+    queryKey: ['channels'],
+    queryFn: async () => {
+      try {
+        const result = await amplifyDataService.chat.listChannels();
+        if (!result.success) {
+          console.error('Failed to fetch channels:', result.error);
+          return { channels: [] };
+        }
+
+        // If no channels exist, create default ones
+        if (!result.data || result.data.length === 0) {
+          if (user && user.id) {
+            const defaultChannels = [
+              { name: 'general', description: 'General discussion', type: 'GENERAL', createdById: user.id },
+              { name: 'team', description: 'Team updates', type: 'GENERAL', createdById: user.id },
+              { name: 'random', description: 'Random chat', type: 'GENERAL', createdById: user.id },
+            ];
+
+            const createdChannels = [];
+            for (const channelData of defaultChannels) {
+              const createResult = await amplifyDataService.chat.getOrCreateChannel(channelData);
+              if (createResult.success) {
+                createdChannels.push(createResult.data);
+              }
+            }
+
+            return { channels: createdChannels };
+          }
+        }
+
+        return { channels: result.data || [] };
+      } catch (error) {
+        console.error('Channel fetch error:', error);
+        return { channels: [] };
+      }
+    },
+    enabled: !!user,
+  });
 
   // Fetch users for DMs
   const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -98,11 +129,20 @@ const Chat = () => {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData) => {
+      if (!user || !user.id) {
+        throw new Error('User must be logged in to send messages');
+      }
+      if (!selectedChannel || !selectedChannel.id) {
+        throw new Error('No channel selected');
+      }
+
       const result = await amplifyDataService.chat.sendMessage({
-        ...messageData,
+        content: messageData.content,
         channelId: selectedChannel.id,
-        userId: user?.id,
+        userId: user.id,
+        projectId: selectedChannel.projectId || null,
       });
+      
       if (!result.success) {
         throw new Error(result.error);
       }
@@ -110,15 +150,16 @@ const Chat = () => {
     },
     onSuccess: (data) => {
       setMessage('');
-      queryClient.invalidateQueries(['chat', 'messages', channelId]);
+      queryClient.invalidateQueries(['messages', selectedChannel?.id]);
+      toast.success('Message sent!');
       
       // Send real-time message via socket
-      if (socket && channelId) {
-        sendMessage(channelId, data.message.content);
+      if (socket && selectedChannel?.id) {
+        sendMessage(selectedChannel.id, message);
       }
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to send message');
+      toast.error(error.message || 'Failed to send message');
     },
   });
 

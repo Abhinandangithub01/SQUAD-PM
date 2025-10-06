@@ -446,6 +446,57 @@ export const chatService = {
     }
   },
 
+  // Get or create channel
+  async getOrCreateChannel(channelData) {
+    try {
+      // First try to find existing channel
+      const { data: existingChannels } = await client.models.Channel.list({
+        filter: { name: { eq: channelData.name } },
+      });
+
+      if (existingChannels && existingChannels.length > 0) {
+        return { success: true, data: existingChannels[0] };
+      }
+
+      // Create new channel if doesn't exist
+      const { data: channel, errors } = await client.models.Channel.create({
+        name: channelData.name,
+        description: channelData.description || '',
+        type: channelData.type || 'GENERAL',
+        createdById: channelData.createdById,
+        projectId: channelData.projectId || null,
+      });
+
+      if (errors) {
+        console.error('Error creating channel:', errors);
+        throw new Error('Failed to create channel');
+      }
+
+      return { success: true, data: channel };
+    } catch (error) {
+      console.error('Get or create channel error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // List all channels
+  async listChannels(projectId = null) {
+    try {
+      const filter = projectId ? { projectId: { eq: projectId } } : {};
+      const { data: channels, errors } = await client.models.Channel.list({ filter });
+
+      if (errors) {
+        console.error('Error listing channels:', errors);
+        throw new Error('Failed to list channels');
+      }
+
+      return { success: true, data: channels || [] };
+    } catch (error) {
+      console.error('List channels error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
   // Subscribe to new messages (real-time)
   subscribeToMessages(channelId, callback) {
     const subscription = client.models.Message.onCreate({
