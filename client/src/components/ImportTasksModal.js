@@ -189,13 +189,41 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
+          const workbook = XLSX.read(data, { 
+            type: 'array',
+            cellDates: true,
+            cellNF: false,
+            cellText: false
+          });
+          
+          if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+            reject(new Error('No sheets found in Excel file'));
+            return;
+          }
+          
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet);
-          resolve(jsonData);
+          
+          if (!worksheet) {
+            reject(new Error('Worksheet is empty'));
+            return;
+          }
+          
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+            defval: null,
+            blankrows: false,
+            raw: false
+          });
+          
+          // Filter out completely empty rows
+          const filteredData = jsonData.filter(row => {
+            return row && Object.values(row).some(val => val !== null && val !== undefined && val !== '');
+          });
+          
+          resolve(filteredData);
         } catch (error) {
-          reject(error);
+          console.error('Excel parsing error:', error);
+          reject(new Error('Failed to parse Excel file. Please ensure it\'s a valid Excel file.'));
         }
       };
       
