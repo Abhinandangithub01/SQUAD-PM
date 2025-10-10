@@ -411,7 +411,7 @@ const KanbanBoard = () => {
     queryFn: async () => {
       try {
         const client = generateClient();
-        const { data: users } = await client.models.User.list();
+        const { data: users } = await client.models.UserProfile.list();
         return users || [];
       } catch (error) {
         console.error('Error fetching team members:', error);
