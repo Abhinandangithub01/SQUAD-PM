@@ -29,6 +29,7 @@ import {
   ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
+import { generateClient } from 'aws-amplify/data';
 import amplifyDataService from '../services/amplifyDataService';
 import { formatDate, getPriorityColor, truncateText } from '../utils/helpers';
 import TaskTimer from '../components/TaskTimer';
@@ -408,8 +409,14 @@ const KanbanBoard = () => {
   const { data: teamMembers = [] } = useQuery({
     queryKey: ['teamMembers', projectId],
     queryFn: async () => {
-      // TODO: Implement team members fetch from Amplify
-      return [];
+      try {
+        const client = generateClient();
+        const { data: users } = await client.models.User.list();
+        return users || [];
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+        return [];
+      }
     },
     enabled: !!projectId,
   });
@@ -418,12 +425,26 @@ const KanbanBoard = () => {
   useEffect(() => {
     const fetchChannels = async () => {
       try {
-        // TODO: Fetch from Amplify chat service
-        setChatChannels([
-          { id: 'general', name: 'general', icon: 'chat', description: 'General project discussion' },
-          { id: 'team-chat', name: 'team-chat', icon: 'users', description: 'Team discussions' },
-          { id: 'tasks', name: 'tasks', icon: 'clipboard', description: 'Task updates and assignments' }
-        ]);
+        const client = generateClient();
+        const { data: channels } = await client.models.Channel.list({
+          filter: { projectId: { eq: projectId } }
+        });
+        
+        if (channels && channels.length > 0) {
+          setChatChannels(channels.map(ch => ({
+            id: ch.id,
+            name: ch.name,
+            icon: ch.type === 'DIRECT' ? 'user' : 'chat',
+            description: ch.description || ''
+          })));
+        } else {
+          // Default channels if none exist
+          setChatChannels([
+            { id: 'general', name: 'general', icon: 'chat', description: 'General project discussion' },
+            { id: 'team-chat', name: 'team-chat', icon: 'users', description: 'Team discussions' },
+            { id: 'tasks', name: 'tasks', icon: 'clipboard', description: 'Task updates and assignments' }
+          ]);
+        }
       } catch (error) {
         console.error('Error fetching channels:', error);
       }
@@ -836,20 +857,18 @@ const KanbanBoard = () => {
         `/chat/projects/${projectId}/messages` // Another possible structure
       ];
 
-      for (const endpoint of endpoints) {
-        try {
-          // TODO: Implement with Amplify chat service
-          await amplifyDataService.chat.sendMessage({
-            content: message,
-            channelId: channelId,
-            userId: amplifyDataService.auth.currentUser?.username || 'current-user', // TODO: Get from auth context
-          });
-          success = true;
-          break;
-        } catch (endpointError) {
-          console.log(`Failed to send message:`, endpointError);
-          continue;
-        }
+      try {
+        const client = generateClient();
+        await client.models.Message.create({
+          channelId: channelId,
+          content: message,
+          userId: 'current-user', // TODO: Get from auth context
+          timestamp: new Date().toISOString()
+        });
+        success = true;
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        success = false;
       }
 
       if (!success) {
