@@ -108,20 +108,34 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
         const row = data[i];
         
         try {
+          // Skip empty rows
+          if (!row || Object.keys(row).length === 0) {
+            continue;
+          }
+          
+          // Get title from various possible column names
+          const title = row['Task Name'] || row['title'] || row['Title'] || row['Name'] || `Task ${i + 1}`;
+          
+          // Skip if title is still empty or null
+          if (!title || title.trim() === '') {
+            console.log(`Skipping row ${i + 1}: No title found`);
+            continue;
+          }
+          
           // Map Excel columns to task fields
           const taskInput = {
             projectId: projectId,
-            title: row['Task Name'] || row['title'] || `Task ${i + 1}`,
-            description: row['Description'] || '',
-            status: mapStatus(row['Custom Status'] || row['Status']),
-            priority: mapPriority(row['Priority']),
-            tags: row['Tags'] ? [row['Tags']] : [],
-            dueDate: parseExcelDate(row['Due Date']),
-            startDate: parseExcelDate(row['Start Date']),
-            estimatedHours: parseFloat(row['Duration']) || undefined,
-            actualHours: parseFloat(row['Work hours']) || undefined,
-            progressPercentage: parseInt(row['% Completed']) || 0,
-            completedAt: parseExcelDate(row['Completion Date']),
+            title: title.trim(),
+            description: (row['Description'] || row['description'] || '').toString(),
+            status: mapStatus(row['Custom Status'] || row['Status'] || row['status']),
+            priority: mapPriority(row['Priority'] || row['priority']),
+            tags: row['Tags'] || row['tags'] ? [row['Tags'] || row['tags']] : [],
+            dueDate: parseExcelDate(row['Due Date'] || row['dueDate']),
+            startDate: parseExcelDate(row['Start Date'] || row['startDate']),
+            estimatedHours: parseFloat(row['Duration'] || row['estimatedHours']) || undefined,
+            actualHours: parseFloat(row['Work hours'] || row['actualHours']) || undefined,
+            progressPercentage: parseInt(row['% Completed'] || row['progress'] || 0) || 0,
+            completedAt: parseExcelDate(row['Completion Date'] || row['completedAt']),
             createdById: 'temp-user-id', // TODO: Get from current user
             columnId: 'todo',
             position: i
