@@ -37,10 +37,16 @@ const Register = () => {
     if (result.success) {
       if (result.requiresConfirmation) {
         toast.success('Account created! Please check your email for verification code.');
-        navigate('/verify-email', { state: { email: data.email } });
+        navigate('/verify-email', { 
+          state: { 
+            email: data.email,
+            firstName: data.first_name,
+            lastName: data.last_name 
+          } 
+        });
       } else {
-        toast.success('Account created successfully! Let\'s set up your organization.');
-        navigate('/organization-setup', { replace: true });
+        toast.success('Account created successfully!');
+        navigate('/dashboard', { replace: true });
       }
     } else {
       toast.error(result.error);

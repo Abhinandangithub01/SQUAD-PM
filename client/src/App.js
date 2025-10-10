@@ -99,13 +99,6 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
                 
-                {/* Organization Setup (Protected but no Layout) */}
-                <Route path="/organization-setup" element={
-                  <ProtectedRoute>
-                    <OrganizationSetup />
-                  </ProtectedRoute>
-                } />
-                
                 {/* Protected routes */}
                 <Route path="/" element={
                   <ProtectedRoute>

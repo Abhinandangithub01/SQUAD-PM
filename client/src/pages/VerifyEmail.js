@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { generateClient } from 'aws-amplify/data';
+import { signIn } from 'aws-amplify/auth';
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
@@ -12,6 +14,8 @@ const VerifyEmail = () => {
   const [isResending, setIsResending] = useState(false);
   
   const email = location.state?.email || '';
+  const firstName = location.state?.firstName || '';
+  const lastName = location.state?.lastName || '';
   
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
@@ -19,13 +23,68 @@ const VerifyEmail = () => {
     }
   });
 
+  const createDefaultOrganization = async (userId, userEmail) => {
+    try {
+      const client = generateClient();
+      
+      // Create default organization
+      const orgName = `${firstName}'s Organization`;
+      const orgSlug = userEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
+      
+      const { data: organization } = await client.models.Organization.create({
+        name: orgName,
+        slug: orgSlug,
+        description: 'My workspace',
+        ownerId: userId,
+        plan: 'FREE',
+        maxUsers: 5,
+        maxProjects: 3,
+        isActive: true,
+        billingEmail: userEmail,
+      });
+
+      // Create organization membership
+      await client.models.OrganizationMember.create({
+        organizationId: organization.id,
+        userId: userId,
+        role: 'OWNER',
+        joinedAt: new Date().toISOString(),
+      });
+
+      // Create user profile
+      await client.models.UserProfile.create({
+        email: userEmail,
+        firstName: firstName || 'User',
+        lastName: lastName || '',
+        role: 'ADMIN',
+        isActive: true,
+        lastLoginAt: new Date().toISOString(),
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error creating default organization:', error);
+      return false;
+    }
+  };
+
   const onSubmit = async (data) => {
     try {
       const result = await confirmSignUp(email, data.code);
       
       if (result.success) {
-        toast.success('Email verified successfully! Let\'s set up your organization.');
-        navigate('/organization-setup');
+        toast.success('Email verified! Setting up your account...');
+        
+        // Auto-login after verification
+        try {
+          // Note: User needs to provide password again or we store it temporarily
+          // For now, just redirect to login
+          toast.success('Please login to continue');
+          navigate('/login');
+        } catch (error) {
+          console.error('Error during setup:', error);
+          navigate('/login');
+        }
       } else {
         toast.error(result.error || 'Verification failed');
       }

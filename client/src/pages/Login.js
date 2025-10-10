@@ -32,6 +32,59 @@ const Login = () => {
     }
   }, [isAuthenticated, loading, navigate, from]);
 
+  const createDefaultOrganization = async (user) => {
+    try {
+      const client = generateClient();
+      
+      // Get user attributes
+      const userEmail = user.signInDetails?.loginId || user.username;
+      
+      // Create default organization
+      const orgName = `${userEmail.split('@')[0]}'s Organization`;
+      const orgSlug = userEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now();
+      
+      const { data: organization } = await client.models.Organization.create({
+        name: orgName,
+        slug: orgSlug,
+        description: 'My workspace',
+        ownerId: user.userId,
+        plan: 'FREE',
+        maxUsers: 5,
+        maxProjects: 3,
+        isActive: true,
+        billingEmail: userEmail,
+      });
+
+      // Create organization membership
+      await client.models.OrganizationMember.create({
+        organizationId: organization.id,
+        userId: user.userId,
+        role: 'OWNER',
+        joinedAt: new Date().toISOString(),
+      });
+
+      // Create user profile if doesn't exist
+      try {
+        await client.models.UserProfile.create({
+          email: userEmail,
+          firstName: userEmail.split('@')[0],
+          lastName: '',
+          role: 'ADMIN',
+          isActive: true,
+          lastLoginAt: new Date().toISOString(),
+        });
+      } catch (error) {
+        // Profile might already exist
+        console.log('User profile may already exist:', error);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error creating default organization:', error);
+      return false;
+    }
+  };
+
   const onSubmit = async (data) => {
     const result = await login(data.email, data.password);
     
@@ -50,12 +103,19 @@ const Login = () => {
         });
         
         if (!memberships || memberships.length === 0) {
-          // No organization, redirect to setup
-          navigate('/organization-setup', { replace: true });
-        } else {
-          // Has organization, go to dashboard
-          navigate(from, { replace: true });
+          // No organization, create one automatically
+          toast.loading('Setting up your workspace...');
+          const created = await createDefaultOrganization(user);
+          
+          if (created) {
+            toast.dismiss();
+            toast.success('Workspace created! Welcome to SQUAD PM!');
+          }
         }
+        
+        // Go to dashboard
+        navigate(from, { replace: true });
+        
       } catch (error) {
         console.error('Error checking organization:', error);
         // If check fails, just go to dashboard
