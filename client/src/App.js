@@ -23,6 +23,7 @@ const Register = lazy(() => import('./pages/Register'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const OrganizationSetup = lazy(() => import('./pages/OrganizationSetup'));
 const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
+const DepartmentsRoles = lazy(() => import('./pages/DepartmentsRoles'));
 const Dashboard = lazy(() => import('./pages/CleanDashboard'));
 const ModernDashboard = lazy(() => import('./pages/ModernDashboard'));
 const Projects = lazy(() => import('./pages/Projects'));
@@ -147,6 +148,9 @@ function App() {
                   
                   {/* Organization Settings */}
                   <Route path="organization/settings" element={<OrganizationSettings />} />
+                  
+                  {/* Departments & Roles */}
+                  <Route path="departments" element={<DepartmentsRoles />} />
                   
                   {/* Feature Demo Route */}
                   <Route path="demo" element={<FeatureDemo />} />

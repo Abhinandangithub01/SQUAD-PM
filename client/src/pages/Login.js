@@ -7,6 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { generateClient } from 'aws-amplify/data';
 import { getCurrentUser } from 'aws-amplify/auth';
+import { createDefaultDepartments } from '../utils/defaultDepartments';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -76,6 +77,13 @@ const Login = () => {
       } catch (error) {
         // Profile might already exist
         console.log('User profile may already exist:', error);
+      }
+
+      // Create default departments and roles
+      console.log('Creating default departments...');
+      const deptResult = await createDefaultDepartments(client, organization.id);
+      if (deptResult.success) {
+        console.log(`Created ${deptResult.departments.length} departments with roles`);
       }
 
       return true;
