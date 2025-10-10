@@ -15,6 +15,7 @@ const Login = () => {
   const [showVerificationInput, setShowVerificationInput] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const { login, isAuthenticated, loading, resendConfirmationCode, confirmSignUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -171,12 +172,19 @@ const Login = () => {
   const handleResendVerification = async () => {
     if (!unverifiedEmail) return;
     
-    const result = await resendConfirmationCode(unverifiedEmail);
-    if (result.success) {
-      toast.success('Verification code sent! Check your email.');
-      setShowVerificationInput(true);
-    } else {
+    setIsResending(true);
+    try {
+      const result = await resendConfirmationCode(unverifiedEmail);
+      if (result.success) {
+        toast.success('Verification code sent! Check your email.');
+        setShowVerificationInput(true);
+      } else {
+        toast.error('Failed to send verification code');
+      }
+    } catch (error) {
       toast.error('Failed to send verification code');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -355,9 +363,14 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={handleResendVerification}
-                      className="mt-3 w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-sm"
+                      disabled={isResending}
+                      className="mt-3 w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      📧 Send Verification Code
+                      {isResending ? (
+                        <LoadingSpinner size="sm" color="white" />
+                      ) : (
+                        '📧 Send Verification Code'
+                      )}
                     </button>
                   ) : (
                     <div className="mt-3 space-y-3">
@@ -386,9 +399,10 @@ const Login = () => {
                         <button
                           type="button"
                           onClick={handleResendVerification}
-                          className="px-4 py-2 text-sm text-red-700 hover:text-red-800 font-medium"
+                          disabled={isResending}
+                          className="px-4 py-2 text-sm text-red-700 hover:text-red-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Resend
+                          {isResending ? <LoadingSpinner size="sm" /> : 'Resend'}
                         </button>
                       </div>
                     </div>
