@@ -142,24 +142,39 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
             continue;
           }
           
-          // Map Excel columns to task fields
+          // Map Excel columns to task fields (only fields that exist in schema)
           const taskInput = {
             projectId: projectId,
             title: title.trim(),
             description: (row['Description'] || row['description'] || '').toString(),
             status: mapStatus(row['Custom Status'] || row['Status'] || row['status']),
             priority: mapPriority(row['Priority'] || row['priority']),
-            tags: row['Tags'] || row['tags'] ? [row['Tags'] || row['tags']] : [],
             dueDate: parseExcelDate(row['Due Date'] || row['dueDate']),
             startDate: parseExcelDate(row['Start Date'] || row['startDate']),
-            estimatedHours: parseFloat(row['Duration'] || row['estimatedHours']) || undefined,
-            actualHours: parseFloat(row['Work hours'] || row['actualHours']) || undefined,
-            progressPercentage: parseInt(row['% Completed'] || row['progress'] || 0) || 0,
             completedAt: parseExcelDate(row['Completion Date'] || row['completedAt']),
             createdById: 'temp-user-id', // TODO: Get from current user
-            columnId: 'todo',
-            position: i
           };
+
+          // Add optional fields only if they have values
+          const tags = row['Tags'] || row['tags'];
+          if (tags) {
+            taskInput.tags = JSON.stringify([tags]);
+          }
+
+          const estimatedHours = parseFloat(row['Duration'] || row['estimatedHours']);
+          if (estimatedHours && !isNaN(estimatedHours)) {
+            taskInput.estimatedHours = estimatedHours;
+          }
+
+          const actualHours = parseFloat(row['Work hours'] || row['actualHours']);
+          if (actualHours && !isNaN(actualHours)) {
+            taskInput.actualHours = actualHours;
+          }
+
+          const progress = parseInt(row['% Completed'] || row['progress'] || 0);
+          if (progress && !isNaN(progress)) {
+            taskInput.progressPercentage = progress;
+          }
 
           // Final validation before creating
           if (!taskInput.title || taskInput.title.trim() === '') {
