@@ -35,6 +35,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { PauseIcon } from '@heroicons/react/24/solid';
 import { Menu } from '@headlessui/react';
+import { generateClient } from 'aws-amplify/data';
 import api from '../utils/api';
 import { formatDate, getRoleColor, getRoleLabel } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -1864,13 +1865,59 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
     due_date: '',
     color: '#3B82F6'
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically make an API call to create the milestone
-    console.log('Creating milestone:', { ...formData, project_id: projectId });
-    toast.success('Milestone created successfully!');
-    onClose();
+    
+    if (!formData.title.trim()) {
+      toast.error('Please enter a milestone name');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const client = generateClient();
+      
+      const milestoneInput = {
+        name: formData.title.trim(),
+        description: formData.description || '',
+        projectId: projectId,
+        status: 'NOT_STARTED',
+        completionPercentage: 0
+      };
+
+      // Add dueDate if provided
+      if (formData.due_date) {
+        milestoneInput.dueDate = new Date(formData.due_date).toISOString();
+      }
+
+      console.log('Creating milestone:', milestoneInput);
+
+      const response = await client.models.Milestone.create(milestoneInput);
+
+      console.log('Milestone creation response:', response);
+
+      if (response.errors && response.errors.length > 0) {
+        console.error('Milestone creation errors:', response.errors);
+        toast.error(response.errors[0].message || 'Failed to create milestone');
+        return;
+      }
+
+      toast.success('Milestone created successfully!');
+      
+      // Refresh the project data to show the new milestone
+      queryClient.invalidateQueries(['project', projectId]);
+      
+      onClose();
+    } catch (error) {
+      console.error('Error creating milestone:', error);
+      toast.error(error.message || 'Failed to create milestone');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -1970,15 +2017,17 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Milestone
+              {isSubmitting ? 'Creating...' : 'Create Milestone'}
             </button>
           </div>
         </form>
