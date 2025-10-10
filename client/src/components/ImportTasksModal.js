@@ -86,16 +86,16 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
             description: row['Description'] || '',
             status: mapStatus(row['Custom Status'] || row['Status']),
             priority: mapPriority(row['Priority']),
-            tags: row['Tags'] ? JSON.stringify([row['Tags']]) : '[]',
-            dueDate: row['Due Date'] ? new Date(row['Due Date']).toISOString() : null,
-            startDate: row['Start Date'] ? new Date(row['Start Date']).toISOString() : null,
-            estimatedHours: parseFloat(row['Duration']) || 0,
-            actualHours: parseFloat(row['Work hours']) || 0,
+            tags: row['Tags'] ? [row['Tags']] : [],
+            dueDate: row['Due Date'] ? new Date(row['Due Date']).toISOString() : undefined,
+            startDate: row['Start Date'] ? new Date(row['Start Date']).toISOString() : undefined,
+            estimatedHours: parseFloat(row['Duration']) || undefined,
+            actualHours: parseFloat(row['Work hours']) || undefined,
             progressPercentage: parseInt(row['% Completed']) || 0,
-            completedAt: row['Completion Date'] ? new Date(row['Completion Date']).toISOString() : null,
-            type: 'TASK',
-            archived: false,
-            isRecurring: false
+            completedAt: row['Completion Date'] ? new Date(row['Completion Date']).toISOString() : undefined,
+            createdById: 'temp-user-id', // TODO: Get from current user
+            columnId: 'todo',
+            position: i
           };
 
           console.log(`Creating task ${i + 1}:`, taskInput);
