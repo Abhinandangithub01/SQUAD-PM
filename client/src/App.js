@@ -22,6 +22,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const Dashboard = lazy(() => import('./pages/CleanDashboard'));
+const ModernDashboard = lazy(() => import('./pages/ModernDashboard'));
 const Projects = lazy(() => import('./pages/Projects'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const KanbanBoard = lazy(() => import('./pages/KanbanBoard'));
@@ -102,8 +103,9 @@ function App() {
                     <Layout />
                   </ProtectedRoute>
                 }>
-                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route index element={<Navigate to="/modern-dashboard" replace />} />
                   <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="modern-dashboard" element={<ModernDashboard />} />
                   
                   {/* Task Management Routes */}
                   <Route path="projects" element={<Projects />} />
