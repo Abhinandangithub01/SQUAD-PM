@@ -47,6 +47,35 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
     maxFiles: 1
   });
 
+  // Helper to safely parse dates from Excel
+  const parseExcelDate = (dateValue) => {
+    if (!dateValue) return undefined;
+    
+    try {
+      // Excel dates can be numbers (serial dates) or strings
+      let date;
+      
+      if (typeof dateValue === 'number') {
+        // Excel serial date (days since 1900-01-01)
+        const excelEpoch = new Date(1900, 0, 1);
+        date = new Date(excelEpoch.getTime() + (dateValue - 2) * 86400000);
+      } else {
+        // Try parsing as string
+        date = new Date(dateValue);
+      }
+      
+      // Validate the date
+      if (isNaN(date.getTime())) {
+        return undefined;
+      }
+      
+      return date.toISOString();
+    } catch (error) {
+      console.warn('Failed to parse date:', dateValue, error);
+      return undefined;
+    }
+  };
+
   const handleImport = async () => {
     if (!file) {
       toast.error('Please select a file to import');
@@ -87,12 +116,12 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
             status: mapStatus(row['Custom Status'] || row['Status']),
             priority: mapPriority(row['Priority']),
             tags: row['Tags'] ? [row['Tags']] : [],
-            dueDate: row['Due Date'] ? new Date(row['Due Date']).toISOString() : undefined,
-            startDate: row['Start Date'] ? new Date(row['Start Date']).toISOString() : undefined,
+            dueDate: parseExcelDate(row['Due Date']),
+            startDate: parseExcelDate(row['Start Date']),
             estimatedHours: parseFloat(row['Duration']) || undefined,
             actualHours: parseFloat(row['Work hours']) || undefined,
             progressPercentage: parseInt(row['% Completed']) || 0,
-            completedAt: row['Completion Date'] ? new Date(row['Completion Date']).toISOString() : undefined,
+            completedAt: parseExcelDate(row['Completion Date']),
             createdById: 'temp-user-id', // TODO: Get from current user
             columnId: 'todo',
             position: i
