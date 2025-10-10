@@ -214,12 +214,23 @@ const Register = () => {
                 Phone number (optional)
               </label>
               <input
-                {...registerField('phone_number')}
+                {...registerField('phone_number', {
+                  pattern: {
+                    value: /^\+[1-9]\d{1,14}$/,
+                    message: 'Phone number must be in E.164 format (e.g., +15551234567)',
+                  },
+                })}
                 type="tel"
                 autoComplete="tel"
-                className="mt-1 input"
-                placeholder="+1 (555) 000-0000"
+                className={`mt-1 input ${errors.phone_number ? 'input-error' : ''}`}
+                placeholder="+15551234567"
               />
+              {errors.phone_number && (
+                <p className="mt-1 text-sm text-red-600">{errors.phone_number.message}</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Format: +[country code][number] (e.g., +15551234567 for US)
+              </p>
             </div>
 
             <div>

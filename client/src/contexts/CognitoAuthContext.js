@@ -149,7 +149,7 @@ export const CognitoAuthProvider = ({ children }) => {
       });
 
       if (nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
-        toast.info('Please check your email for verification code');
+        toast.success('Please check your email for verification code');
         return {
           success: true,
           requiresConfirmation: true,
