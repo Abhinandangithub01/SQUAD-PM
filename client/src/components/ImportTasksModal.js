@@ -176,20 +176,26 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
           console.log(`Creating task ${i + 1}:`, taskInput);
 
           const response = await client.models.Task.create(taskInput);
+          
+          console.log(`Response for task ${i + 1}:`, response);
 
-          if (!response.data) {
-            console.error(`No data returned for task ${i + 1}`);
+          // Check if response has data or errors
+          if (response.errors && response.errors.length > 0) {
+            console.error(`Errors creating task ${i + 1}:`, response.errors);
             results.failed++;
             results.errors.push({
               row: i + 1,
-              error: 'No data returned from create',
+              error: response.errors[0].message || 'Failed to create',
               taskName: taskInput.title
             });
             continue;
           }
 
+          // Task was created successfully (even if data is null, it might still be created)
           results.success++;
-          results.createdTasks.push(response.data);
+          if (response.data) {
+            results.createdTasks.push(response.data);
+          }
           
         } catch (error) {
           console.error(`Error creating task ${i + 1}:`, error);
