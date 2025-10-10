@@ -8,7 +8,12 @@ import toast from 'react-hot-toast';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { register: registerUser, isAuthenticated, loading } = useAuth();
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const { register: registerUser, isAuthenticated, loading, confirmSignUp, resendConfirmationCode } = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -41,23 +46,61 @@ const Register = () => {
     if (result.success) {
       if (result.requiresConfirmation) {
         toast.success('Account created! Please check your email for verification code.');
-        navigate('/verify-email', { 
-          state: { 
-            email: data.email,
-            firstName: data.first_name,
-            lastName: data.last_name,
-            companyName: data.company_name,
-            companySize: data.company_size,
-            industry: data.industry,
-            phoneNumber: data.phone_number,
-          } 
-        });
+        setVerificationEmail(data.email);
+        setShowVerification(true);
       } else {
         toast.success('Account created successfully!');
         navigate('/dashboard', { replace: true });
       }
     } else {
-      toast.error(result.error);
+      // Check if user already exists but is unverified
+      if (result.error && (result.error.includes('User already exists') || result.error.includes('UsernameExistsException'))) {
+        toast.error('Account exists but may not be verified. Please verify your email.');
+        setVerificationEmail(data.email);
+        setShowVerification(true);
+        // Try to resend confirmation code
+        handleResendCode(data.email);
+      } else {
+        toast.error(result.error);
+      }
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      toast.error('Please enter a valid 6-digit code');
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const result = await confirmSignUp(verificationEmail, verificationCode);
+      if (result.success) {
+        toast.success('Email verified successfully! Please login.');
+        navigate('/login');
+      } else {
+        toast.error(result.error || 'Verification failed');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Verification failed');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendCode = async (email = verificationEmail) => {
+    setIsResending(true);
+    try {
+      const result = await resendConfirmationCode(email);
+      if (result.success) {
+        toast.success('Verification code sent! Check your email.');
+      } else {
+        toast.error(result.error || 'Failed to resend code');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to resend code');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -80,19 +123,90 @@ const Register = () => {
             <h1 className="mt-4 text-2xl font-bold text-gray-900">SQUAD PM</h1>
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Create your account
+            {showVerification ? 'Verify your email' : 'Create your account'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              to="/login"
-              className="font-medium text-primary-600 hover:text-primary-500"
-            >
-              sign in to your existing account
-            </Link>
+            {showVerification ? (
+              <>
+                Enter the verification code sent to{' '}
+                <span className="font-medium text-primary-600">{verificationEmail}</span>
+              </>
+            ) : (
+              <>
+                Or{' '}
+                <Link
+                  to="/login"
+                  className="font-medium text-primary-600 hover:text-primary-500"
+                >
+                  sign in to your existing account
+                </Link>
+              </>
+            )}
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+
+        {showVerification ? (
+          <div className="mt-8 space-y-6">
+            <div>
+              <label htmlFor="verification_code" className="block text-sm font-medium text-gray-700">
+                Verification Code
+              </label>
+              <input
+                id="verification_code"
+                type="text"
+                maxLength="6"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-2xl tracking-widest"
+                placeholder="000000"
+              />
+              <p className="mt-2 text-sm text-gray-500 text-center">
+                Enter the 6-digit code from your email
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleVerifyCode}
+                disabled={isVerifying || verificationCode.length !== 6}
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                {isVerifying ? (
+                  <LoadingSpinner size="sm" color="white" />
+                ) : (
+                  'Verify Email'
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleResendCode()}
+                disabled={isResending}
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                {isResending ? (
+                  <LoadingSpinner size="sm" />
+                ) : (
+                  'Resend Code'
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowVerification(false);
+                  setVerificationCode('');
+                  setVerificationEmail('');
+                }}
+                className="w-full text-sm text-gray-600 hover:text-gray-900"
+              >
+                ← Back to registration
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -350,6 +464,7 @@ const Register = () => {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
