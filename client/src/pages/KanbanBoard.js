@@ -26,6 +26,7 @@ import {
   BugAntIcon,
   DocumentTextIcon,
   TrashIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
 import amplifyDataService from '../services/amplifyDataService';
@@ -34,6 +35,7 @@ import TaskTimer from '../components/TaskTimer';
 import EffortEstimation from '../components/EffortEstimation';
 import CleanTaskDetailModal from '../components/CleanTaskDetailModal';
 import TrelloStyleTaskModal from '../components/TrelloStyleTaskModal';
+import ImportTasksModal from '../components/ImportTasksModal';
 import toast from 'react-hot-toast';
 
 const KanbanBoard = () => {
@@ -67,6 +69,7 @@ const KanbanBoard = () => {
   const [showQuickMenu, setShowQuickMenu] = useState(false);
   const [quickMenuPosition, setQuickMenuPosition] = useState({ top: 0, left: 0 });
   const [quickMenuTask, setQuickMenuTask] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false);
   const taskCardRefs = useRef({});
   const scrollContainerRef = useRef(null);
   const queryClient = useQueryClient();
@@ -1207,6 +1210,15 @@ const KanbanBoard = () => {
 
           {/* Right Side - Actions */}
           <div className="flex items-center space-x-3">
+            {/* Import Button */}
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <ArrowUpTrayIcon className="h-4 w-4 mr-2" />
+              Import Tasks
+            </button>
+            
             {/* Filter Dropdown */}
             <div className="relative filter-dropdown">
               <button 
@@ -1795,6 +1807,17 @@ const KanbanBoard = () => {
           ]}
         />
       )}
+
+      {/* Import Tasks Modal */}
+      <ImportTasksModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        projectId={projectId}
+        onImportComplete={(results) => {
+          refetch();
+          toast.success(`Successfully imported ${results.success} tasks!`);
+        }}
+      />
     </div>
   );
 };

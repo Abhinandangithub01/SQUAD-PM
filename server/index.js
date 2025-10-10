@@ -53,6 +53,7 @@ app.use('/api/chat', require('./routes/chat'));
 app.use('/api/files', require('./routes/files'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/import', require('./routes/import'));
 
 // Socket.io connection handling
 const socketAuth = require('./middleware/socketAuth');
