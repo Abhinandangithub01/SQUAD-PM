@@ -32,6 +32,10 @@ const Register = () => {
       password: data.password,
       firstName: data.first_name,
       lastName: data.last_name,
+      companyName: data.company_name,
+      companySize: data.company_size,
+      industry: data.industry,
+      phoneNumber: data.phone_number,
     });
     
     if (result.success) {
@@ -41,7 +45,11 @@ const Register = () => {
           state: { 
             email: data.email,
             firstName: data.first_name,
-            lastName: data.last_name 
+            lastName: data.last_name,
+            companyName: data.company_name,
+            companySize: data.company_size,
+            industry: data.industry,
+            phoneNumber: data.phone_number,
           } 
         });
       } else {
@@ -125,6 +133,93 @@ const Register = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.last_name.message}</p>
                 )}
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="company_name" className="block text-sm font-medium text-gray-700">
+                Company name
+              </label>
+              <input
+                {...registerField('company_name', {
+                  required: 'Company name is required',
+                  minLength: {
+                    value: 2,
+                    message: 'Company name must be at least 2 characters',
+                  },
+                })}
+                type="text"
+                autoComplete="organization"
+                className={`mt-1 input ${errors.company_name ? 'input-error' : ''}`}
+                placeholder="Acme Inc."
+              />
+              {errors.company_name && (
+                <p className="mt-1 text-sm text-red-600">{errors.company_name.message}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="company_size" className="block text-sm font-medium text-gray-700">
+                  Company size
+                </label>
+                <select
+                  {...registerField('company_size', {
+                    required: 'Company size is required',
+                  })}
+                  className={`mt-1 input ${errors.company_size ? 'input-error' : ''}`}
+                >
+                  <option value="">Select size</option>
+                  <option value="1-10">1-10 employees</option>
+                  <option value="11-50">11-50 employees</option>
+                  <option value="51-200">51-200 employees</option>
+                  <option value="201-500">201-500 employees</option>
+                  <option value="501-1000">501-1000 employees</option>
+                  <option value="1000+">1000+ employees</option>
+                </select>
+                {errors.company_size && (
+                  <p className="mt-1 text-sm text-red-600">{errors.company_size.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
+                  Industry
+                </label>
+                <select
+                  {...registerField('industry', {
+                    required: 'Industry is required',
+                  })}
+                  className={`mt-1 input ${errors.industry ? 'input-error' : ''}`}
+                >
+                  <option value="">Select industry</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Education">Education</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Consulting">Consulting</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Real Estate">Real Estate</option>
+                  <option value="Other">Other</option>
+                </select>
+                {errors.industry && (
+                  <p className="mt-1 text-sm text-red-600">{errors.industry.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700">
+                Phone number (optional)
+              </label>
+              <input
+                {...registerField('phone_number')}
+                type="tel"
+                autoComplete="tel"
+                className="mt-1 input"
+                placeholder="+1 (555) 000-0000"
+              />
             </div>
 
             <div>

@@ -40,21 +40,44 @@ const Login = () => {
       // Get user attributes
       const userEmail = user.signInDetails?.loginId || user.username;
       
-      // Create default organization
-      const orgName = `${userEmail.split('@')[0]}'s Organization`;
-      const orgSlug = userEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now();
+      // Get company info from localStorage (if available from registration)
+      const companyInfoStr = localStorage.getItem('pendingCompanyInfo');
+      const companyInfo = companyInfoStr ? JSON.parse(companyInfoStr) : null;
+      
+      // Create organization with company info or defaults
+      const orgName = companyInfo?.companyName || `${userEmail.split('@')[0]}'s Organization`;
+      const orgSlug = (companyInfo?.companyName || userEmail.split('@')[0])
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-') + '-' + Date.now();
+      
+      // Map company size to enum
+      const sizeMap = {
+        '1-10': 'SMALL',
+        '11-50': 'SMALL',
+        '51-200': 'MEDIUM',
+        '201-500': 'LARGE',
+        '501-1000': 'LARGE',
+        '1000+': 'ENTERPRISE',
+      };
       
       const { data: organization } = await client.models.Organization.create({
         name: orgName,
         slug: orgSlug,
-        description: 'My workspace',
+        description: companyInfo?.industry ? `${companyInfo.industry} company` : 'My workspace',
         ownerId: user.userId,
+        industry: companyInfo?.industry || 'Technology',
+        size: companyInfo?.companySize ? sizeMap[companyInfo.companySize] : 'SMALL',
         plan: 'FREE',
         maxUsers: 5,
         maxProjects: 3,
         isActive: true,
         billingEmail: userEmail,
       });
+      
+      // Clear company info from localStorage
+      if (companyInfo) {
+        localStorage.removeItem('pendingCompanyInfo');
+      }
 
       // Create organization membership
       await client.models.OrganizationMember.create({
@@ -71,6 +94,7 @@ const Login = () => {
           firstName: userEmail.split('@')[0],
           lastName: '',
           role: 'ADMIN',
+          phoneNumber: companyInfo?.phoneNumber || null,
           isActive: true,
           lastLoginAt: new Date().toISOString(),
         });

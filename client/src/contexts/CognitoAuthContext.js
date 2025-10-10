@@ -113,9 +113,20 @@ export const CognitoAuthProvider = ({ children }) => {
     }
   };
 
-  const register = async ({ email, password, firstName, lastName }) => {
+  const register = async ({ email, password, firstName, lastName, companyName, companySize, industry, phoneNumber }) => {
     try {
       setLoading(true);
+      
+      // Store company info in localStorage temporarily for use after email verification
+      if (companyName) {
+        localStorage.setItem('pendingCompanyInfo', JSON.stringify({
+          companyName,
+          companySize,
+          industry,
+          phoneNumber,
+        }));
+      }
+      
       const { isSignUpComplete, userId, nextStep } = await signUp({
         username: email,
         password,
@@ -124,6 +135,7 @@ export const CognitoAuthProvider = ({ children }) => {
             email,
             given_name: firstName,
             family_name: lastName,
+            phone_number: phoneNumber || undefined,
           },
           autoSignIn: true
         }
