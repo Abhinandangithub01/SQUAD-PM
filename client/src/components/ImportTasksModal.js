@@ -2,8 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle, Download } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
-import { uploadData } from 'aws-amplify/storage';
-import { generateClient } from 'aws-amplify/api';
+import * as XLSX from 'xlsx';
+import { generateClient } from 'aws-amplify/data';
 
 const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
   const [file, setFile] = useState(null);
@@ -54,75 +54,130 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
     }
 
     try {
-      setUploading(true);
-
-      // Upload file to S3 using Amplify Storage
-      const fileKey = `imports/${projectId}/${Date.now()}_${file.name}`;
-      
-      const result = await uploadData({
-        key: fileKey,
-        data: file,
-        options: {
-          contentType: file.type,
-        }
-      }).result;
-
-      console.log('File uploaded to S3:', result);
-
-      setUploading(false);
       setImporting(true);
-
-      // Call the GraphQL mutation to import tasks
-      const client = generateClient();
       
-      const importResult = await client.graphql({
-        query: `
-          mutation ImportTasks($projectId: ID!, $fileKey: String!) {
-            importTasksFromExcel(projectId: $projectId, fileKey: $fileKey) {
-              success
-              failed
-              errors {
-                row
-                error
-                taskName
-              }
-              createdTasks {
-                id
-                title
-                status
-                priority
-              }
-            }
-          }
-        `,
-        variables: {
-          projectId: projectId,
-          fileKey: result.key
-        }
-      });
+      // Read Excel file
+      const data = await readExcelFile(file);
+      console.log('Parsed Excel data:', data);
 
-      setImporting(false);
-      const data = importResult.data.importTasksFromExcel;
-      setImportResults(data);
-      setShowResults(true);
+      if (!data || data.length === 0) {
+        toast.error('No data found in Excel file');
+        setImporting(false);
+        return;
+      }
 
-      if (data.success > 0) {
-        toast.success(`Successfully imported ${data.success} tasks!`);
-        if (onImportComplete) {
-          onImportComplete(data);
+      const client = generateClient();
+      const results = {
+        success: 0,
+        failed: 0,
+        errors: [],
+        createdTasks: []
+      };
+
+      // Import tasks one by one
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        
+        try {
+          // Map Excel columns to task fields
+          const taskInput = {
+            projectId: projectId,
+            title: row['Task Name'] || row['title'] || `Task ${i + 1}`,
+            description: row['Description'] || '',
+            status: mapStatus(row['Custom Status'] || row['Status']),
+            priority: mapPriority(row['Priority']),
+            tags: row['Tags'] ? JSON.stringify([row['Tags']]) : '[]',
+            dueDate: row['Due Date'] ? new Date(row['Due Date']).toISOString() : null,
+            startDate: row['Start Date'] ? new Date(row['Start Date']).toISOString() : null,
+            estimatedHours: parseFloat(row['Duration']) || 0,
+            actualHours: parseFloat(row['Work hours']) || 0,
+            progressPercentage: parseInt(row['% Completed']) || 0,
+            completedAt: row['Completion Date'] ? new Date(row['Completion Date']).toISOString() : null,
+            type: 'TASK',
+            archived: false,
+            isRecurring: false
+          };
+
+          console.log(`Creating task ${i + 1}:`, taskInput);
+
+          const response = await client.models.Task.create(taskInput);
+
+          results.success++;
+          results.createdTasks.push(response.data);
+          
+        } catch (error) {
+          console.error(`Error creating task ${i + 1}:`, error);
+          results.failed++;
+          results.errors.push({
+            row: i + 1,
+            error: error.message || 'Failed to create task',
+            taskName: row['Task Name'] || `Task ${i + 1}`
+          });
         }
       }
 
-      if (data.failed > 0) {
-        toast.error(`Failed to import ${data.failed} tasks`);
+      setImporting(false);
+      setImportResults(results);
+      setShowResults(true);
+
+      if (results.success > 0) {
+        toast.success(`Successfully imported ${results.success} tasks!`);
+        if (onImportComplete) {
+          onImportComplete(results);
+        }
+      }
+
+      if (results.failed > 0) {
+        toast.error(`Failed to import ${results.failed} tasks`);
       }
 
     } catch (error) {
       console.error('Import error:', error);
-      setUploading(false);
       setImporting(false);
       toast.error(error.message || 'Failed to import tasks');
     }
+  };
+
+  // Helper function to read Excel file
+  const readExcelFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          resolve(jsonData);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      reader.onerror = (error) => reject(error);
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  // Map status from Excel to app status
+  const mapStatus = (status) => {
+    if (!status) return 'TODO';
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('progress') || statusLower.includes('doing')) return 'IN_PROGRESS';
+    if (statusLower.includes('done') || statusLower.includes('complete')) return 'DONE';
+    return 'TODO';
+  };
+
+  // Map priority from Excel to app priority
+  const mapPriority = (priority) => {
+    if (!priority) return 'MEDIUM';
+    const priorityLower = priority.toLowerCase();
+    if (priorityLower.includes('high') || priorityLower.includes('urgent')) return 'HIGH';
+    if (priorityLower.includes('low')) return 'LOW';
+    if (priorityLower.includes('critical')) return 'URGENT';
+    return 'MEDIUM';
   };
 
   const downloadTemplate = () => {
