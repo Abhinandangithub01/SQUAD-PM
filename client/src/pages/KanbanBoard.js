@@ -165,12 +165,18 @@ const KanbanBoard = () => {
       });
 
       filteredTasks.forEach(task => {
+        // Skip tasks with null or undefined title
+        if (!task || !task.title) {
+          console.warn('Skipping task with null title:', task?.id);
+          return;
+        }
+        
         const column = columns.find(col => col.id === task.status);
         if (column) {
           column.tasks.push({
             id: task.id,
-            title: task.title,
-            description: task.description,
+            title: task.title || 'Untitled Task',
+            description: task.description || '',
             priority: task.priority,
             status: task.status,
             dueDate: task.dueDate,
@@ -632,7 +638,7 @@ const KanbanBoard = () => {
       return;
     }
 
-    console.log('Dropping task:', taskToMove.id, taskToMove.title, 'to column:', targetColumnId);
+    console.log('Dropping task:', taskToMove.id, taskToMove?.title || 'Untitled', 'to column:', targetColumnId);
 
     // Find source column using the specific task ID
     const sourceColumn = kanbanData.columns.find(col => 
@@ -689,7 +695,7 @@ const KanbanBoard = () => {
     });
 
     const targetColumn = kanbanData.columns.find(col => col.id === targetColumnId);
-    toast.success(`Task "${taskToMove.title}" moved to ${targetColumn.name}`);
+    toast.success(`Task "${taskToMove?.title || 'Untitled Task'}" moved to ${targetColumn.name}`);
     
     // Reset drag states immediately to prevent opacity issues
     setDraggedTask(null);
@@ -844,7 +850,7 @@ const KanbanBoard = () => {
       
       // Create a more chat-friendly message format
       const taskList = pendingChatTasks.map(task => 
-        `• ${task.title} (${task.priority} priority) - ${task.assignee_name || 'Unassigned'}`
+        `• ${task?.title || 'Untitled Task'} (${task.priority} priority) - ${task.assignee_name || 'Unassigned'}`
       ).join('\n');
 
       const message = `Task Update from Kanban Board:\n\n${taskList}`;
@@ -895,7 +901,7 @@ const KanbanBoard = () => {
         projectId,
         channelId,
         tasks: pendingChatTasks,
-        message: `Task Update: ${pendingChatTasks.map(t => t.title).join(', ')}`
+        message: `Task Update: ${pendingChatTasks.map(t => t?.title || 'Untitled Task').join(', ')}`
       });
     }
   };
@@ -1565,7 +1571,7 @@ const KanbanBoard = () => {
                       className="cursor-pointer"
                     >
                       <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-primary-700 transition-colors">
-                        {task.title}
+                        {task?.title || 'Untitled Task'}
                       </h4>
                       
                       {task.description && (
@@ -1712,7 +1718,7 @@ const KanbanBoard = () => {
                 {pendingChatTasks.map(task => (
                   <div key={task.id} className="text-xs bg-gray-50 rounded px-2 py-1 flex items-center">
                     <ClipboardDocumentListIcon className="h-3 w-3 mr-1" />
-                    {task.title}
+                    {task?.title || 'Untitled Task'}
                   </div>
                 ))}
               </div>
