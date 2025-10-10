@@ -155,16 +155,23 @@ const Login = () => {
         navigate(from, { replace: true });
       }
     } else {
-      // Check if user is not confirmed (multiple error message formats)
-      const errorMsg = (result.error || '').toLowerCase();
-      console.log('Error message:', errorMsg); // Debug log
-      
-      if (errorMsg.includes('not confirmed') || errorMsg.includes('confirmed')) {
-        console.log('Setting unverified email:', data.email); // Debug log
+      // Check if user requires confirmation
+      if (result.requiresConfirmation) {
+        console.log('User requires confirmation:', data.email);
         setUnverifiedEmail(data.email);
-        toast.error('⚠️ Account not verified! See below to verify.');
+        toast.error('⚠️ Account not verified! Please verify your email below.');
       } else {
-        toast.error(result.error);
+        // Check if user is not confirmed (multiple error message formats)
+        const errorMsg = (result.error || '').toLowerCase();
+        console.log('Error message:', errorMsg); // Debug log
+        
+        if (errorMsg.includes('not confirmed') || errorMsg.includes('confirmed')) {
+          console.log('Setting unverified email:', data.email); // Debug log
+          setUnverifiedEmail(data.email);
+          toast.error('⚠️ Account not verified! See below to verify.');
+        } else {
+          toast.error(result.error);
+        }
       }
     }
   };

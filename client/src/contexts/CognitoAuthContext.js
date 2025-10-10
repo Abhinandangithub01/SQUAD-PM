@@ -98,15 +98,30 @@ export const CognitoAuthProvider = ({ children }) => {
         return { 
           success: false, 
           requiresConfirmation: true,
+          error: 'User is not confirmed.',
           message: 'Please confirm your email first'
         };
       }
     } catch (error) {
       console.error('Login error:', error);
+      
+      // Check if error is due to unconfirmed user
+      const errorMessage = error.message || error.toString();
+      if (errorMessage.includes('UserNotConfirmedException') || 
+          errorMessage.includes('User is not confirmed') ||
+          errorMessage.includes('not confirmed')) {
+        return { 
+          success: false, 
+          requiresConfirmation: true,
+          error: 'User is not confirmed.',
+          message: 'Please confirm your email first'
+        };
+      }
+      
       toast.error(error.message || 'Login failed');
       return { 
         success: false, 
-        error: error.message 
+        error: error.message || error.toString()
       };
     } finally {
       setLoading(false);
