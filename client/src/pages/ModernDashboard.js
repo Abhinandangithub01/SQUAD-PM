@@ -1,133 +1,151 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  UsersIcon,
-  BriefcaseIcon,
-  ClipboardDocumentCheckIcon,
-  DocumentTextIcon,
-  ChartBarIcon,
+  FolderIcon,
+  CheckCircleIcon,
   ClockIcon,
-  CurrencyDollarIcon,
-  DocumentDuplicateIcon,
+  UsersIcon,
+  ChartBarIcon,
+  ExclamationTriangleIcon,
   ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import ModernSidebar from '../components/ModernSidebar';
 import ModernTopBar from '../components/ModernTopBar';
+import { generateClient } from 'aws-amplify/data';
+import { getCurrentUser } from 'aws-amplify/auth';
 
 const ModernDashboard = () => {
-  const [timeRange, setTimeRange] = useState('Last 7 days');
-  const [viewMode, setViewMode] = useState('grid');
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalProjects: 0,
+    activeProjects: 0,
+    completedProjects: 0,
+    totalTasks: 0,
+    completedTasks: 0,
+    inProgressTasks: 0,
+    overdueTasks: 0,
+    teamMembers: 0,
+  });
+  const [recentProjects, setRecentProjects] = useState([]);
 
-  // Mock data - replace with real data from Amplify
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const client = generateClient();
+      const user = await getCurrentUser();
+
+      // Get user's organization
+      const { data: memberships } = await client.models.OrganizationMember.list({
+        filter: { userId: { eq: user.userId } }
+      });
+
+      if (!memberships || memberships.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      const organizationId = memberships[0].organizationId;
+
+      // Fetch projects
+      const { data: projects } = await client.models.Project.list({
+        filter: { organizationId: { eq: organizationId } }
+      });
+
+      // Fetch all tasks for the organization's projects
+      const projectIds = projects?.map(p => p.id) || [];
+      let allTasks = [];
+      
+      for (const projectId of projectIds) {
+        const { data: tasks } = await client.models.Task.list({
+          filter: { projectId: { eq: projectId } }
+        });
+        allTasks = [...allTasks, ...(tasks || [])];
+      }
+
+      // Fetch team members
+      const { data: members } = await client.models.OrganizationMember.list({
+        filter: { organizationId: { eq: organizationId } }
+      });
+
+      // Calculate stats
+      const activeProjects = projects?.filter(p => p.status === 'ACTIVE').length || 0;
+      const completedProjects = projects?.filter(p => p.status === 'COMPLETED').length || 0;
+      const completedTasks = allTasks.filter(t => t.status === 'DONE').length;
+      const inProgressTasks = allTasks.filter(t => t.status === 'IN_PROGRESS').length;
+      const overdueTasks = allTasks.filter(t => {
+        if (!t.dueDate) return false;
+        return new Date(t.dueDate) < new Date() && t.status !== 'DONE';
+      }).length;
+
+      setStats({
+        totalProjects: projects?.length || 0,
+        activeProjects,
+        completedProjects,
+        totalTasks: allTasks.length,
+        completedTasks,
+        inProgressTasks,
+        overdueTasks,
+        teamMembers: members?.length || 0,
+      });
+
+      setRecentProjects(projects?.slice(0, 5) || []);
+      
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const metrics = [
     {
-      title: 'Total Users',
-      value: '124',
-      change: '+8%',
-      trend: 'up',
-      subtitle: 'from last month',
-      icon: UsersIcon,
+      title: 'Total Projects',
+      value: stats.totalProjects.toString(),
+      subtitle: `${stats.activeProjects} active`,
+      icon: FolderIcon,
       color: 'blue',
+      link: '/projects',
     },
     {
-      title: 'Active Users',
-      value: '118',
-      change: '+5%',
-      trend: 'up',
-      subtitle: 'from last month',
-      icon: UsersIcon,
+      title: 'Active Projects',
+      value: stats.activeProjects.toString(),
+      subtitle: `${stats.completedProjects} completed`,
+      icon: ChartBarIcon,
       color: 'green',
+      link: '/projects',
     },
     {
-      title: 'New Users This Month',
-      value: '12',
-      change: '+20%',
-      trend: 'up',
-      subtitle: 'from last month',
-      icon: UsersIcon,
+      title: 'Total Tasks',
+      value: stats.totalTasks.toString(),
+      subtitle: `${stats.completedTasks} completed`,
+      icon: CheckCircleIcon,
       color: 'purple',
     },
     {
-      title: 'Total Departments',
-      value: '8',
-      change: '',
-      trend: 'neutral',
-      subtitle: 'Active departments',
-      icon: BriefcaseIcon,
+      title: 'In Progress',
+      value: stats.inProgressTasks.toString(),
+      subtitle: 'Tasks being worked on',
+      icon: ClockIcon,
       color: 'orange',
     },
     {
-      title: 'Attendance Rate',
-      value: '94.5%',
-      change: '+2%',
-      trend: 'up',
-      subtitle: 'from last month',
-      icon: ClipboardDocumentCheckIcon,
-      color: 'teal',
-    },
-    {
-      title: 'Pending Leave Requests',
-      value: '7',
-      change: '',
-      trend: 'neutral',
-      subtitle: 'Awaiting approval',
-      icon: DocumentTextIcon,
-      color: 'yellow',
-    },
-    {
-      title: 'Open Positions',
-      value: '14',
-      change: '+27%',
-      trend: 'up',
-      subtitle: 'from last month',
-      icon: BriefcaseIcon,
-      color: 'indigo',
-    },
-    {
-      title: 'Applications This Month',
-      value: '89',
-      change: '+48%',
-      trend: 'up',
-      subtitle: 'from last month',
-      icon: DocumentDuplicateIcon,
-      color: 'pink',
-    },
-    {
-      title: 'Pending Reviews',
-      value: '23',
-      change: '',
-      trend: 'neutral',
-      subtitle: 'Performance reviews',
-      icon: ClipboardDocumentCheckIcon,
+      title: 'Overdue Tasks',
+      value: stats.overdueTasks.toString(),
+      subtitle: 'Need attention',
+      icon: ExclamationTriangleIcon,
       color: 'red',
     },
     {
-      title: 'Training Completion',
-      value: '76%',
-      change: '+12%',
-      trend: 'up',
-      subtitle: 'from last quarter',
-      icon: ChartBarIcon,
-      color: 'cyan',
-    },
-    {
-      title: 'Payroll Status',
-      value: 'On Track',
-      change: '',
-      trend: 'neutral',
-      subtitle: 'Next run in 5 days',
-      icon: CurrencyDollarIcon,
-      color: 'emerald',
-    },
-    {
-      title: 'Expiring Documents',
-      value: '12',
-      change: '',
-      trend: 'neutral',
-      subtitle: 'Within 30 days',
-      icon: DocumentTextIcon,
-      color: 'amber',
+      title: 'Team Members',
+      value: stats.teamMembers.toString(),
+      subtitle: 'In your organization',
+      icon: UsersIcon,
+      color: 'indigo',
+      link: '/organization/settings',
     },
   ];
 
@@ -149,6 +167,18 @@ const ModernDashboard = () => {
     return colors[color] || colors.blue;
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <ModernSidebar />
+        <ModernTopBar title="Dashboard" />
+        <div className="ml-16 mt-16 p-6 flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <ModernSidebar />
@@ -157,131 +187,97 @@ const ModernDashboard = () => {
       {/* Main Content */}
       <div className="ml-16 mt-16 p-6">
         {/* Header Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Overview</p>
-              <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
-                Abhinandan R
-                <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  ● Inactive
-                </span>
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Employee ID: <span className="font-medium">N/A</span> • Shift: <span className="font-medium">Not Assigned</span>
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900">Project Overview</h1>
+              <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your projects.</p>
             </div>
-
-            <div className="flex items-center space-x-3">
-              <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
-                <DocumentTextIcon className="h-4 w-4 mr-2" />
-                Payslip
-              </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center">
-                Edit profile
-              </button>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8">
-              {['Activities', 'Feeds', 'Profile', 'Approvals', 'Leave', 'Attendance', 'Timelogs', 'Timesheets', 'Jobs', 'Files'].map((tab) => (
-                <button
-                  key={tab}
-                  className={`pb-3 px-1 border-b-2 font-medium text-sm ${
-                    tab === 'Activities'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </nav>
+            <Link
+              to="/projects"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              New Project
+            </Link>
           </div>
         </div>
 
-        {/* Insights Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Insights</h3>
-              <p className="text-sm text-gray-500">12 metrics • Last 7 days</p>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {metrics.map((metric, index) => {
+            const Icon = metric.icon;
+            const MetricCard = metric.link ? Link : 'div';
+            return (
+              <MetricCard
+                key={index}
+                to={metric.link}
+                className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all cursor-pointer"
               >
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>Last 90 days</option>
-                <option>Last year</option>
-              </select>
-
-              <div className="flex border border-gray-300 rounded-lg">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100' : ''}`}
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 ${viewMode === 'list' ? 'bg-gray-100' : ''}`}
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-              </div>
-
-              <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {metrics.map((metric, index) => {
-              const Icon = metric.icon;
-              return (
-                <div
-                  key={index}
-                  className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-2 rounded-lg ${getColorClasses(metric.color)}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    {metric.change && (
-                      <div className={`flex items-center text-xs font-medium ${
-                        metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {metric.trend === 'up' ? (
-                          <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
-                        ) : (
-                          <ArrowTrendingDownIcon className="h-3 w-3 mr-1" />
-                        )}
-                        {metric.change}
-                      </div>
-                    )}
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`p-3 rounded-lg ${getColorClasses(metric.color)}`}>
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <div className="text-sm text-gray-600 mb-1">{metric.title}</div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">{metric.value}</div>
-                  <div className="text-xs text-gray-500">{metric.subtitle}</div>
                 </div>
-              );
-            })}
+                <div className="text-sm font-medium text-gray-600 mb-1">{metric.title}</div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">{metric.value}</div>
+                <div className="text-sm text-gray-500">{metric.subtitle}</div>
+              </MetricCard>
+            );
+          })}
+        </div>
+
+        {/* Recent Projects */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Recent Projects</h2>
+            <Link to="/projects" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+              View All →
+            </Link>
           </div>
+
+          {recentProjects.length === 0 ? (
+            <div className="text-center py-12">
+              <FolderIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 mb-4">No projects yet</p>
+              <Link
+                to="/projects"
+                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Create Your First Project
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {recentProjects.map((project) => (
+                <Link
+                  key={project.id}
+                  to={`/projects/${project.id}/kanban`}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
+                      <FolderIcon className="h-6 w-6 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">{project.name}</h3>
+                      <p className="text-sm text-gray-500">{project.description || 'No description'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      project.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                      project.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {project.status}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

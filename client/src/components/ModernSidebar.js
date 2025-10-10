@@ -18,15 +18,10 @@ const ModernSidebar = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Jobs', href: '/projects', icon: BriefcaseIcon },
-    { name: 'Users', href: '/users', icon: UsersIcon },
-    { name: 'Pipeline', href: '/pipeline', icon: ChartBarIcon },
-    { name: 'Payroll', href: '/payroll', icon: CurrencyDollarIcon },
-    { name: 'PMS', href: '/pms', icon: Cog6ToothIcon },
-    { name: 'LMS', href: '/lms', icon: DocumentTextIcon },
-    { name: 'Squad Bot', href: '/squad-bot', icon: Squares2X2Icon },
-    { name: 'Reports', href: '/reports', icon: ClipboardDocumentListIcon },
-    { name: 'More', href: '/more', icon: EllipsisHorizontalIcon },
+    { name: 'Projects', href: '/projects', icon: BriefcaseIcon },
+    { name: 'Chat', href: '/chat', icon: UsersIcon },
+    { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+    { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
   ];
 
   const isActive = (href) => {

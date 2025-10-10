@@ -112,9 +112,8 @@ function App() {
                     <Layout />
                   </ProtectedRoute>
                 }>
-                  <Route index element={<Navigate to="/modern-dashboard" replace />} />
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="modern-dashboard" element={<ModernDashboard />} />
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="dashboard" element={<ModernDashboard />} />
                   
                   {/* Task Management Routes */}
                   <Route path="projects" element={<Projects />} />
