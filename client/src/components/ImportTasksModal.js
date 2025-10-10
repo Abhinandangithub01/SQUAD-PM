@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle, Download } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
-import axios from 'axios';
+import { uploadData } from 'aws-amplify/storage';
+import { generateClient } from 'aws-amplify/api';
 
 const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
   const [file, setFile] = useState(null);
@@ -54,43 +55,73 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
 
     try {
       setUploading(true);
+
+      // Upload file to S3 using Amplify Storage
+      const fileKey = `imports/${projectId}/${Date.now()}_${file.name}`;
+      
+      const result = await uploadData({
+        key: fileKey,
+        data: file,
+        options: {
+          contentType: file.type,
+        }
+      }).result;
+
+      console.log('File uploaded to S3:', result);
+
+      setUploading(false);
       setImporting(true);
 
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Get auth token
-      const token = localStorage.getItem('token');
+      // Call the GraphQL mutation to import tasks
+      const client = generateClient();
       
-      const response = await axios.post(`/api/import/tasks/${projectId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
+      const importResult = await client.graphql({
+        query: `
+          mutation ImportTasks($projectId: ID!, $fileKey: String!) {
+            importTasksFromExcel(projectId: $projectId, fileKey: $fileKey) {
+              success
+              failed
+              errors {
+                row
+                error
+                taskName
+              }
+              createdTasks {
+                id
+                title
+                status
+                priority
+              }
+            }
+          }
+        `,
+        variables: {
+          projectId: projectId,
+          fileKey: result.key
         }
       });
 
-      setUploading(false);
       setImporting(false);
-      setImportResults(response.data.results);
+      const data = importResult.data.importTasksFromExcel;
+      setImportResults(data);
       setShowResults(true);
 
-      if (response.data.results.success > 0) {
-        toast.success(`Successfully imported ${response.data.results.success} tasks!`);
+      if (data.success > 0) {
+        toast.success(`Successfully imported ${data.success} tasks!`);
         if (onImportComplete) {
-          onImportComplete(response.data.results);
+          onImportComplete(data);
         }
       }
 
-      if (response.data.results.failed > 0) {
-        toast.error(`Failed to import ${response.data.results.failed} tasks`);
+      if (data.failed > 0) {
+        toast.error(`Failed to import ${data.failed} tasks`);
       }
 
     } catch (error) {
       console.error('Import error:', error);
       setUploading(false);
       setImporting(false);
-      toast.error(error.response?.data?.message || 'Failed to import tasks');
+      toast.error(error.message || 'Failed to import tasks');
     }
   };
 
