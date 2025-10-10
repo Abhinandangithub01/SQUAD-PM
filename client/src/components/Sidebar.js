@@ -51,14 +51,9 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="flex flex-col items-center h-20 flex-shrink-0 px-2 py-3 bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg">
-        <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center shadow-md transform hover:scale-105 transition-transform duration-200">
-          <svg className="h-5 w-5 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-          </svg>
-        </div>
-        <div className="mt-1 text-center">
-          <h1 className="text-white text-sm font-bold">SQUAD</h1>
+      <div className="flex flex-col items-center h-20 flex-shrink-0 px-2 py-4 bg-blue-600">
+        <div className="h-10 w-10 bg-white rounded-md flex items-center justify-center shadow-sm">
+          <span className="text-blue-600 text-lg font-bold">SQ</span>
         </div>
       </div>
 
@@ -72,27 +67,13 @@ const Sidebar = ({ open, setOpen, onNotificationClick }) => {
               to={item.href}
               className={({ isActive }) =>
                 isActive
-                  ? 'flex flex-col items-center px-2 py-3 font-medium rounded-lg bg-primary-100 text-primary-700'
-                  : 'flex flex-col items-center px-2 py-3 font-medium rounded-lg hover:text-gray-900'
+                  ? 'flex flex-col items-center px-2 py-3 font-medium rounded-lg bg-blue-50 text-blue-600'
+                  : 'flex flex-col items-center px-2 py-3 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }
-              style={({ isActive }) => ({
-                color: isActive ? undefined : textColor,
-                backgroundColor: isActive ? undefined : 'transparent',
-                fontSize: '11px'
-              })}
-              onMouseEnter={(e) => {
-                if (!e.currentTarget.classList.contains('bg-primary-100')) {
-                  e.currentTarget.style.backgroundColor = hoverBg;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!e.currentTarget.classList.contains('bg-primary-100')) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
-              }}
+              style={{ fontSize: '11px' }}
               onClick={() => setOpen(false)}
             >
-              <item.icon className="h-6 w-6 mb-1" />
+              <item.icon className="h-5 w-5 mb-1.5" />
               <span className="text-center leading-tight">{item.name}</span>
             </NavLink>
           ))}
