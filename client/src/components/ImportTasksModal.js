@@ -110,15 +110,35 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
         try {
           // Skip empty rows
           if (!row || Object.keys(row).length === 0) {
+            console.log(`Skipping row ${i + 1}: Empty row`);
             continue;
           }
           
+          // Debug: Log row keys to see what columns exist
+          if (i === 0) {
+            console.log('Excel columns found:', Object.keys(row));
+          }
+          
           // Get title from various possible column names
-          const title = row['Task Name'] || row['title'] || row['Title'] || row['Name'] || `Task ${i + 1}`;
+          let title = row['Task Name'] || row['title'] || row['Title'] || row['Name'] || row['Task'] || row['task'];
+          
+          // If still no title, try to get first non-empty value
+          if (!title) {
+            const values = Object.values(row);
+            title = values.find(val => val && typeof val === 'string' && val.trim() !== '');
+          }
+          
+          // If still no title, use default
+          if (!title) {
+            title = `Task ${i + 1}`;
+          }
+          
+          // Convert to string and trim
+          title = String(title).trim();
           
           // Skip if title is still empty or null
-          if (!title || title.trim() === '') {
-            console.log(`Skipping row ${i + 1}: No title found`);
+          if (!title || title === '' || title === 'null' || title === 'undefined') {
+            console.log(`Skipping row ${i + 1}: No valid title found`, row);
             continue;
           }
           
@@ -141,9 +161,32 @@ const ImportTasksModal = ({ isOpen, onClose, projectId, onImportComplete }) => {
             position: i
           };
 
+          // Final validation before creating
+          if (!taskInput.title || taskInput.title.trim() === '') {
+            console.warn(`Skipping task ${i + 1}: Title is empty after processing`);
+            results.failed++;
+            results.errors.push({
+              row: i + 1,
+              error: 'Title is empty',
+              taskName: `Row ${i + 1}`
+            });
+            continue;
+          }
+
           console.log(`Creating task ${i + 1}:`, taskInput);
 
           const response = await client.models.Task.create(taskInput);
+
+          if (!response.data) {
+            console.error(`No data returned for task ${i + 1}`);
+            results.failed++;
+            results.errors.push({
+              row: i + 1,
+              error: 'No data returned from create',
+              taskName: taskInput.title
+            });
+            continue;
+          }
 
           results.success++;
           results.createdTasks.push(response.data);
