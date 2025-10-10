@@ -21,6 +21,7 @@ import VersionInfo from './components/VersionInfo';
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const VerifyAccount = lazy(() => import('./pages/VerifyAccount'));
 const OrganizationSetup = lazy(() => import('./pages/OrganizationSetup'));
 const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
 const DepartmentsRoles = lazy(() => import('./pages/DepartmentsRoles'));
@@ -99,6 +100,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/verify-account" element={<VerifyAccount />} />
                 
                 {/* Protected routes */}
                 <Route path="/" element={

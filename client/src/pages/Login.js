@@ -250,6 +250,17 @@ const Login = () => {
               create a new account
             </Link>
           </p>
+          <div className="mt-3 text-center">
+            <Link
+              to="/verify-account"
+              className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-500 bg-orange-50 px-4 py-2 rounded-lg border border-orange-200 hover:bg-orange-100 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Need to verify your account?
+            </Link>
+          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
