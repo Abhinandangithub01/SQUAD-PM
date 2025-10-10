@@ -1,15 +1,30 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   BellIcon, 
   Cog6ToothIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
+import { signOut } from 'aws-amplify/auth';
+import toast from 'react-hot-toast';
 
 const ModernTopBar = ({ title = 'Dashboard', user }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Failed to logout');
+    }
+  };
 
   return (
     <div className="fixed top-0 left-16 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-40">
@@ -89,10 +104,12 @@ const ModernTopBar = ({ title = 'Dashboard', user }) => {
             <Menu.Item>
               {({ active }) => (
                 <button
+                  onClick={handleLogout}
                   className={`${
                     active ? 'bg-gray-50' : ''
-                  } block w-full text-left px-4 py-2 text-sm text-red-600`}
+                  } flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50`}
                 >
+                  <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
                   Sign out
                 </button>
               )}

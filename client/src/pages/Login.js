@@ -5,6 +5,8 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { generateClient } from 'aws-amplify/data';
+import { getCurrentUser } from 'aws-amplify/auth';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +39,28 @@ const Login = () => {
     
     if (result.success) {
       toast.success('Welcome back!');
-      navigate(from, { replace: true });
+      
+      // Check if user has an organization
+      try {
+        const client = generateClient();
+        const user = await getCurrentUser();
+        
+        const { data: memberships } = await client.models.OrganizationMember.list({
+          filter: { userId: { eq: user.userId } }
+        });
+        
+        if (!memberships || memberships.length === 0) {
+          // No organization, redirect to setup
+          navigate('/organization-setup', { replace: true });
+        } else {
+          // Has organization, go to dashboard
+          navigate(from, { replace: true });
+        }
+      } catch (error) {
+        console.error('Error checking organization:', error);
+        // If check fails, just go to dashboard
+        navigate(from, { replace: true });
+      }
     } else {
       // Check if user is not confirmed (multiple error message formats)
       const errorMsg = (result.error || '').toLowerCase();

@@ -39,8 +39,8 @@ const Register = () => {
         toast.success('Account created! Please check your email for verification code.');
         navigate('/verify-email', { state: { email: data.email } });
       } else {
-        toast.success('Account created successfully!');
-        navigate('/dashboard', { replace: true });
+        toast.success('Account created successfully! Let\'s set up your organization.');
+        navigate('/organization-setup', { replace: true });
       }
     } else {
       toast.error(result.error);

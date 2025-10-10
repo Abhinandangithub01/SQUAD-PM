@@ -24,8 +24,8 @@ const VerifyEmail = () => {
       const result = await confirmSignUp(email, data.code);
       
       if (result.success) {
-        toast.success('Email verified successfully! Please login.');
-        navigate('/login');
+        toast.success('Email verified successfully! Let\'s set up your organization.');
+        navigate('/organization-setup');
       } else {
         toast.error(result.error || 'Verification failed');
       }

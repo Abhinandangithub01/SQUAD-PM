@@ -21,6 +21,8 @@ import VersionInfo from './components/VersionInfo';
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const OrganizationSetup = lazy(() => import('./pages/OrganizationSetup'));
+const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
 const Dashboard = lazy(() => import('./pages/CleanDashboard'));
 const ModernDashboard = lazy(() => import('./pages/ModernDashboard'));
 const Projects = lazy(() => import('./pages/Projects'));
@@ -97,6 +99,13 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
                 
+                {/* Organization Setup (Protected but no Layout) */}
+                <Route path="/organization-setup" element={
+                  <ProtectedRoute>
+                    <OrganizationSetup />
+                  </ProtectedRoute>
+                } />
+                
                 {/* Protected routes */}
                 <Route path="/" element={
                   <ProtectedRoute>
@@ -143,6 +152,9 @@ function App() {
                   {/* Settings Routes */}
                   <Route path="settings" element={<Settings />} />
                   <Route path="settings/:tab" element={<Settings />} />
+                  
+                  {/* Organization Settings */}
+                  <Route path="organization/settings" element={<OrganizationSettings />} />
                   
                   {/* Feature Demo Route */}
                   <Route path="demo" element={<FeatureDemo />} />
