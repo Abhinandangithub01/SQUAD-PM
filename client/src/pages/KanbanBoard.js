@@ -1236,34 +1236,13 @@ const KanbanBoard = () => {
 
           {/* Right Side - Actions */}
           <div className="flex items-center space-x-3">
-            {/* Cleanup Button */}
-            <button
-              onClick={async () => {
-                if (window.confirm('This will delete all tasks with null/empty titles. Continue?')) {
-                  toast.loading('Cleaning up invalid tasks...');
-                  const result = await cleanupNullTasks(projectId);
-                  toast.dismiss();
-                  if (result.success) {
-                    toast.success(`Cleaned up ${result.deleted} invalid tasks`);
-                    refetch();
-                  } else {
-                    toast.error('Cleanup failed: ' + result.error);
-                  }
-                }
-              }}
-              className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <TrashIcon className="h-4 w-4 mr-2" />
-              Cleanup
-            </button>
-            
-            {/* Import Button */}
+            {/* Import Button - Icon Only */}
             <button
               onClick={() => setShowImportModal(true)}
-              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center justify-center p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              title="Import Tasks"
             >
-              <ArrowUpTrayIcon className="h-4 w-4 mr-2" />
-              Import Tasks
+              <ArrowUpTrayIcon className="h-5 w-5" />
             </button>
             
             {/* Filter Dropdown */}
