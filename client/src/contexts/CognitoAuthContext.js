@@ -127,16 +127,23 @@ export const CognitoAuthProvider = ({ children }) => {
         }));
       }
       
+      // Build user attributes - only include phone_number if it exists and is valid
+      const userAttributes = {
+        email,
+        given_name: firstName,
+        family_name: lastName,
+      };
+      
+      // Only add phone_number if it's provided and not empty
+      if (phoneNumber && phoneNumber.trim() !== '') {
+        userAttributes.phone_number = phoneNumber;
+      }
+      
       const { isSignUpComplete, userId, nextStep } = await signUp({
         username: email,
         password,
         options: {
-          userAttributes: {
-            email,
-            given_name: firstName,
-            family_name: lastName,
-            phone_number: phoneNumber || undefined,
-          },
+          userAttributes,
           autoSignIn: true
         }
       });
