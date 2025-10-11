@@ -9,41 +9,27 @@ import {
   ArrowTrendingUpIcon,
   ClockIcon,
   UserGroupIcon,
-  EyeIcon,
-  CalendarIcon,
   ChartBarIcon,
-  PencilIcon,
+  ArrowRightIcon,
+  FlagIcon,
+  ListBulletIcon,
+  CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
+  PencilIcon,
   UserIcon,
   PaperClipIcon,
   ArrowPathIcon,
+  EyeIcon,
   ClipboardDocumentListIcon,
-  ArrowRightIcon,
-  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { formatRelativeTime, getPriorityColor, getStatusColor } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
-import Avatar from '../components/Avatar';
-import TimeTrackingWidget from '../components/TimeTrackingWidget';
-import MilestoneCelebration from '../components/MilestoneCelebration';
+import { generateClient } from 'aws-amplify/data';
 import amplifyDataService from '../services/amplifyDataService';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [celebrationMilestone, setCelebrationMilestone] = useState(null);
-  const [showCelebration, setShowCelebration] = useState(false);
-
-  // Demo milestone for testing
-  const demoMilestone = {
-    id: 'milestone-1',
-    title: 'MVP Development Complete',
-    description: 'Successfully completed the minimum viable product with all core features implemented.',
-    due_date: new Date().toISOString(),
-    completed_tasks: 15,
-    progress: 100,
-    team_members: 5,
-  };
 
   // Fetch dashboard data from AWS Amplify
   const { data: dashboardData, isLoading, error } = useQuery({
@@ -115,118 +101,183 @@ const Dashboard = () => {
   const activeProjects = projects.filter(p => p.task_count > 0 || p.issue_count > 0).length;
 
   return (
-    <div style={{ padding: '32px', backgroundColor: '#F9FAFB', minHeight: '100vh' }}>
-      {/* Header with Customize Button */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Dashboard</h1>
-          <p style={{ fontSize: '15px', color: '#6B7280' }}>Welcome back, {user?.first_name}! Here's what's happening today.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Project Overview</h1>
+          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your projects.</p>
         </div>
         <Link
-          to="/custom-dashboard"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '12px 20px',
-            backgroundColor: '#3B82F6',
-            color: '#FFFFFF',
-            borderRadius: '10px',
-            fontWeight: 500,
-            fontSize: '14px',
-            textDecoration: 'none',
-            transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#2563EB';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#3B82F6';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-          }}
+          to="/projects"
+          className="btn-primary flex items-center"
         >
-          <Cog6ToothIcon style={{ height: '18px', width: '18px' }} />
-          <span>Customize Dashboard</span>
+          <PlusIcon className="h-5 w-5 mr-2" />
+          New Project
         </Link>
       </div>
 
       {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-        <div style={{
-          backgroundColor: '#FFFFFF',
-          padding: '24px',
-          borderRadius: '12px',
-          border: '1px solid #E5E7EB',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          transition: 'all 200ms ease'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
-          e.currentTarget.style.transform = 'translateY(-2px)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
-          e.currentTarget.style.transform = 'translateY(0)';
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              backgroundColor: '#EFF6FF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '16px'
-            }}>
-              <FolderIcon style={{ height: '24px', width: '24px', color: '#3B82F6' }} />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Total Projects */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between">
             <div>
-              <p style={{ fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '4px' }}>Active Projects</p>
-              <p style={{ fontSize: '28px', fontWeight: 600, color: '#111827' }}>
-                {activeProjects}/{totalProjects}
+              <p className="text-sm font-medium text-gray-600 mb-1">Total Projects</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.totalProjects || 0}</p>
+              <p className="text-xs text-gray-500 mt-1">{stats.activeProjects || 0} active</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <FolderIcon className="h-6 w-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Active Projects */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Active Projects</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.activeProjects || 0}</p>
+              <p className="text-xs text-gray-500 mt-1">0 completed</p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <ArrowTrendingUpIcon className="h-6 w-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Total Tasks */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Total Tasks</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.totalTasks || 0}</p>
+              <p className="text-xs text-gray-500 mt-1">{stats.completedTasks || 0} completed</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+              <ListBulletIcon className="h-6 w-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Overdue Tasks */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Overdue Tasks</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.overdueTasks || 0}</p>
+              <p className="text-xs text-gray-500 mt-1">Need attention</p>
+            </div>
+            <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+              <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Project Progress Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* In Progress Tasks */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">In Progress</h3>
+            <ClockIcon className="h-5 w-5 text-orange-500" />
+          </div>
+          <div className="text-center">
+            <p className="text-4xl font-bold text-orange-600">{stats.inProgressTasks || 0}</p>
+            <p className="text-sm text-gray-500 mt-2">tasks being worked on</p>
+          </div>
+        </div>
+
+        {/* Team Members */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
+            <UserGroupIcon className="h-5 w-5 text-blue-500" />
+          </div>
+          <div className="text-center">
+            <p className="text-4xl font-bold text-blue-600">0</p>
+            <p className="text-sm text-gray-500 mt-2">in your organization</p>
+          </div>
+        </div>
+
+        {/* Completion Rate */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Completion Rate</h3>
+            <ChartBarIcon className="h-5 w-5 text-green-500" />
+          </div>
+          <div className="text-center">
+            <p className="text-4xl font-bold text-green-600">{stats.completionRate || 0}%</p>
+            <p className="text-sm text-gray-500 mt-2">overall progress</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Milestones & Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Upcoming Milestones */}
+        <div className="card">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Upcoming Milestones</h3>
+              <FlagIcon className="h-5 w-5 text-yellow-500" />
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="text-center py-8">
+              <FlagIcon className="mx-auto h-12 w-12 text-gray-300" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No milestones yet</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Create milestones to track project progress
               </p>
             </div>
           </div>
         </div>
 
-        <div className="card p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <CheckCircleIcon className="h-8 w-8 text-success-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">My Tasks</p>
-              <p className="text-2xl font-semibold text-gray-900">{totalTasks}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <ExclamationTriangleIcon className="h-8 w-8 text-danger-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Overdue</p>
-              <p className="text-2xl font-semibold text-gray-900">{overdueTasks}</p>
+        {/* Recent Projects */}
+        <div className="card">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Recent Projects</h3>
+              <Link to="/projects" className="text-sm text-primary-600 hover:text-primary-700">
+                View All
+              </Link>
             </div>
           </div>
-        </div>
-
-        <div className="card p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <ClockIcon className="h-8 w-8 text-warning-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Due Soon</p>
-              <p className="text-2xl font-semibold text-gray-900">{dueSoonTasks}</p>
-            </div>
+          <div className="p-6">
+            {projects.length > 0 ? (
+              <div className="space-y-4">
+                {projects.slice(0, 3).map((project) => (
+                  <Link
+                    key={project.id}
+                    to={`/projects/${project.id}`}
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: project.color || '#3B82F6' }}
+                      />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{project.name}</p>
+                        <p className="text-xs text-gray-500">{project.task_count || 0} tasks</p>
+                      </div>
+                    </div>
+                    <ArrowRightIcon className="h-4 w-4 text-gray-400" />
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FolderIcon className="mx-auto h-12 w-12 text-gray-300" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No projects yet</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Get started by creating your first project
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -382,26 +433,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Time Tracking Widget */}
-          <TimeTrackingWidget />
-
-          {/* Milestone Celebration Demo */}
-          <div className="card p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">🎉 Celebrations</h3>
-            <button
-              onClick={() => {
-                setCelebrationMilestone(demoMilestone);
-                setShowCelebration(true);
-              }}
-              className="w-full px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-medium rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all transform hover:scale-105"
-            >
-              🏆 Celebrate Milestone (Demo)
-            </button>
-            <p className="text-sm text-gray-500 mt-2">
-              Click to see milestone celebration animation!
-            </p>
-          </div>
-
           {/* Quick Actions */}
           <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
@@ -434,15 +465,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Milestone Celebration Modal */}
-      <MilestoneCelebration
-        milestone={celebrationMilestone}
-        isVisible={showCelebration}
-        onClose={() => {
-          setShowCelebration(false);
-          setCelebrationMilestone(null);
-        }}
-      />
     </div>
   );
 };
