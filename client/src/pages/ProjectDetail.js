@@ -1978,10 +1978,26 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
     title: '',
     description: '',
     due_date: '',
+    owner: '',
     color: '#3B82F6'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+
+  // Fetch team members for owner selection
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ['teamMembers', projectId],
+    queryFn: async () => {
+      try {
+        const client = generateClient();
+        const { data: users } = await client.models.UserProfile.list();
+        return users || [];
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+        return [];
+      }
+    }
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -2003,6 +2019,11 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
         status: 'NOT_STARTED',
         completionPercentage: 0
       };
+
+      // Add ownerId if provided
+      if (formData.owner) {
+        milestoneInput.ownerId = formData.owner;
+      }
 
       // Add dueDate if provided
       if (formData.due_date) {
@@ -2100,6 +2121,25 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               placeholder="Enter milestone description"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Owner
+            </label>
+            <select
+              name="owner"
+              value={formData.owner}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="">Select owner (optional)</option>
+              {teamMembers.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.firstName} {member.lastName} ({member.email})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
