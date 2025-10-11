@@ -1879,9 +1879,7 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      const client = generateClient({
-        authMode: 'apiKey'
-      });
+      const client = generateClient();
       
       const milestoneInput = {
         name: formData.title.trim(),
@@ -1940,8 +1938,15 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center" style={{ zIndex: 9999 }}>
-      <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center" 
+      style={{ zIndex: 9999 }}
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md mx-4" 
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Create Milestone</h3>
           <button
