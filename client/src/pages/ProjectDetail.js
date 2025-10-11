@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -1937,10 +1938,10 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
     { value: '#F97316', label: 'Orange' }
   ];
 
-  return (
+  const modalContent = (
     <div 
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center" 
-      style={{ zIndex: 9999 }}
+      style={{ zIndex: 99999 }}
       onClick={onClose}
     >
       <div 
@@ -2042,6 +2043,8 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default ProjectDetail;
