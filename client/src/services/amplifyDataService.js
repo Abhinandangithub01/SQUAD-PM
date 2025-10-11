@@ -6,7 +6,26 @@
 
 import { generateClient } from 'aws-amplify/data';
 
-const client = generateClient();
+// Lazy client initialization to ensure Amplify is configured
+let client = null;
+
+const getClient = () => {
+  if (!client) {
+    try {
+      client = generateClient();
+    } catch (error) {
+      console.error('Error generating Amplify client:', error);
+      return null;
+    }
+  }
+  return client;
+};
+
+// Helper to check if models are available
+const areModelsAvailable = () => {
+  const c = getClient();
+  return c && c.models && Object.keys(c.models).length > 0;
+};
 
 /**
  * PROJECT OPERATIONS
@@ -16,6 +35,11 @@ export const projectService = {
   // Create a new project
   async create(projectData) {
     try {
+      const client = getClient();
+      if (!client || !client.models || !client.models.Project) {
+        return { success: false, error: 'Amplify not configured yet' };
+      }
+
       // Map status to match schema enum values
       const statusMap = {
         'PLANNING': 'ACTIVE',
@@ -50,6 +74,11 @@ export const projectService = {
   // Get all projects
   async list() {
     try {
+      const client = getClient();
+      if (!client || !client.models || !client.models.Project) {
+        return { success: false, error: 'Amplify not configured yet', data: [] };
+      }
+      
       const { data: projects, errors } = await client.models.Project.list();
 
       if (errors) {
@@ -67,6 +96,11 @@ export const projectService = {
   // Get a single project by ID
   async get(id) {
     try {
+      const client = getClient();
+      if (!client || !client.models || !client.models.Project) {
+        return { success: false, error: 'Amplify not configured yet' };
+      }
+      
       const { data: project, errors } = await client.models.Project.get({ id });
 
       if (errors) {
@@ -265,8 +299,10 @@ export const dashboardService = {
   // Get dashboard statistics
   async getStats() {
     try {
+      const client = getClient();
+      
       // Check if Amplify models are available
-      if (!client.models || !client.models.Project || !client.models.Task) {
+      if (!client || !client.models || !client.models.Project || !client.models.Task) {
         console.warn('Amplify models not yet available, returning empty stats');
         return {
           success: true,
