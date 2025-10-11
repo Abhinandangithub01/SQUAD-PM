@@ -37,6 +37,7 @@ import {
 import { PauseIcon } from '@heroicons/react/24/solid';
 import { Menu } from '@headlessui/react';
 import { generateClient } from 'aws-amplify/data';
+import amplifyDataService from '../services/amplifyDataService';
 import api from '../utils/api';
 import { formatDate, getRoleColor, getRoleLabel } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -54,6 +55,25 @@ const ProjectDetail = () => {
     queryKey: ['project', projectId],
     queryFn: async () => {
       try {
+        // Try Amplify first
+        const amplifyResult = await amplifyDataService.projects.get(projectId);
+        if (amplifyResult.success && amplifyResult.data) {
+          const projectFromAmplify = amplifyResult.data;
+          return {
+            project: {
+              id: projectFromAmplify.id,
+              name: projectFromAmplify.name || projectFromAmplify.title || `Project ${projectId}`,
+              description: projectFromAmplify.description || '',
+              status: projectFromAmplify.status || 'ACTIVE',
+              color: projectFromAmplify.color || '#8B5CF6',
+              startDate: projectFromAmplify.startDate,
+              endDate: projectFromAmplify.endDate,
+              members: []
+            }
+          };
+        }
+        
+        // Fallback to API
         const response = await api.get(`/projects/${projectId}`);
         return response.data;
       } catch (error) {
@@ -119,6 +139,7 @@ const ProjectDetail = () => {
   const tabs = [
     { id: 'overview', name: 'Overview', icon: ChartBarIcon },
     { id: 'members', name: 'Members', icon: UserPlusIcon },
+    { id: 'files', name: 'Files', icon: DocumentIcon },
     { id: 'settings', name: 'Settings', icon: Cog6ToothIcon, requiresEdit: true },
   ];
 
@@ -135,17 +156,21 @@ const ProjectDetail = () => {
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </Link>
-          <div className="flex items-center space-x-3">
-            <div 
-              className="w-4 h-4 rounded-full flex-shrink-0"
-              style={{ backgroundColor: project.color }}
-            />
-            <div>
+
+          <div>
+            <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-              {project.description && (
-                <p className="text-gray-600 mt-1">{project.description}</p>
-              )}
+              <Link
+                to={`/projects/${projectId}/kanban`}
+                className="flex items-center px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+              >
+                <EyeIcon className="h-4 w-4 mr-1.5" />
+                View Project
+              </Link>
             </div>
+            {project.description && (
+              <p className="text-gray-600 mt-1">{project.description}</p>
+            )}
           </div>
         </div>
 
@@ -179,54 +204,6 @@ const ProjectDetail = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Link
-          to={`/projects/${projectId}/kanban`}
-          className="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all duration-200"
-        >
-          <Squares2X2Icon className="h-8 w-8 text-primary-600 mr-3" />
-          <div>
-            <p className="font-medium text-gray-900">Kanban Board</p>
-            <p className="text-sm text-gray-500">Visual task management</p>
-          </div>
-        </Link>
-
-        <Link
-          to={`/projects/${projectId}/list`}
-          className="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all duration-200"
-        >
-          <ListBulletIcon className="h-8 w-8 text-primary-600 mr-3" />
-          <div>
-            <p className="font-medium text-gray-900">List View</p>
-            <p className="text-sm text-gray-500">Spreadsheet-like view</p>
-          </div>
-        </Link>
-
-        <Link
-          to={`/projects/${projectId}/gantt`}
-          className="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all duration-200"
-        >
-          <ChartBarIcon className="h-8 w-8 text-primary-600 mr-3" />
-          <div>
-            <p className="font-medium text-gray-900">Gantt Chart</p>
-            <p className="text-sm text-gray-500">Timeline view</p>
-          </div>
-        </Link>
-
-        <Link
-          to={`/projects/${projectId}/files`}
-          className="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all duration-200"
-        >
-          <DocumentIcon className="h-8 w-8 text-primary-600 mr-3" />
-          <div>
-            <p className="font-medium text-gray-900">Files</p>
-            <p className="text-sm text-gray-500">Project documents</p>
-          </div>
-        </Link>
-
-        <ProjectChatLink projectId={projectId} projectName={project.name} />
-      </div>
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
@@ -251,7 +228,8 @@ const ProjectDetail = () => {
       {/* Tab Content */}
       <div className="mt-6">
         {activeTab === 'overview' && <OverviewTab project={project} />}
-        {activeTab === 'members' && <MembersTab project={project} canEdit={canEdit} />}
+        {activeTab === 'members' && <MembersTab project={project} projectId={projectId} canEdit={canEdit} />}
+        {activeTab === 'files' && <FilesTab projectId={projectId} />}
         {activeTab === 'settings' && canEdit && <SettingsTab project={project} />}
       </div>
     </div>
@@ -338,7 +316,7 @@ const OverviewTab = ({ project }) => {
   );
 };
 
-const MembersTab = ({ project, canEdit }) => {
+const MembersTab = ({ project, projectId, canEdit }) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const queryClient = useQueryClient();
 
@@ -440,8 +418,144 @@ const MembersTab = ({ project, canEdit }) => {
           </table>
         </div>
       </div>
+
+      {/* Invite Member Modal */}
+      {showInviteModal && (
+        <InviteMemberModal
+          projectId={projectId}
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={() => {
+            queryClient.invalidateQueries(['project', projectId]);
+            setShowInviteModal(false);
+          }}
+        />
+      )}
     </div>
   );
+};
+
+// Files Tab Component
+const FilesTab = ({ projectId }) => {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium text-gray-900">Project Files</h3>
+        <button className="btn-primary">
+          <PlusIcon className="h-4 w-4 mr-2" />
+          Upload File
+        </button>
+      </div>
+
+      <div className="card p-6">
+        <div className="text-center py-12">
+          <DocumentIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No files yet</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Get started by uploading a file.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Invite Member Modal Component
+const InviteMemberModal = ({ projectId, onClose, onSuccess }) => {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!email.trim() || !email.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Call the invitation API
+      const response = await api.post(`/projects/${projectId}/invite`, {
+        email: email.trim(),
+        projectId: projectId
+      });
+
+      if (response.data.success) {
+        toast.success(`Invitation sent to ${email}`);
+        onSuccess();
+      } else {
+        toast.error(response.data.message || 'Failed to send invitation');
+      }
+    } catch (error) {
+      console.error('Error sending invitation:', error);
+      toast.error(error.response?.data?.message || 'Failed to send invitation');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const modalContent = (
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center" 
+      style={{ zIndex: 99999 }}
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md mx-4" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">Invite Team Member</h3>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="colleague@example.com"
+              required
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              A custom invitation link will be sent to this email address
+            </p>
+          </div>
+
+          <div className="flex space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? 'Sending...' : 'Send Invitation'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 const SettingsTab = ({ project }) => {
