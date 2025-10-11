@@ -32,8 +32,10 @@
     "aws_region": "ap-south-1",
     "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
-      "AWS_IAM"
+      "AWS_IAM",
+      "API_KEY"
     ],
+    "api_key": "da2-fakeApiKey123456",
     "model_introspection": {
       "version": 1,
       "models": {
@@ -1661,6 +1663,115 @@
             "primaryKeyFieldName": "id",
             "sortKeyFieldNames": []
           }
+        },
+        "Milestone": {
+          "name": "Milestone",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "name": {
+              "name": "name",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "projectId": {
+              "name": "projectId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "ownerId": {
+              "name": "ownerId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "dueDate": {
+              "name": "dueDate",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
+              "isArray": false,
+              "type": {
+                "enum": "MilestoneStatus"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "completionPercentage": {
+              "name": "completionPercentage",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "Milestones",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "public",
+                    "provider": "apiKey",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
         }
       },
       "enums": {
@@ -1727,6 +1838,14 @@
             "MENTION",
             "PROJECT_INVITE",
             "DEADLINE_REMINDER"
+          ]
+        },
+        "MilestoneStatus": {
+          "name": "MilestoneStatus",
+          "values": [
+            "NOT_STARTED",
+            "IN_PROGRESS",
+            "COMPLETED"
           ]
         }
       },
