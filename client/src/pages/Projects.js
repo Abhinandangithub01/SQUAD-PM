@@ -247,7 +247,7 @@ const ProjectCard = ({ project, onDelete }) => {
     : 0;
 
   return (
-    <div className="card hover:shadow-medium transition-shadow duration-200">
+    <div className="card hover:border-primary-500 transition-colors">
       <div className="p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
