@@ -265,6 +265,32 @@ export const dashboardService = {
   // Get dashboard statistics
   async getStats() {
     try {
+      // Check if Amplify models are available
+      if (!client.models || !client.models.Project || !client.models.Task) {
+        console.warn('Amplify models not yet available, returning empty stats');
+        return {
+          success: true,
+          data: {
+            totalProjects: 0,
+            activeProjects: 0,
+            totalTasks: 0,
+            completedTasks: 0,
+            inProgressTasks: 0,
+            todoTasks: 0,
+            overdueTasks: 0,
+            completionRate: 0,
+            overview: {
+              total_projects: 0,
+              total_tasks: 0,
+              completed_tasks: 0,
+              total_issues: 0,
+              completion_rate: 0,
+              team_members: 0,
+            },
+          },
+        };
+      }
+
       // Fetch projects and tasks in parallel
       const [projectsResult, tasksResult] = await Promise.all([
         client.models.Project.list(),

@@ -1990,6 +1990,10 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
     queryFn: async () => {
       try {
         const client = generateClient();
+        if (!client.models || !client.models.UserProfile) {
+          console.warn('Amplify models not yet available');
+          return [];
+        }
         const { data: users } = await client.models.UserProfile.list();
         return users || [];
       } catch (error) {
@@ -2011,6 +2015,13 @@ const CreateMilestoneModal = ({ projectId, onClose }) => {
     
     try {
       const client = generateClient();
+      
+      // Check if Amplify models are available
+      if (!client.models || !client.models.Milestone) {
+        toast.error('Backend is still deploying. Please try again in a few minutes.');
+        setIsSubmitting(false);
+        return;
+      }
       
       const milestoneInput = {
         name: formData.title.trim(),
