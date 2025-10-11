@@ -24,7 +24,6 @@ const navigation = [
   { name: 'Projects', href: '/projects', icon: FolderIcon },
   { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
-  { name: 'Automation', href: '/automation', icon: BoltIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 
