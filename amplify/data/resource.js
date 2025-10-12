@@ -21,7 +21,9 @@ const schema = a.schema({
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
     createdById: a.id(),
+    createdBy: a.belongsTo('User', 'createdById'),
     assignedToId: a.id(),
+    assignedTo: a.belongsTo('User', 'assignedToId'),
     assigneeIds: a.string(), // JSON array
     watcherIds: a.string(), // JSON array
     
