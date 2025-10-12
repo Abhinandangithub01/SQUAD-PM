@@ -1,7 +1,7 @@
 import { defineBackend } from '@aws-amplify/backend';
-import { auth } from './auth/resource';
-import { data } from './data/enhanced-resource';
-import { storage } from './storage/resource';
+import { auth } from './auth/resource.js';
+import { data } from './data/enhanced-resource.js';
+import { storage } from './storage/resource.js';
 
 /**
  * Complete AWS Amplify Backend Configuration
