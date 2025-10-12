@@ -1,0 +1,309 @@
+# GraphQL Schema for Project Management System
+
+type User @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  cognitoId: String! @index(name: "byCognitoId")
+  email: AWSEmail!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  avatarUrl: AWSURL
+  projects: [ProjectMember] @hasMany(indexName: "byUser", fields: ["id"])
+  createdTasks: [Task] @hasMany(indexName: "byCreator", fields: ["id"])
+  assignedTasks: [Task] @hasMany(indexName: "byAssignee", fields: ["id"])
+  comments: [Comment] @hasMany(indexName: "byUser", fields: ["id"])
+  messages: [Message] @hasMany(indexName: "byUser", fields: ["id"])
+  activityLogs: [ActivityLog] @hasMany(indexName: "byUser", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
+  VIEWER
+}
+
+type Project @model @auth(rules: [
+  { allow: owner },
+  { allow: groups, groups: ["Admins"] }
+]) {
+  id: ID!
+  name: String!
+  description: String
+  color: String
+  ownerId: ID! @index(name: "byOwner", sortKeyFields: ["createdAt"])
+  owner: User @belongsTo(fields: ["ownerId"])
+  status: ProjectStatus!
+  startDate: AWSDate
+  endDate: AWSDate
+  members: [ProjectMember] @hasMany(indexName: "byProject", fields: ["id"])
+  tasks: [Task] @hasMany(indexName: "byProject", fields: ["id"])
+  channels: [Channel] @hasMany(indexName: "byProject", fields: ["id"])
+  activityLogs: [ActivityLog] @hasMany(indexName: "byProject", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+  ON_HOLD
+}
+
+type ProjectMember @model @auth(rules: [
+  { allow: owner },
+  { allow: groups, groups: ["Admins"] }
+]) {
+  id: ID!
+  projectId: ID! @index(name: "byProject", sortKeyFields: ["userId"])
+  project: Project @belongsTo(fields: ["projectId"])
+  userId: ID! @index(name: "byUser", sortKeyFields: ["projectId"])
+  user: User @belongsTo(fields: ["userId"])
+  role: MemberRole!
+  joinedAt: AWSDateTime!
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+type Task @model @auth(rules: [
+  { allow: owner },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  projectId: ID! @index(name: "byProject", sortKeyFields: ["status", "createdAt"])
+  project: Project @belongsTo(fields: ["projectId"])
+  title: String!
+  description: String
+  status: TaskStatus!
+  priority: TaskPriority!
+  dueDate: AWSDateTime
+  createdById: ID! @index(name: "byCreator", sortKeyFields: ["createdAt"])
+  createdBy: User @belongsTo(fields: ["createdById"])
+  assignedToId: ID @index(name: "byAssignee", sortKeyFields: ["status"])
+  assignedTo: User @belongsTo(fields: ["assignedToId"])
+  columnId: ID
+  position: Int
+  tags: [String]
+  
+  # Import fields for Zoho Projects migration
+  startDate: AWSDateTime
+  durationHours: Float
+  completionPercentage: Int
+  completedAt: AWSDateTime
+  workHours: Float
+  billingType: String
+  
+  comments: [Comment] @hasMany(indexName: "byTask", fields: ["id"])
+  attachments: [Attachment] @hasMany(indexName: "byTask", fields: ["id"])
+  subtasks: [Subtask] @hasMany(indexName: "byTask", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+type Subtask @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  taskId: ID! @index(name: "byTask", sortKeyFields: ["position"])
+  task: Task @belongsTo(fields: ["taskId"])
+  title: String!
+  completed: Boolean!
+  position: Int
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Comment @model @auth(rules: [
+  { allow: owner },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  taskId: ID! @index(name: "byTask", sortKeyFields: ["createdAt"])
+  task: Task @belongsTo(fields: ["taskId"])
+  userId: ID! @index(name: "byUser", sortKeyFields: ["createdAt"])
+  user: User @belongsTo(fields: ["userId"])
+  content: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Attachment @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  taskId: ID! @index(name: "byTask", sortKeyFields: ["createdAt"])
+  task: Task @belongsTo(fields: ["taskId"])
+  fileName: String!
+  fileUrl: AWSURL!
+  fileSize: Int
+  fileType: String
+  uploadedById: ID!
+  uploadedBy: User @belongsTo(fields: ["uploadedById"])
+  createdAt: AWSDateTime!
+}
+
+type Channel @model @auth(rules: [
+  { allow: owner },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  name: String!
+  description: String
+  projectId: ID @index(name: "byProject", sortKeyFields: ["type"])
+  project: Project @belongsTo(fields: ["projectId"])
+  type: ChannelType!
+  createdById: ID!
+  createdBy: User @belongsTo(fields: ["createdById"])
+  messages: [Message] @hasMany(indexName: "byChannel", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum ChannelType {
+  PROJECT
+  DIRECT
+  GENERAL
+}
+
+type Message @model @auth(rules: [
+  { allow: owner },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  channelId: ID! @index(name: "byChannel", sortKeyFields: ["createdAt"])
+  channel: Channel @belongsTo(fields: ["channelId"])
+  userId: ID! @index(name: "byUser", sortKeyFields: ["createdAt"])
+  user: User @belongsTo(fields: ["userId"])
+  content: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ActivityLog @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser", sortKeyFields: ["createdAt"])
+  user: User @belongsTo(fields: ["userId"])
+  projectId: ID @index(name: "byProject", sortKeyFields: ["createdAt"])
+  project: Project @belongsTo(fields: ["projectId"])
+  taskId: ID
+  action: String!
+  entityType: String
+  entityName: String
+  fromStatus: String
+  toStatus: String
+  createdAt: AWSDateTime!
+}
+
+# Custom Queries and Mutations
+
+type Query {
+  getDashboardStats(userId: ID!): DashboardStats
+    @function(name: "getDashboardStats-${env}")
+  
+  getProjectStats(projectId: ID!): ProjectStats
+    @function(name: "getProjectStats-${env}")
+  
+  searchTasks(searchTerm: String!, projectId: ID): TaskSearchResults
+    @function(name: "searchTasks-${env}")
+}
+
+type Mutation {
+  assignTask(taskId: ID!, userId: ID!): Task
+    @function(name: "assignTask-${env}")
+  
+  moveTask(taskId: ID!, newStatus: TaskStatus!, position: Int): Task
+    @function(name: "moveTask-${env}")
+  
+  createNotification(userId: ID!, type: String!, message: String!): Notification
+    @function(name: "createNotification-${env}")
+  
+  importTasksFromExcel(projectId: ID!, fileKey: String!): ImportResult
+    @function(name: "importTasks-${env}")
+}
+
+# Custom Types
+
+type DashboardStats {
+  totalProjects: Int!
+  activeProjects: Int!
+  totalTasks: Int!
+  completedTasks: Int!
+  overdueTasks: Int!
+  dueSoonTasks: Int!
+  recentActivity: [ActivityLog]
+}
+
+type ProjectStats {
+  tasksByStatus: [StatusCount]
+  tasksByPriority: [PriorityCount]
+  completionRate: Float
+  averageCompletionTime: Float
+}
+
+type StatusCount {
+  status: TaskStatus!
+  count: Int!
+}
+
+type PriorityCount {
+  priority: TaskPriority!
+  count: Int!
+}
+
+type TaskSearchResults {
+  items: [Task]
+  total: Int!
+}
+
+type Notification @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser", sortKeyFields: ["createdAt"])
+  type: NotificationType!
+  title: String!
+  message: String!
+  read: Boolean!
+  linkTo: String
+  createdAt: AWSDateTime!
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  COMMENT_ADDED
+  MENTION
+  PROJECT_INVITE
+  DEADLINE_REMINDER
+}
+
+# Import Types
+type ImportResult {
+  success: Int!
+  failed: Int!
+  errors: [ImportError]
+  createdTasks: [Task]
+}
+
+type ImportError {
+  row: Int!
+  error: String!
+  taskName: String
+}

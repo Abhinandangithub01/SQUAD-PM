@@ -107,10 +107,12 @@ Thumbs.db
 *.temp
 
 # AWS Amplify
-amplify/
+# amplify/ - REMOVED: Need to commit backend code for Gen 2
 .amplifyrc
 amplify-backup/
 amplify-meta.json
+amplify/.amplify/
+amplify/node_modules/
 
 # Vercel (not used)
 .vercel
