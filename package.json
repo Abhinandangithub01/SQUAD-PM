@@ -1,6 +1,7 @@
 {
   "name": "project-management-app",
   "version": "1.0.0",
+  "type": "module",
   "description": "Full-stack project management application with React, Node.js, Express, PostgreSQL, and WebSockets",
   "main": "server/index.js",
   "scripts": {
