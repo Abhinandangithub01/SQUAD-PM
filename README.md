@@ -2,6 +2,8 @@
 
 A modern, production-ready project management application built with React and AWS Amplify.
 
+> Latest update: Backend deployed with Milestone model support
+
 ## ✨ Features
 
 - **📊 Dashboard**: Real-time activity stream and notifications
