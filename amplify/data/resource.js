@@ -10,8 +10,8 @@ const schema = a.schema({
     description: a.string(),
     industry: a.string(),
     size: a.enum(['SMALL', 'MEDIUM', 'LARGE', 'ENTERPRISE']),
-    plan: a.enum(['FREE', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE']).default('FREE'),
-    status: a.enum(['ACTIVE', 'SUSPENDED', 'CANCELLED', 'TRIAL']).default('ACTIVE'),
+    plan: a.enum(['FREE', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE']),
+    status: a.enum(['ACTIVE', 'SUSPENDED', 'CANCELLED', 'TRIAL']),
     
     // Settings stored as JSON string
     settings: a.json(),
@@ -88,7 +88,7 @@ const schema = a.schema({
     invitedAt: a.datetime(),
     joinedAt: a.datetime(),
     
-    status: a.enum(['ACTIVE', 'INVITED', 'SUSPENDED']).default('ACTIVE'),
+    status: a.enum(['ACTIVE', 'INVITED', 'SUSPENDED']),
     
     // Department/team assignment
     department: a.string(),
@@ -108,7 +108,7 @@ const schema = a.schema({
     role: a.enum(['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']).required(),
     invitedBy: a.id().required(),
     token: a.string().required(),
-    status: a.enum(['PENDING', 'ACCEPTED', 'EXPIRED', 'CANCELLED']).default('PENDING'),
+    status: a.enum(['PENDING', 'ACCEPTED', 'EXPIRED', 'CANCELLED']),
     expiresAt: a.datetime().required(),
     acceptedAt: a.datetime(),
   })
