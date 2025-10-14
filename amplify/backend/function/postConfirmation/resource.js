@@ -9,7 +9,14 @@ export const postConfirmation = defineFunction({
   },
   timeoutSeconds: 30,
   bundling: {
-    nodeModules: ['@aws-sdk/client-dynamodb', '@aws-sdk/lib-dynamodb'],
-    externalModules: ['@aws-sdk/client-dynamodb', '@aws-sdk/lib-dynamodb'],
+    commandHooks: {
+      beforeBundling: () => [],
+      afterBundling: () => [],
+      beforeInstall: () => [],
+    },
+    esbuildArgs: {
+      '--external:@aws-sdk/client-dynamodb': true,
+      '--external:@aws-sdk/lib-dynamodb': true,
+    },
   },
 });
