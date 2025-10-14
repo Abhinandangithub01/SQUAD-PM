@@ -458,6 +458,43 @@ const schema = a.schema({
     allow.authenticated().to(['read']),
     allow.owner('ownerId'),
   ]),
+
+  // ============================================
+  // AUDIT LOG MODEL - Track all changes
+  // ============================================
+  AuditLog: a.model({
+    organizationId: a.id().required(),
+    userId: a.id().required(),
+    action: a.enum(['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT']).required(),
+    resourceType: a.string().required(), // Task, Project, User, etc.
+    resourceId: a.id(),
+    changes: a.json(), // { before: {...}, after: {...} }
+    ipAddress: a.string(),
+    userAgent: a.string(),
+    timestamp: a.datetime().required(),
+  })
+  .authorization(allow => [
+    allow.authenticated().to(['read']),
+    allow.owner('userId').to(['read']),
+  ]),
+
+  // ============================================
+  // WEBHOOK MODEL - Integration webhooks
+  // ============================================
+  Webhook: a.model({
+    organizationId: a.id().required(),
+    name: a.string().required(),
+    url: a.url().required(),
+    events: a.string().array(), // ['task.created', 'task.updated', etc.]
+    secret: a.string().required(),
+    active: a.boolean(),
+    lastTriggered: a.datetime(),
+    failureCount: a.integer(),
+  })
+  .authorization(allow => [
+    allow.authenticated().to(['read']),
+    allow.owner('organizationId'),
+  ]),
 });
 
 export const data = defineData({

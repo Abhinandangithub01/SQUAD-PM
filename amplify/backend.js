@@ -10,6 +10,8 @@ import { acceptInvite } from './backend/function/acceptInvite/resource';
 import { removeUser } from './backend/function/removeUser/resource';
 import { dueDateReminder } from './backend/function/dueDateReminder/resource';
 import { sendNotification } from './backend/function/sendNotification/resource';
+import { webhookDispatcher } from './backend/function/webhookDispatcher/resource';
+import { slackNotifier } from './backend/function/slackNotifier/resource';
 
 /**
  * Complete AWS Amplify Backend Configuration
@@ -26,6 +28,8 @@ export const backend = defineBackend({
   removeUser,
   dueDateReminder,
   sendNotification,
+  webhookDispatcher,
+  slackNotifier,
 });
 
 // Grant Lambda functions access to DynamoDB
@@ -135,3 +139,19 @@ backend.sendNotification.resources.lambda.addToRolePolicy(
 backend.sendNotification.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
 backend.sendNotification.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
 backend.sendNotification.addEnvironment('APP_URL', 'https://main.d8tv3j2hk2i9r.amplifyapp.com');
+
+// WebhookDispatcher Lambda permissions
+backend.webhookDispatcher.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:Query',
+      'dynamodb:GetItem',
+      'dynamodb:UpdateItem',
+    ],
+    resources: [dataTableArn, `${dataTableArn}/index/*`],
+  })
+);
+
+backend.webhookDispatcher.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+
+// SlackNotifier Lambda - no special permissions needed (just HTTP calls)
