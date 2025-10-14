@@ -77,7 +77,7 @@ const schema = a.schema({
     userId: a.id().required(),
     user: a.belongsTo('User', 'userId'),
     
-    role: a.enum(['OWNER', 'ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']).required(),
+    role: a.string().required(), // OWNER, ADMIN, MANAGER, MEMBER, VIEWER
     
     // Custom permissions array
     permissions: a.string(), // JSON array of permission strings
@@ -103,7 +103,7 @@ const schema = a.schema({
   Invitation: a.model({
     organizationId: a.id().required(),
     email: a.email().required(),
-    role: a.enum(['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']).required(),
+    role: a.string().required(), // ADMIN, MANAGER, MEMBER, VIEWER
     invitedBy: a.id().required(),
     token: a.string().required(),
     status: a.enum(['PENDING', 'ACCEPTED', 'EXPIRED', 'CANCELLED']),
@@ -452,7 +452,7 @@ const schema = a.schema({
   AuditLog: a.model({
     organizationId: a.id().required(),
     userId: a.id().required(),
-    action: a.enum(['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT']).required(),
+    action: a.string().required(), // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
     resourceType: a.string().required(), // Task, Project, User, etc.
     resourceId: a.id(),
     changes: a.json(), // { before: {...}, after: {...} }
