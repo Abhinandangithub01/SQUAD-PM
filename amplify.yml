@@ -5,6 +5,8 @@ backend:
       commands:
         - npm install --legacy-peer-deps
         - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
+        # Copy amplify_outputs.json to client/src with proper encoding
+        - cat amplify_outputs.json | jq '.' > client/src/amplify_outputs.json
 frontend:
   phases:
     preBuild:
