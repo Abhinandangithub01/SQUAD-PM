@@ -40,6 +40,8 @@ const Settings = () => {
     { id: 'notifications', name: 'Notifications', icon: BellIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
     { id: 'preferences', name: 'Preferences', icon: Cog6ToothIcon },
+    { id: 'integrations', name: 'Integrations', icon: Cog6ToothIcon },
+    { id: 'privacy', name: 'Privacy & Data', icon: ShieldCheckIcon },
   ];
 
   const visibleTabs = tabs.filter(t => !t.adminOnly || user?.role === 'admin');
