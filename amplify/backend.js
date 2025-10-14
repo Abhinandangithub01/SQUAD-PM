@@ -8,6 +8,8 @@ import { createOrganization } from './backend/function/createOrganization/resour
 import { inviteUser } from './backend/function/inviteUser/resource';
 import { acceptInvite } from './backend/function/acceptInvite/resource';
 import { removeUser } from './backend/function/removeUser/resource';
+import { dueDateReminder } from './backend/function/dueDateReminder/resource';
+import { sendNotification } from './backend/function/sendNotification/resource';
 
 /**
  * Complete AWS Amplify Backend Configuration
@@ -22,6 +24,8 @@ export const backend = defineBackend({
   inviteUser,
   acceptInvite,
   removeUser,
+  dueDateReminder,
+  sendNotification,
 });
 
 // Grant Lambda functions access to DynamoDB
@@ -96,3 +100,38 @@ backend.removeUser.resources.lambda.addToRolePolicy(
 );
 
 backend.removeUser.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+
+// DueDateReminder Lambda permissions
+backend.dueDateReminder.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:Scan',
+      'dynamodb:Query',
+      'dynamodb:GetItem',
+      'ses:SendEmail',
+      'ses:SendRawEmail',
+    ],
+    resources: ['*'], // SES requires wildcard, Scan needs table access
+  })
+);
+
+backend.dueDateReminder.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+backend.dueDateReminder.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
+backend.dueDateReminder.addEnvironment('APP_URL', 'https://main.d8tv3j2hk2i9r.amplifyapp.com');
+
+// SendNotification Lambda permissions
+backend.sendNotification.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:PutItem',
+      'dynamodb:GetItem',
+      'ses:SendEmail',
+      'ses:SendRawEmail',
+    ],
+    resources: ['*'], // SES requires wildcard
+  })
+);
+
+backend.sendNotification.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+backend.sendNotification.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
+backend.sendNotification.addEnvironment('APP_URL', 'https://main.d8tv3j2hk2i9r.amplifyapp.com');
