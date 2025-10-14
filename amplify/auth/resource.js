@@ -39,6 +39,7 @@ export const auth = defineAuth({
   },
   // Lambda triggers
   triggers: {
+    preSignUp: './backend/function/preSignUp',
     postConfirmation: './backend/function/postConfirmation',
   },
 });

@@ -14,6 +14,10 @@ import { webhookDispatcher } from './backend/function/webhookDispatcher/resource
 import { slackNotifier } from './backend/function/slackNotifier/resource';
 import { exportUserData } from './backend/function/exportUserData/resource';
 import { deleteUserData } from './backend/function/deleteUserData/resource';
+import { preSignUp } from './backend/function/preSignUp/resource';
+import { recurringTaskCreator } from './backend/function/recurringTaskCreator/resource';
+import { bulkTaskImport } from './backend/function/bulkTaskImport/resource';
+import { emailDigest } from './backend/function/emailDigest/resource';
 
 /**
  * Complete AWS Amplify Backend Configuration
@@ -34,6 +38,10 @@ export const backend = defineBackend({
   slackNotifier,
   exportUserData,
   deleteUserData,
+  preSignUp,
+  recurringTaskCreator,
+  bulkTaskImport,
+  emailDigest,
 });
 
 // Grant Lambda functions access to DynamoDB
@@ -196,3 +204,60 @@ backend.deleteUserData.resources.lambda.addToRolePolicy(
 backend.deleteUserData.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
 backend.deleteUserData.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
 backend.deleteUserData.addEnvironment('USER_POOL_ID', backend.auth.resources.userPool.userPoolId);
+
+// PreSignUp Lambda permissions
+backend.preSignUp.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:Query',
+      'dynamodb:GetItem',
+    ],
+    resources: [dataTableArn, `${dataTableArn}/index/*`],
+  })
+);
+
+backend.preSignUp.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+
+// RecurringTaskCreator Lambda permissions
+backend.recurringTaskCreator.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:Scan',
+      'dynamodb:PutItem',
+      'dynamodb:UpdateItem',
+    ],
+    resources: [dataTableArn],
+  })
+);
+
+backend.recurringTaskCreator.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+
+// BulkTaskImport Lambda permissions
+backend.bulkTaskImport.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:PutItem',
+      'dynamodb:BatchWriteItem',
+    ],
+    resources: [dataTableArn],
+  })
+);
+
+backend.bulkTaskImport.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+
+// EmailDigest Lambda permissions
+backend.emailDigest.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:Scan',
+      'dynamodb:Query',
+      'ses:SendEmail',
+      'ses:SendRawEmail',
+    ],
+    resources: ['*'],
+  })
+);
+
+backend.emailDigest.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+backend.emailDigest.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
+backend.emailDigest.addEnvironment('APP_URL', 'https://main.d8tv3j2hk2i9r.amplifyapp.com');
