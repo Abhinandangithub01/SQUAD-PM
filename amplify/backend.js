@@ -6,6 +6,8 @@ import { storage } from './storage/resource';
 import { postConfirmation } from './backend/function/postConfirmation/resource';
 import { createOrganization } from './backend/function/createOrganization/resource';
 import { inviteUser } from './backend/function/inviteUser/resource';
+import { acceptInvite } from './backend/function/acceptInvite/resource';
+import { removeUser } from './backend/function/removeUser/resource';
 
 /**
  * Complete AWS Amplify Backend Configuration
@@ -18,6 +20,8 @@ export const backend = defineBackend({
   postConfirmation,
   createOrganization,
   inviteUser,
+  acceptInvite,
+  removeUser,
 });
 
 // Grant Lambda functions access to DynamoDB
@@ -62,3 +66,33 @@ backend.inviteUser.resources.lambda.addToRolePolicy(
 backend.inviteUser.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
 backend.inviteUser.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
 backend.inviteUser.addEnvironment('APP_URL', 'https://main.d8tv3j2hk2i9r.amplifyapp.com');
+
+// AcceptInvite Lambda permissions
+backend.acceptInvite.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:PutItem',
+      'dynamodb:GetItem',
+      'dynamodb:Query',
+      'dynamodb:UpdateItem',
+    ],
+    resources: [dataTableArn, `${dataTableArn}/index/*`],
+  })
+);
+
+backend.acceptInvite.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+
+// RemoveUser Lambda permissions
+backend.removeUser.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:DeleteItem',
+      'dynamodb:GetItem',
+      'dynamodb:Query',
+      'dynamodb:UpdateItem',
+    ],
+    resources: [dataTableArn, `${dataTableArn}/index/*`],
+  })
+);
+
+backend.removeUser.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
