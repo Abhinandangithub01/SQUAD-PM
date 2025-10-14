@@ -8,5 +8,8 @@ export const deleteUserData = defineFunction({
     SES_FROM_EMAIL: process.env.SES_FROM_EMAIL || 'noreply@projecthub.com',
     USER_POOL_ID: process.env.USER_POOL_ID || '',
   },
-  timeoutSeconds: 300, // 5 minutes for complete deletion
-});
+  timeoutSeconds: 300,
+  bundling: {
+    externalModules: ['@aws-sdk/*'],
+  },
+}); // 5 minutes for complete deletion

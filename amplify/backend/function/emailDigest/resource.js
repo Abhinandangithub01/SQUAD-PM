@@ -11,4 +11,7 @@ export const emailDigest = defineFunction({
   timeoutSeconds: 300, // 5 minutes for processing many users
   // Schedule: Run daily at 8 AM UTC
   schedule: 'cron(0 8 * * ? *)',
+  bundling: {
+    externalModules: ['@aws-sdk/*'],
+  },
 });

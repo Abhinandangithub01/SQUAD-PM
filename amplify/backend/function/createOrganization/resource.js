@@ -7,4 +7,7 @@ export const createOrganization = defineFunction({
     DYNAMODB_TABLE_NAME: process.env.DYNAMODB_TABLE_NAME || 'AmplifyDataTable',
   },
   timeoutSeconds: 30,
+  bundling: {
+    externalModules: ['@aws-sdk/*'],
+  },
 });
