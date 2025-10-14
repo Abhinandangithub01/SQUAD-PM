@@ -8,15 +8,4 @@ export const postConfirmation = defineFunction({
     DYNAMODB_TABLE_NAME: process.env.DYNAMODB_TABLE_NAME || 'AmplifyDataTable',
   },
   timeoutSeconds: 30,
-  bundling: {
-    commandHooks: {
-      beforeBundling: () => [],
-      afterBundling: () => [],
-      beforeInstall: () => [],
-    },
-    esbuildArgs: {
-      '--external:@aws-sdk/client-dynamodb': true,
-      '--external:@aws-sdk/lib-dynamodb': true,
-    },
-  },
 });
