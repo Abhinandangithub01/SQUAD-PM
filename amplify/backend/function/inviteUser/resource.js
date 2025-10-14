@@ -9,7 +9,4 @@ export const inviteUser = defineFunction({
     APP_URL: process.env.APP_URL || 'https://main.d8tv3j2hk2i9r.amplifyapp.com',
   },
   timeoutSeconds: 60,
-  bundling: {
-    externalModules: ['@aws-sdk/*'],
-  },
 });

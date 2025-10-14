@@ -11,7 +11,4 @@ export const dueDateReminder = defineFunction({
   timeoutSeconds: 300, // 5 minutes for processing many tasks
   // Schedule: Run daily at 9 AM UTC
   schedule: 'cron(0 9 * * ? *)',
-  bundling: {
-    externalModules: ['@aws-sdk/*'],
-  },
 });

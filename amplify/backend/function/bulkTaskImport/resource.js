@@ -7,7 +7,4 @@ export const bulkTaskImport = defineFunction({
     DYNAMODB_TABLE_NAME: process.env.DYNAMODB_TABLE_NAME || 'AmplifyDataTable',
   },
   timeoutSeconds: 300, // 5 minutes for large imports
-  bundling: {
-    externalModules: ['@aws-sdk/*'],
-  },
 });
