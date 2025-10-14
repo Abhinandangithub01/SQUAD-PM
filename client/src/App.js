@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 
 // Import contexts
 import { CognitoAuthProvider } from './contexts/CognitoAuthContext';
+import { OrganizationProvider } from './contexts/OrganizationContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TimeTrackingProvider } from './contexts/TimeTrackingContext';
@@ -23,6 +24,7 @@ const Register = lazy(() => import('./pages/Register'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const VerifyAccount = lazy(() => import('./pages/VerifyAccount'));
 const OrganizationSetup = lazy(() => import('./pages/OrganizationSetup'));
+const OrganizationSetupFlow = lazy(() => import('./components/OrganizationSetupFlow'));
 const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
 const DepartmentsRoles = lazy(() => import('./pages/DepartmentsRoles'));
 const Dashboard = lazy(() => import('./pages/CleanDashboard'));
@@ -61,9 +63,10 @@ function App() {
       <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <CognitoAuthProvider>
-              <TimeTrackingProvider>
-                <DashboardProvider>
-                  <SocketProvider>
+              <OrganizationProvider>
+                <TimeTrackingProvider>
+                  <DashboardProvider>
+                    <SocketProvider>
                   <Router>
               <div className="App">
             <Toaster
@@ -101,6 +104,13 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/verify-account" element={<VerifyAccount />} />
+                
+                {/* Organization Setup (Protected but no org required) */}
+                <Route path="/organization/setup" element={
+                  <ProtectedRoute requireOrganization={false}>
+                    <OrganizationSetupFlow />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Protected routes */}
                 <Route path="/" element={
@@ -165,9 +175,10 @@ function App() {
             <VersionInfo />
             </div>
                   </Router>
-                </SocketProvider>
-                </DashboardProvider>
-              </TimeTrackingProvider>
+                    </SocketProvider>
+                  </DashboardProvider>
+                </TimeTrackingProvider>
+              </OrganizationProvider>
             </CognitoAuthProvider>
           </ThemeProvider>
       </QueryClientProvider>

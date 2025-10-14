@@ -41,17 +41,54 @@ export const CognitoAuthProvider = ({ children }) => {
       const currentUser = await getCurrentUser();
       const attributes = await fetchUserAttributes();
       
-      // Fetch user data from our database using Amplify Data client
-      const { data: users } = await client.models.UserProfile.list({
-        filter: { email: { eq: attributes.email } }
-      });
+      // Try to fetch user data from database
+      try {
+        // Check if UserProfile model exists (backward compatibility)
+        if (client.models.UserProfile) {
+          const { data: users } = await client.models.UserProfile.list({
+            filter: { email: { eq: attributes.email } }
+          });
 
-      if (users && users.length > 0) {
-        setUser(users[0]);
+          if (users && users.length > 0) {
+            setUser(users[0]);
+            setIsAuthenticated(true);
+          } else {
+            // User exists in Cognito but not in our DB - create user record
+            await createUserRecord(currentUser, attributes);
+          }
+        } else if (client.models.User) {
+          // Fallback to User model if UserProfile doesn't exist
+          const { data: users } = await client.models.User.list({
+            filter: { email: { eq: attributes.email } }
+          });
+
+          if (users && users.length > 0) {
+            setUser(users[0]);
+            setIsAuthenticated(true);
+          } else {
+            await createUserRecord(currentUser, attributes);
+          }
+        } else {
+          // No user model available, use Cognito attributes
+          console.warn('User model not available, using Cognito attributes');
+          setUser({
+            id: currentUser.userId,
+            email: attributes.email,
+            firstName: attributes.given_name || '',
+            lastName: attributes.family_name || '',
+          });
+          setIsAuthenticated(true);
+        }
+      } catch (dbError) {
+        console.error('Database error, falling back to Cognito attributes:', dbError);
+        // Fallback: use Cognito attributes
+        setUser({
+          id: currentUser.userId,
+          email: attributes.email,
+          firstName: attributes.given_name || '',
+          lastName: attributes.family_name || '',
+        });
         setIsAuthenticated(true);
-      } else {
-        // User exists in Cognito but not in our DB - create user record
-        await createUserRecord(currentUser, attributes);
       }
     } catch (error) {
       console.log('Not authenticated', error);
@@ -71,14 +108,37 @@ export const CognitoAuthProvider = ({ children }) => {
         role: 'MEMBER',
       };
 
-      const { data: createdUser } = await client.models.UserProfile.create(newUser);
+      let createdUser;
+      
+      // Try UserProfile first, then User model
+      if (client.models.UserProfile) {
+        const { data } = await client.models.UserProfile.create(newUser);
+        createdUser = data;
+      } else if (client.models.User) {
+        const { data } = await client.models.User.create(newUser);
+        createdUser = data;
+      } else {
+        // No model available, use Cognito data
+        console.warn('No user model available');
+        createdUser = {
+          id: cognitoUser.userId,
+          ...newUser,
+        };
+      }
 
       setUser(createdUser);
       setIsAuthenticated(true);
       return createdUser;
     } catch (error) {
       console.error('Error creating user record:', error);
-      throw error;
+      // Don't throw - allow user to continue with Cognito auth
+      setUser({
+        id: cognitoUser.userId,
+        email: attributes.email,
+        firstName: attributes.given_name || '',
+        lastName: attributes.family_name || '',
+      });
+      setIsAuthenticated(true);
     }
   };
 

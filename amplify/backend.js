@@ -1,14 +1,64 @@
 import { defineBackend } from '@aws-amplify/backend';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { storage } from './storage/resource';
+import { postConfirmation } from './backend/function/postConfirmation/resource';
+import { createOrganization } from './backend/function/createOrganization/resource';
+import { inviteUser } from './backend/function/inviteUser/resource';
 
 /**
  * Complete AWS Amplify Backend Configuration
- * Includes: Auth, Data (GraphQL), Storage (S3)
+ * Includes: Auth, Data (GraphQL), Storage (S3), Lambda Functions
  */
 export const backend = defineBackend({
   auth,
   data,
   storage,
+  postConfirmation,
+  createOrganization,
+  inviteUser,
 });
+
+// Grant Lambda functions access to DynamoDB
+const dataTableArn = backend.data.resources.tables['AmplifyDataTable'].tableArn;
+const dataTableName = backend.data.resources.tables['AmplifyDataTable'].tableName;
+
+// PostConfirmation Lambda permissions
+backend.postConfirmation.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ['dynamodb:PutItem', 'dynamodb:GetItem', 'dynamodb:Query'],
+    resources: [dataTableArn, `${dataTableArn}/index/*`],
+  })
+);
+
+backend.postConfirmation.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+
+// CreateOrganization Lambda permissions
+backend.createOrganization.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ['dynamodb:PutItem', 'dynamodb:GetItem', 'dynamodb:Query', 'dynamodb:UpdateItem'],
+    resources: [dataTableArn, `${dataTableArn}/index/*`],
+  })
+);
+
+backend.createOrganization.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+
+// InviteUser Lambda permissions
+backend.inviteUser.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:PutItem',
+      'dynamodb:GetItem',
+      'dynamodb:Query',
+      'dynamodb:UpdateItem',
+      'ses:SendEmail',
+      'ses:SendRawEmail',
+    ],
+    resources: ['*'], // SES requires wildcard
+  })
+);
+
+backend.inviteUser.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+backend.inviteUser.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
+backend.inviteUser.addEnvironment('APP_URL', 'https://main.d8tv3j2hk2i9r.amplifyapp.com');
