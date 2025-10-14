@@ -12,6 +12,8 @@ import { dueDateReminder } from './backend/function/dueDateReminder/resource';
 import { sendNotification } from './backend/function/sendNotification/resource';
 import { webhookDispatcher } from './backend/function/webhookDispatcher/resource';
 import { slackNotifier } from './backend/function/slackNotifier/resource';
+import { exportUserData } from './backend/function/exportUserData/resource';
+import { deleteUserData } from './backend/function/deleteUserData/resource';
 
 /**
  * Complete AWS Amplify Backend Configuration
@@ -30,6 +32,8 @@ export const backend = defineBackend({
   sendNotification,
   webhookDispatcher,
   slackNotifier,
+  exportUserData,
+  deleteUserData,
 });
 
 // Grant Lambda functions access to DynamoDB
@@ -155,3 +159,40 @@ backend.webhookDispatcher.resources.lambda.addToRolePolicy(
 backend.webhookDispatcher.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
 
 // SlackNotifier Lambda - no special permissions needed (just HTTP calls)
+
+// ExportUserData Lambda permissions
+backend.exportUserData.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:Query',
+      'dynamodb:Scan',
+      'dynamodb:GetItem',
+      'ses:SendEmail',
+      'ses:SendRawEmail',
+    ],
+    resources: ['*'],
+  })
+);
+
+backend.exportUserData.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+backend.exportUserData.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
+
+// DeleteUserData Lambda permissions
+backend.deleteUserData.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:Query',
+      'dynamodb:Scan',
+      'dynamodb:DeleteItem',
+      'dynamodb:UpdateItem',
+      'cognito-idp:AdminDeleteUser',
+      'ses:SendEmail',
+      'ses:SendRawEmail',
+    ],
+    resources: ['*'],
+  })
+);
+
+backend.deleteUserData.addEnvironment('DYNAMODB_TABLE_NAME', dataTableName);
+backend.deleteUserData.addEnvironment('SES_FROM_EMAIL', 'noreply@projecthub.com');
+backend.deleteUserData.addEnvironment('USER_POOL_ID', backend.auth.resources.userPool.userPoolId);

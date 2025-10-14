@@ -17,6 +17,10 @@ export const auth = defineAuth({
       required: true,
       mutable: true,
     },
+    phoneNumber: {
+      required: false,
+      mutable: true,
+    },
     // Custom attributes for multi-tenancy
     'custom:organizationId': {
       dataType: 'String',
@@ -26,6 +30,12 @@ export const auth = defineAuth({
       dataType: 'String',
       mutable: true,
     },
+  },
+  // Multi-factor authentication
+  multifactor: {
+    mode: 'OPTIONAL',
+    sms: true,
+    totp: true,
   },
   // Lambda triggers
   triggers: {
