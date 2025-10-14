@@ -8,5 +8,5 @@ export const recurringTaskCreator = defineFunction({
   },
   timeoutSeconds: 300, // 5 minutes for processing many tasks
   // Schedule: Run daily at 1 AM UTC
-  schedule: 'cron(0 1 * * ? *)',
+  schedule: 'rate(1 day)',
 });
