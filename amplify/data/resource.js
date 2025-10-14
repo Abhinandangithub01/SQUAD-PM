@@ -64,8 +64,7 @@ const schema = a.schema({
     updatedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.owner('ownerId'),
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -95,8 +94,7 @@ const schema = a.schema({
     title: a.string(),
   })
   .authorization(allow => [
-    allow.owner('userId'),
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -186,9 +184,7 @@ const schema = a.schema({
     timeEntries: a.hasMany('TimeEntry', 'taskId'),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('createdById'),
-    allow.owner('assignedToId'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -213,8 +209,7 @@ const schema = a.schema({
     channels: a.hasMany('Channel', 'projectId'),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('ownerId'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -256,8 +251,7 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('userId'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -298,8 +292,7 @@ const schema = a.schema({
     messages: a.hasMany('Message', 'channelId'),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('createdById'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -318,8 +311,7 @@ const schema = a.schema({
     editedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('userId'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -342,7 +334,7 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.owner('userId'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -359,8 +351,7 @@ const schema = a.schema({
     isPublic: a.boolean(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('createdById'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -378,8 +369,7 @@ const schema = a.schema({
     createdById: a.id(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('createdById'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -417,8 +407,7 @@ const schema = a.schema({
     billable: a.boolean(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('userId'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -437,8 +426,7 @@ const schema = a.schema({
     uploadedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('uploadedById'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -455,8 +443,7 @@ const schema = a.schema({
     completionPercentage: a.integer(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('ownerId'),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -474,8 +461,7 @@ const schema = a.schema({
     timestamp: a.datetime().required(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('userId').to(['read']),
+    allow.authenticated(),
   ]),
 
   // ============================================
@@ -492,8 +478,7 @@ const schema = a.schema({
     failureCount: a.integer(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.owner('organizationId'),
+    allow.authenticated(),
   ]),
 });
 
