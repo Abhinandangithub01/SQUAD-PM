@@ -37,9 +37,4 @@ export const auth = defineAuth({
     sms: true,
     totp: true,
   },
-  // Lambda triggers
-  triggers: {
-    preSignUp: '../backend/function/preSignUp',
-    postConfirmation: '../backend/function/postConfirmation',
-  },
 });

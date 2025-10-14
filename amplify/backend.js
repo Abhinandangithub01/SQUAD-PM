@@ -44,6 +44,17 @@ export const backend = defineBackend({
   emailDigest,
 });
 
+// Configure Cognito triggers
+backend.auth.resources.userPool.addTrigger(
+  'preSignUp',
+  backend.preSignUp.resources.lambda
+);
+
+backend.auth.resources.userPool.addTrigger(
+  'postConfirmation',
+  backend.postConfirmation.resources.lambda
+);
+
 // Grant Lambda functions access to DynamoDB
 const dataTableArn = backend.data.resources.tables['AmplifyDataTable'].tableArn;
 const dataTableName = backend.data.resources.tables['AmplifyDataTable'].tableName;
