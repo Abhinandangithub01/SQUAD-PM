@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     checkUser();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkUser = async () => {
@@ -123,7 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         firstName: attributes.given_name || '',
         lastName: attributes.family_name || '',
         role: 'MEMBER',
-      };
+      } as any;
 
       const { data } = await client.models.User.create(newUser);
       

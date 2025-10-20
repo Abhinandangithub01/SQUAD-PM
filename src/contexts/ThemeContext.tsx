@@ -168,6 +168,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     }
 
     localStorage.setItem('app-theme', currentTheme);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTheme]);
 
   useEffect(() => {
