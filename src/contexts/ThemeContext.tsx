@@ -181,7 +181,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateBranding = (branding: Partial<Branding>) => {
-    setCustomBranding(prev => ({ ...prev, ...branding }));
+    setCustomBranding((prev: Branding) => ({ ...prev, ...branding }));
   };
 
   const isDarkMode = () => {
