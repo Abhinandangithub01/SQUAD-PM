@@ -17,6 +17,17 @@
 - ✅ Simplified `amplify.yml` to focus on frontend only
 - ✅ Backend will be deployed separately using `npx ampx sandbox`
 
+### 3. PostCSS Config ES Module Error
+**Problem**: `postcss.config.js` was using CommonJS syntax (`module.exports`) while `package.json` has `"type": "module"`.
+
+**Error**:
+```
+ReferenceError: module is not defined in ES module scope
+```
+
+**Solution**:
+- ✅ Converted `postcss.config.js` from `module.exports` to `export default`
+
 ## 📋 Current amplify.yml
 
 ```yaml
