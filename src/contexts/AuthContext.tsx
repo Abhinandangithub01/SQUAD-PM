@@ -296,7 +296,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       await resetPassword({ username: email });
-      toast.info('Password reset code sent to your email');
+      toast.success('Password reset code sent to your email');
       return { success: true };
     } catch (error: any) {
       console.error('Forgot password error:', error);
