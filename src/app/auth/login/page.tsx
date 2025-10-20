@@ -8,10 +8,12 @@ import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuthContext();
+  const { login, resendConfirmationCode } = useAuthContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +25,11 @@ export default function LoginPage() {
       if (result.success) {
         router.push('/dashboard');
       } else if (result.requiresConfirmation) {
-        toast.error('Please confirm your email first');
-        router.push(`/auth/confirm?email=${encodeURIComponent(email)}`);
+        setShowVerificationPrompt(true);
+        toast.error('Please verify your email first');
+      } else if (result.error?.includes('not confirmed') || result.error?.includes('not authenticated')) {
+        setShowVerificationPrompt(true);
+        toast.error('Please verify your email first');
       } else {
         toast.error(result.error || 'Login failed');
       }
@@ -32,6 +37,29 @@ export default function LoginPage() {
       toast.error('An unexpected error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    setResending(true);
+    try {
+      const result = await resendConfirmationCode(email);
+      
+      if (result.success) {
+        toast.success('Verification code sent! Check your email.');
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+      } else {
+        toast.error(result.error || 'Failed to resend code');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to resend code');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -103,6 +131,43 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
+
+        {showVerificationPrompt && (
+          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-yellow-800">
+                  Email Not Verified
+                </h3>
+                <div className="mt-2 text-sm text-yellow-700">
+                  <p>Your email address hasn&apos;t been verified yet. Please check your inbox for the verification code.</p>
+                </div>
+                <div className="mt-4 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={resending}
+                    className="text-sm font-medium text-yellow-800 hover:text-yellow-900 underline disabled:opacity-50"
+                  >
+                    {resending ? 'Sending...' : 'Resend Code'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-700 underline"
+                  >
+                    Enter Code
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
