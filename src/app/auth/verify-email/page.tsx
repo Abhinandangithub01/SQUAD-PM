@@ -78,7 +78,7 @@ export default function VerifyEmailPage() {
             Verify Your Email
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            We've sent a verification code to your email address
+            We&apos;ve sent a verification code to your email address
           </p>
         </div>
 
@@ -160,7 +160,7 @@ export default function VerifyEmailPage() {
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-xs text-gray-600">
-            <strong>Note:</strong> Check your spam folder if you don't see the email. 
+            <strong>Note:</strong> Check your spam folder if you don&apos;t see the email. 
             The verification code expires in 24 hours.
           </p>
         </div>
