@@ -49,7 +49,7 @@ export default function RegisterPage() {
 
       if (result.success && result.requiresConfirmation) {
         toast.success('Please check your email for verification code');
-        router.push(`/auth/confirm?email=${encodeURIComponent(formData.email)}`);
+        router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
       } else if (result.success) {
         router.push('/dashboard');
       } else {
