@@ -162,8 +162,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     document.body.style.color = theme.text;
     
     if (isDarkMode()) {
+      document.documentElement.classList.add('dark');
       document.body.classList.add('dark-mode');
     } else {
+      document.documentElement.classList.remove('dark');
       document.body.classList.remove('dark-mode');
     }
 

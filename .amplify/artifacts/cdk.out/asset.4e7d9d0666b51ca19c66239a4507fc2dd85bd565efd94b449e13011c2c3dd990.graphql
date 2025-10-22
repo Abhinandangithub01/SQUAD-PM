@@ -1,0 +1,1766 @@
+type Organization @aws_iam @aws_cognito_user_pools {
+  name: String!
+  slug: String!
+  description: String
+  logoUrl: AWSURL
+  website: AWSURL
+  industry: String
+  size: OrganizationSize
+  plan: OrganizationPlan
+  ownerId: ID!
+  members(filter: ModelOrganizationMemberFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelOrganizationMemberConnection
+  projects(filter: ModelProjectFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelProjectConnection
+  invitations(filter: ModelInvitationFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelInvitationConnection
+  settings: AWSJSON
+  billingEmail: AWSEmail
+  maxUsers: Int
+  maxProjects: Int
+  isActive: Boolean
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type OrganizationMember @aws_iam @aws_cognito_user_pools {
+  organizationId: ID!
+  organization: Organization
+  userId: ID!
+  user: User
+  role: OrganizationMemberRole
+  invitedBy: ID
+  joinedAt: AWSDateTime
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Invitation @aws_iam @aws_cognito_user_pools {
+  organizationId: ID!
+  organization: Organization
+  email: AWSEmail!
+  role: InvitationRole
+  invitedBy: ID!
+  token: String!
+  status: InvitationStatus
+  expiresAt: AWSDateTime!
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type User @aws_iam @aws_cognito_user_pools {
+  email: AWSEmail!
+  firstName: String!
+  lastName: String!
+  role: UserRole
+  avatarUrl: AWSURL
+  phoneNumber: AWSPhone
+  timezone: String
+  organizations(filter: ModelOrganizationMemberFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelOrganizationMemberConnection
+  projects(filter: ModelProjectMemberFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelProjectMemberConnection
+  createdTasks(filter: ModelTaskFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelTaskConnection
+  assignedTasks(filter: ModelTaskFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelTaskConnection
+  comments(filter: ModelCommentFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelCommentConnection
+  messages(filter: ModelMessageFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelMessageConnection
+  uploadedAttachments(filter: ModelAttachmentFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelAttachmentConnection
+  activityLogs(filter: ModelActivityLogFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelActivityLogConnection
+  notifications(filter: ModelNotificationFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelNotificationConnection
+  lastLoginAt: AWSDateTime
+  isActive: Boolean
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Project @aws_iam @aws_cognito_user_pools {
+  organizationId: ID!
+  organization: Organization
+  name: String!
+  description: String
+  color: String
+  status: ProjectStatus
+  startDate: AWSDate
+  endDate: AWSDate
+  ownerId: ID!
+  members(filter: ModelProjectMemberFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelProjectMemberConnection
+  tasks(filter: ModelTaskFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelTaskConnection
+  channels(filter: ModelChannelFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelChannelConnection
+  activityLogs(filter: ModelActivityLogFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelActivityLogConnection
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type ProjectMember @aws_iam @aws_cognito_user_pools {
+  projectId: ID!
+  project: Project
+  userId: ID!
+  user: User
+  role: ProjectMemberRole
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Task @aws_iam @aws_cognito_user_pools {
+  projectId: ID!
+  project: Project
+  title: String!
+  description: String
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: AWSDateTime
+  startDate: AWSDateTime
+  createdById: ID!
+  createdBy: User
+  assignedToId: ID
+  assignedTo: User
+  columnId: String
+  position: Int
+  tags: [String]
+  estimatedHours: Float
+  actualHours: Float
+  progressPercentage: Int
+  completedAt: AWSDateTime
+  comments(filter: ModelCommentFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelCommentConnection
+  attachments(filter: ModelAttachmentFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelAttachmentConnection
+  subtasks(filter: ModelSubtaskFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelSubtaskConnection
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Subtask @aws_iam @aws_cognito_user_pools {
+  taskId: ID!
+  task: Task
+  title: String!
+  completed: Boolean!
+  position: Int
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Comment @aws_iam @aws_cognito_user_pools {
+  taskId: ID!
+  task: Task
+  userId: ID!
+  user: User
+  content: String!
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Attachment @aws_iam @aws_cognito_user_pools {
+  taskId: ID!
+  task: Task
+  fileName: String!
+  fileUrl: AWSURL!
+  fileSize: Int
+  fileType: String
+  uploadedById: ID!
+  uploadedBy: User
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Channel @aws_iam @aws_cognito_user_pools {
+  name: String!
+  description: String
+  projectId: ID
+  project: Project
+  type: ChannelType
+  createdById: ID!
+  messages(filter: ModelMessageFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelMessageConnection
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Message @aws_iam @aws_cognito_user_pools {
+  channelId: ID!
+  channel: Channel
+  userId: ID!
+  user: User
+  content: String!
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type ActivityLog @aws_iam @aws_cognito_user_pools {
+  userId: ID!
+  user: User
+  projectId: ID
+  project: Project
+  taskId: ID
+  action: String!
+  entityType: String
+  entityName: String
+  fromStatus: String
+  toStatus: String
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Notification @aws_iam @aws_cognito_user_pools {
+  userId: ID!
+  user: User
+  type: NotificationType
+  title: String!
+  message: String!
+  read: Boolean!
+  linkTo: String
+  id: ID!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+enum OrganizationSize {
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum OrganizationPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum OrganizationMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum InvitationRole {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
+  VIEWER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+  ON_HOLD
+}
+
+enum ProjectMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ChannelType {
+  PROJECT
+  DIRECT
+  GENERAL
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  COMMENT_ADDED
+  MENTION
+  PROJECT_INVITE
+  DEADLINE_REMINDER
+}
+
+input AmplifyAIConversationTurnErrorInput {
+  errorType: String!
+  message: String!
+}
+
+input ModelStringInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelIntInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelFloatInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: [Float]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelBooleanInput {
+  ne: Boolean
+  eq: Boolean
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelIDInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelSubscriptionStringInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+  in: [String]
+  notIn: [String]
+}
+
+input ModelSubscriptionIntInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+  in: [Int]
+  notIn: [Int]
+}
+
+input ModelSubscriptionFloatInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: [Float]
+  in: [Float]
+  notIn: [Float]
+}
+
+input ModelSubscriptionBooleanInput {
+  ne: Boolean
+  eq: Boolean
+}
+
+input ModelSubscriptionIDInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+  in: [ID]
+  notIn: [ID]
+}
+
+enum ModelAttributeTypes {
+  binary
+  binarySet
+  bool
+  list
+  map
+  number
+  numberSet
+  string
+  stringSet
+  _null
+}
+
+input ModelSizeInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+}
+
+enum ModelSortDirection {
+  ASC
+  DESC
+}
+
+type ModelOrganizationConnection @aws_iam @aws_cognito_user_pools {
+  items: [Organization]!
+  nextToken: String
+}
+
+input ModelOrganizationSizeInput {
+  eq: OrganizationSize
+  ne: OrganizationSize
+}
+
+input ModelOrganizationPlanInput {
+  eq: OrganizationPlan
+  ne: OrganizationPlan
+}
+
+input ModelOrganizationFilterInput {
+  name: ModelStringInput
+  slug: ModelStringInput
+  description: ModelStringInput
+  logoUrl: ModelStringInput
+  website: ModelStringInput
+  industry: ModelStringInput
+  size: ModelOrganizationSizeInput
+  plan: ModelOrganizationPlanInput
+  ownerId: ModelIDInput
+  settings: ModelStringInput
+  billingEmail: ModelStringInput
+  maxUsers: ModelIntInput
+  maxProjects: ModelIntInput
+  isActive: ModelBooleanInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelOrganizationFilterInput]
+  or: [ModelOrganizationFilterInput]
+  not: ModelOrganizationFilterInput
+  owner: ModelStringInput
+}
+
+type Query {
+  getOrganization(id: ID!): Organization @aws_iam @aws_cognito_user_pools
+  listOrganizations(filter: ModelOrganizationFilterInput, limit: Int, nextToken: String): ModelOrganizationConnection @aws_iam @aws_cognito_user_pools
+  getOrganizationMember(id: ID!): OrganizationMember @aws_iam @aws_cognito_user_pools
+  listOrganizationMembers(filter: ModelOrganizationMemberFilterInput, limit: Int, nextToken: String): ModelOrganizationMemberConnection @aws_iam @aws_cognito_user_pools
+  getInvitation(id: ID!): Invitation @aws_iam @aws_cognito_user_pools
+  listInvitations(filter: ModelInvitationFilterInput, limit: Int, nextToken: String): ModelInvitationConnection @aws_iam @aws_cognito_user_pools
+  getUser(id: ID!): User @aws_iam @aws_cognito_user_pools
+  listUsers(filter: ModelUserFilterInput, limit: Int, nextToken: String): ModelUserConnection @aws_iam @aws_cognito_user_pools
+  getProject(id: ID!): Project @aws_iam @aws_cognito_user_pools
+  listProjects(filter: ModelProjectFilterInput, limit: Int, nextToken: String): ModelProjectConnection @aws_iam @aws_cognito_user_pools
+  getProjectMember(id: ID!): ProjectMember @aws_iam @aws_cognito_user_pools
+  listProjectMembers(filter: ModelProjectMemberFilterInput, limit: Int, nextToken: String): ModelProjectMemberConnection @aws_iam @aws_cognito_user_pools
+  getTask(id: ID!): Task @aws_iam @aws_cognito_user_pools
+  listTasks(filter: ModelTaskFilterInput, limit: Int, nextToken: String): ModelTaskConnection @aws_iam @aws_cognito_user_pools
+  getSubtask(id: ID!): Subtask @aws_iam @aws_cognito_user_pools
+  listSubtasks(filter: ModelSubtaskFilterInput, limit: Int, nextToken: String): ModelSubtaskConnection @aws_iam @aws_cognito_user_pools
+  getComment(id: ID!): Comment @aws_iam @aws_cognito_user_pools
+  listComments(filter: ModelCommentFilterInput, limit: Int, nextToken: String): ModelCommentConnection @aws_iam @aws_cognito_user_pools
+  getAttachment(id: ID!): Attachment @aws_iam @aws_cognito_user_pools
+  listAttachments(filter: ModelAttachmentFilterInput, limit: Int, nextToken: String): ModelAttachmentConnection @aws_iam @aws_cognito_user_pools
+  getChannel(id: ID!): Channel @aws_iam @aws_cognito_user_pools
+  listChannels(filter: ModelChannelFilterInput, limit: Int, nextToken: String): ModelChannelConnection @aws_iam @aws_cognito_user_pools
+  getMessage(id: ID!): Message @aws_iam @aws_cognito_user_pools
+  listMessages(filter: ModelMessageFilterInput, limit: Int, nextToken: String): ModelMessageConnection @aws_iam @aws_cognito_user_pools
+  getActivityLog(id: ID!): ActivityLog @aws_iam @aws_cognito_user_pools
+  listActivityLogs(filter: ModelActivityLogFilterInput, limit: Int, nextToken: String): ModelActivityLogConnection @aws_iam @aws_cognito_user_pools
+  getNotification(id: ID!): Notification @aws_iam @aws_cognito_user_pools
+  listNotifications(filter: ModelNotificationFilterInput, limit: Int, nextToken: String): ModelNotificationConnection @aws_iam @aws_cognito_user_pools
+}
+
+input ModelOrganizationConditionInput {
+  name: ModelStringInput
+  slug: ModelStringInput
+  description: ModelStringInput
+  logoUrl: ModelStringInput
+  website: ModelStringInput
+  industry: ModelStringInput
+  size: ModelOrganizationSizeInput
+  plan: ModelOrganizationPlanInput
+  ownerId: ModelIDInput
+  settings: ModelStringInput
+  billingEmail: ModelStringInput
+  maxUsers: ModelIntInput
+  maxProjects: ModelIntInput
+  isActive: ModelBooleanInput
+  and: [ModelOrganizationConditionInput]
+  or: [ModelOrganizationConditionInput]
+  not: ModelOrganizationConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateOrganizationInput {
+  name: String!
+  slug: String!
+  description: String
+  logoUrl: AWSURL
+  website: AWSURL
+  industry: String
+  size: OrganizationSize
+  plan: OrganizationPlan
+  ownerId: ID!
+  settings: AWSJSON
+  billingEmail: AWSEmail
+  maxUsers: Int
+  maxProjects: Int
+  isActive: Boolean
+  id: ID
+}
+
+input UpdateOrganizationInput {
+  name: String
+  slug: String
+  description: String
+  logoUrl: AWSURL
+  website: AWSURL
+  industry: String
+  size: OrganizationSize
+  plan: OrganizationPlan
+  ownerId: ID
+  settings: AWSJSON
+  billingEmail: AWSEmail
+  maxUsers: Int
+  maxProjects: Int
+  isActive: Boolean
+  id: ID!
+}
+
+input DeleteOrganizationInput {
+  id: ID!
+}
+
+type Mutation {
+  createOrganization(input: CreateOrganizationInput!, condition: ModelOrganizationConditionInput): Organization @aws_iam @aws_cognito_user_pools
+  updateOrganization(input: UpdateOrganizationInput!, condition: ModelOrganizationConditionInput): Organization @aws_iam @aws_cognito_user_pools
+  deleteOrganization(input: DeleteOrganizationInput!, condition: ModelOrganizationConditionInput): Organization @aws_iam @aws_cognito_user_pools
+  createOrganizationMember(input: CreateOrganizationMemberInput!, condition: ModelOrganizationMemberConditionInput): OrganizationMember @aws_iam @aws_cognito_user_pools
+  updateOrganizationMember(input: UpdateOrganizationMemberInput!, condition: ModelOrganizationMemberConditionInput): OrganizationMember @aws_iam @aws_cognito_user_pools
+  deleteOrganizationMember(input: DeleteOrganizationMemberInput!, condition: ModelOrganizationMemberConditionInput): OrganizationMember @aws_iam @aws_cognito_user_pools
+  createInvitation(input: CreateInvitationInput!, condition: ModelInvitationConditionInput): Invitation @aws_iam @aws_cognito_user_pools
+  updateInvitation(input: UpdateInvitationInput!, condition: ModelInvitationConditionInput): Invitation @aws_iam @aws_cognito_user_pools
+  deleteInvitation(input: DeleteInvitationInput!, condition: ModelInvitationConditionInput): Invitation @aws_iam @aws_cognito_user_pools
+  createUser(input: CreateUserInput!, condition: ModelUserConditionInput): User @aws_iam @aws_cognito_user_pools
+  updateUser(input: UpdateUserInput!, condition: ModelUserConditionInput): User @aws_iam @aws_cognito_user_pools
+  deleteUser(input: DeleteUserInput!, condition: ModelUserConditionInput): User @aws_iam @aws_cognito_user_pools
+  createProject(input: CreateProjectInput!, condition: ModelProjectConditionInput): Project @aws_iam @aws_cognito_user_pools
+  updateProject(input: UpdateProjectInput!, condition: ModelProjectConditionInput): Project @aws_iam @aws_cognito_user_pools
+  deleteProject(input: DeleteProjectInput!, condition: ModelProjectConditionInput): Project @aws_iam @aws_cognito_user_pools
+  createProjectMember(input: CreateProjectMemberInput!, condition: ModelProjectMemberConditionInput): ProjectMember @aws_iam @aws_cognito_user_pools
+  updateProjectMember(input: UpdateProjectMemberInput!, condition: ModelProjectMemberConditionInput): ProjectMember @aws_iam @aws_cognito_user_pools
+  deleteProjectMember(input: DeleteProjectMemberInput!, condition: ModelProjectMemberConditionInput): ProjectMember @aws_iam @aws_cognito_user_pools
+  createTask(input: CreateTaskInput!, condition: ModelTaskConditionInput): Task @aws_iam @aws_cognito_user_pools
+  updateTask(input: UpdateTaskInput!, condition: ModelTaskConditionInput): Task @aws_iam @aws_cognito_user_pools
+  deleteTask(input: DeleteTaskInput!, condition: ModelTaskConditionInput): Task @aws_iam @aws_cognito_user_pools
+  createSubtask(input: CreateSubtaskInput!, condition: ModelSubtaskConditionInput): Subtask @aws_iam @aws_cognito_user_pools
+  updateSubtask(input: UpdateSubtaskInput!, condition: ModelSubtaskConditionInput): Subtask @aws_iam @aws_cognito_user_pools
+  deleteSubtask(input: DeleteSubtaskInput!, condition: ModelSubtaskConditionInput): Subtask @aws_iam @aws_cognito_user_pools
+  createComment(input: CreateCommentInput!, condition: ModelCommentConditionInput): Comment @aws_iam @aws_cognito_user_pools
+  updateComment(input: UpdateCommentInput!, condition: ModelCommentConditionInput): Comment @aws_iam @aws_cognito_user_pools
+  deleteComment(input: DeleteCommentInput!, condition: ModelCommentConditionInput): Comment @aws_iam @aws_cognito_user_pools
+  createAttachment(input: CreateAttachmentInput!, condition: ModelAttachmentConditionInput): Attachment @aws_iam @aws_cognito_user_pools
+  updateAttachment(input: UpdateAttachmentInput!, condition: ModelAttachmentConditionInput): Attachment @aws_iam @aws_cognito_user_pools
+  deleteAttachment(input: DeleteAttachmentInput!, condition: ModelAttachmentConditionInput): Attachment @aws_iam @aws_cognito_user_pools
+  createChannel(input: CreateChannelInput!, condition: ModelChannelConditionInput): Channel @aws_iam @aws_cognito_user_pools
+  updateChannel(input: UpdateChannelInput!, condition: ModelChannelConditionInput): Channel @aws_iam @aws_cognito_user_pools
+  deleteChannel(input: DeleteChannelInput!, condition: ModelChannelConditionInput): Channel @aws_iam @aws_cognito_user_pools
+  createMessage(input: CreateMessageInput!, condition: ModelMessageConditionInput): Message @aws_iam @aws_cognito_user_pools
+  updateMessage(input: UpdateMessageInput!, condition: ModelMessageConditionInput): Message @aws_iam @aws_cognito_user_pools
+  deleteMessage(input: DeleteMessageInput!, condition: ModelMessageConditionInput): Message @aws_iam @aws_cognito_user_pools
+  createActivityLog(input: CreateActivityLogInput!, condition: ModelActivityLogConditionInput): ActivityLog @aws_iam @aws_cognito_user_pools
+  updateActivityLog(input: UpdateActivityLogInput!, condition: ModelActivityLogConditionInput): ActivityLog @aws_iam @aws_cognito_user_pools
+  deleteActivityLog(input: DeleteActivityLogInput!, condition: ModelActivityLogConditionInput): ActivityLog @aws_iam @aws_cognito_user_pools
+  createNotification(input: CreateNotificationInput!, condition: ModelNotificationConditionInput): Notification @aws_iam @aws_cognito_user_pools
+  updateNotification(input: UpdateNotificationInput!, condition: ModelNotificationConditionInput): Notification @aws_iam @aws_cognito_user_pools
+  deleteNotification(input: DeleteNotificationInput!, condition: ModelNotificationConditionInput): Notification @aws_iam @aws_cognito_user_pools
+}
+
+input ModelSubscriptionOrganizationFilterInput {
+  name: ModelSubscriptionStringInput
+  slug: ModelSubscriptionStringInput
+  description: ModelSubscriptionStringInput
+  logoUrl: ModelSubscriptionStringInput
+  website: ModelSubscriptionStringInput
+  industry: ModelSubscriptionStringInput
+  size: ModelSubscriptionStringInput
+  plan: ModelSubscriptionStringInput
+  ownerId: ModelSubscriptionIDInput
+  settings: ModelSubscriptionStringInput
+  billingEmail: ModelSubscriptionStringInput
+  maxUsers: ModelSubscriptionIntInput
+  maxProjects: ModelSubscriptionIntInput
+  isActive: ModelSubscriptionBooleanInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionOrganizationFilterInput]
+  or: [ModelSubscriptionOrganizationFilterInput]
+  owner: ModelStringInput
+}
+
+type Subscription {
+  onCreateOrganization(filter: ModelSubscriptionOrganizationFilterInput, owner: String): Organization @aws_subscribe(mutations: ["createOrganization"]) @aws_iam @aws_cognito_user_pools
+  onUpdateOrganization(filter: ModelSubscriptionOrganizationFilterInput, owner: String): Organization @aws_subscribe(mutations: ["updateOrganization"]) @aws_iam @aws_cognito_user_pools
+  onDeleteOrganization(filter: ModelSubscriptionOrganizationFilterInput, owner: String): Organization @aws_subscribe(mutations: ["deleteOrganization"]) @aws_iam @aws_cognito_user_pools
+  onCreateOrganizationMember(filter: ModelSubscriptionOrganizationMemberFilterInput, owner: String): OrganizationMember @aws_subscribe(mutations: ["createOrganizationMember"]) @aws_iam @aws_cognito_user_pools
+  onUpdateOrganizationMember(filter: ModelSubscriptionOrganizationMemberFilterInput, owner: String): OrganizationMember @aws_subscribe(mutations: ["updateOrganizationMember"]) @aws_iam @aws_cognito_user_pools
+  onDeleteOrganizationMember(filter: ModelSubscriptionOrganizationMemberFilterInput, owner: String): OrganizationMember @aws_subscribe(mutations: ["deleteOrganizationMember"]) @aws_iam @aws_cognito_user_pools
+  onCreateInvitation(filter: ModelSubscriptionInvitationFilterInput, owner: String): Invitation @aws_subscribe(mutations: ["createInvitation"]) @aws_iam @aws_cognito_user_pools
+  onUpdateInvitation(filter: ModelSubscriptionInvitationFilterInput, owner: String): Invitation @aws_subscribe(mutations: ["updateInvitation"]) @aws_iam @aws_cognito_user_pools
+  onDeleteInvitation(filter: ModelSubscriptionInvitationFilterInput, owner: String): Invitation @aws_subscribe(mutations: ["deleteInvitation"]) @aws_iam @aws_cognito_user_pools
+  onCreateUser(filter: ModelSubscriptionUserFilterInput, owner: String): User @aws_subscribe(mutations: ["createUser"]) @aws_iam @aws_cognito_user_pools
+  onUpdateUser(filter: ModelSubscriptionUserFilterInput, owner: String): User @aws_subscribe(mutations: ["updateUser"]) @aws_iam @aws_cognito_user_pools
+  onDeleteUser(filter: ModelSubscriptionUserFilterInput, owner: String): User @aws_subscribe(mutations: ["deleteUser"]) @aws_iam @aws_cognito_user_pools
+  onCreateProject(filter: ModelSubscriptionProjectFilterInput, owner: String): Project @aws_subscribe(mutations: ["createProject"]) @aws_iam @aws_cognito_user_pools
+  onUpdateProject(filter: ModelSubscriptionProjectFilterInput, owner: String): Project @aws_subscribe(mutations: ["updateProject"]) @aws_iam @aws_cognito_user_pools
+  onDeleteProject(filter: ModelSubscriptionProjectFilterInput, owner: String): Project @aws_subscribe(mutations: ["deleteProject"]) @aws_iam @aws_cognito_user_pools
+  onCreateProjectMember(filter: ModelSubscriptionProjectMemberFilterInput, owner: String): ProjectMember @aws_subscribe(mutations: ["createProjectMember"]) @aws_iam @aws_cognito_user_pools
+  onUpdateProjectMember(filter: ModelSubscriptionProjectMemberFilterInput, owner: String): ProjectMember @aws_subscribe(mutations: ["updateProjectMember"]) @aws_iam @aws_cognito_user_pools
+  onDeleteProjectMember(filter: ModelSubscriptionProjectMemberFilterInput, owner: String): ProjectMember @aws_subscribe(mutations: ["deleteProjectMember"]) @aws_iam @aws_cognito_user_pools
+  onCreateTask(filter: ModelSubscriptionTaskFilterInput, owner: String): Task @aws_subscribe(mutations: ["createTask"]) @aws_iam @aws_cognito_user_pools
+  onUpdateTask(filter: ModelSubscriptionTaskFilterInput, owner: String): Task @aws_subscribe(mutations: ["updateTask"]) @aws_iam @aws_cognito_user_pools
+  onDeleteTask(filter: ModelSubscriptionTaskFilterInput, owner: String): Task @aws_subscribe(mutations: ["deleteTask"]) @aws_iam @aws_cognito_user_pools
+  onCreateSubtask(filter: ModelSubscriptionSubtaskFilterInput, owner: String): Subtask @aws_subscribe(mutations: ["createSubtask"]) @aws_iam @aws_cognito_user_pools
+  onUpdateSubtask(filter: ModelSubscriptionSubtaskFilterInput, owner: String): Subtask @aws_subscribe(mutations: ["updateSubtask"]) @aws_iam @aws_cognito_user_pools
+  onDeleteSubtask(filter: ModelSubscriptionSubtaskFilterInput, owner: String): Subtask @aws_subscribe(mutations: ["deleteSubtask"]) @aws_iam @aws_cognito_user_pools
+  onCreateComment(filter: ModelSubscriptionCommentFilterInput, owner: String): Comment @aws_subscribe(mutations: ["createComment"]) @aws_iam @aws_cognito_user_pools
+  onUpdateComment(filter: ModelSubscriptionCommentFilterInput, owner: String): Comment @aws_subscribe(mutations: ["updateComment"]) @aws_iam @aws_cognito_user_pools
+  onDeleteComment(filter: ModelSubscriptionCommentFilterInput, owner: String): Comment @aws_subscribe(mutations: ["deleteComment"]) @aws_iam @aws_cognito_user_pools
+  onCreateAttachment(filter: ModelSubscriptionAttachmentFilterInput, owner: String): Attachment @aws_subscribe(mutations: ["createAttachment"]) @aws_iam @aws_cognito_user_pools
+  onUpdateAttachment(filter: ModelSubscriptionAttachmentFilterInput, owner: String): Attachment @aws_subscribe(mutations: ["updateAttachment"]) @aws_iam @aws_cognito_user_pools
+  onDeleteAttachment(filter: ModelSubscriptionAttachmentFilterInput, owner: String): Attachment @aws_subscribe(mutations: ["deleteAttachment"]) @aws_iam @aws_cognito_user_pools
+  onCreateChannel(filter: ModelSubscriptionChannelFilterInput, owner: String): Channel @aws_subscribe(mutations: ["createChannel"]) @aws_iam @aws_cognito_user_pools
+  onUpdateChannel(filter: ModelSubscriptionChannelFilterInput, owner: String): Channel @aws_subscribe(mutations: ["updateChannel"]) @aws_iam @aws_cognito_user_pools
+  onDeleteChannel(filter: ModelSubscriptionChannelFilterInput, owner: String): Channel @aws_subscribe(mutations: ["deleteChannel"]) @aws_iam @aws_cognito_user_pools
+  onCreateMessage(filter: ModelSubscriptionMessageFilterInput, owner: String): Message @aws_subscribe(mutations: ["createMessage"]) @aws_iam @aws_cognito_user_pools
+  onUpdateMessage(filter: ModelSubscriptionMessageFilterInput, owner: String): Message @aws_subscribe(mutations: ["updateMessage"]) @aws_iam @aws_cognito_user_pools
+  onDeleteMessage(filter: ModelSubscriptionMessageFilterInput, owner: String): Message @aws_subscribe(mutations: ["deleteMessage"]) @aws_iam @aws_cognito_user_pools
+  onCreateActivityLog(filter: ModelSubscriptionActivityLogFilterInput): ActivityLog @aws_subscribe(mutations: ["createActivityLog"]) @aws_iam @aws_cognito_user_pools
+  onUpdateActivityLog(filter: ModelSubscriptionActivityLogFilterInput): ActivityLog @aws_subscribe(mutations: ["updateActivityLog"]) @aws_iam @aws_cognito_user_pools
+  onDeleteActivityLog(filter: ModelSubscriptionActivityLogFilterInput): ActivityLog @aws_subscribe(mutations: ["deleteActivityLog"]) @aws_iam @aws_cognito_user_pools
+  onCreateNotification(filter: ModelSubscriptionNotificationFilterInput, owner: String): Notification @aws_subscribe(mutations: ["createNotification"]) @aws_iam @aws_cognito_user_pools
+  onUpdateNotification(filter: ModelSubscriptionNotificationFilterInput, owner: String): Notification @aws_subscribe(mutations: ["updateNotification"]) @aws_iam @aws_cognito_user_pools
+  onDeleteNotification(filter: ModelSubscriptionNotificationFilterInput, owner: String): Notification @aws_subscribe(mutations: ["deleteNotification"]) @aws_iam @aws_cognito_user_pools
+}
+
+type ModelOrganizationMemberConnection @aws_iam @aws_cognito_user_pools {
+  items: [OrganizationMember]!
+  nextToken: String
+}
+
+input ModelOrganizationMemberRoleInput {
+  eq: OrganizationMemberRole
+  ne: OrganizationMemberRole
+}
+
+input ModelOrganizationMemberFilterInput {
+  organizationId: ModelIDInput
+  userId: ModelIDInput
+  role: ModelOrganizationMemberRoleInput
+  invitedBy: ModelIDInput
+  joinedAt: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelOrganizationMemberFilterInput]
+  or: [ModelOrganizationMemberFilterInput]
+  not: ModelOrganizationMemberFilterInput
+  owner: ModelStringInput
+}
+
+input ModelOrganizationMemberConditionInput {
+  organizationId: ModelIDInput
+  userId: ModelIDInput
+  role: ModelOrganizationMemberRoleInput
+  invitedBy: ModelIDInput
+  joinedAt: ModelStringInput
+  and: [ModelOrganizationMemberConditionInput]
+  or: [ModelOrganizationMemberConditionInput]
+  not: ModelOrganizationMemberConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateOrganizationMemberInput {
+  organizationId: ID!
+  userId: ID!
+  role: OrganizationMemberRole
+  invitedBy: ID
+  joinedAt: AWSDateTime
+  id: ID
+}
+
+input UpdateOrganizationMemberInput {
+  organizationId: ID
+  userId: ID
+  role: OrganizationMemberRole
+  invitedBy: ID
+  joinedAt: AWSDateTime
+  id: ID!
+}
+
+input DeleteOrganizationMemberInput {
+  id: ID!
+}
+
+input ModelSubscriptionOrganizationMemberFilterInput {
+  organizationId: ModelSubscriptionIDInput
+  userId: ModelSubscriptionIDInput
+  role: ModelSubscriptionStringInput
+  invitedBy: ModelSubscriptionIDInput
+  joinedAt: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionOrganizationMemberFilterInput]
+  or: [ModelSubscriptionOrganizationMemberFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelInvitationConnection @aws_iam @aws_cognito_user_pools {
+  items: [Invitation]!
+  nextToken: String
+}
+
+input ModelInvitationRoleInput {
+  eq: InvitationRole
+  ne: InvitationRole
+}
+
+input ModelInvitationStatusInput {
+  eq: InvitationStatus
+  ne: InvitationStatus
+}
+
+input ModelInvitationFilterInput {
+  organizationId: ModelIDInput
+  email: ModelStringInput
+  role: ModelInvitationRoleInput
+  invitedBy: ModelIDInput
+  token: ModelStringInput
+  status: ModelInvitationStatusInput
+  expiresAt: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelInvitationFilterInput]
+  or: [ModelInvitationFilterInput]
+  not: ModelInvitationFilterInput
+  owner: ModelStringInput
+}
+
+input ModelInvitationConditionInput {
+  organizationId: ModelIDInput
+  email: ModelStringInput
+  role: ModelInvitationRoleInput
+  invitedBy: ModelIDInput
+  token: ModelStringInput
+  status: ModelInvitationStatusInput
+  expiresAt: ModelStringInput
+  and: [ModelInvitationConditionInput]
+  or: [ModelInvitationConditionInput]
+  not: ModelInvitationConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateInvitationInput {
+  organizationId: ID!
+  email: AWSEmail!
+  role: InvitationRole
+  invitedBy: ID!
+  token: String!
+  status: InvitationStatus
+  expiresAt: AWSDateTime!
+  id: ID
+}
+
+input UpdateInvitationInput {
+  organizationId: ID
+  email: AWSEmail
+  role: InvitationRole
+  invitedBy: ID
+  token: String
+  status: InvitationStatus
+  expiresAt: AWSDateTime
+  id: ID!
+}
+
+input DeleteInvitationInput {
+  id: ID!
+}
+
+input ModelSubscriptionInvitationFilterInput {
+  organizationId: ModelSubscriptionIDInput
+  email: ModelSubscriptionStringInput
+  role: ModelSubscriptionStringInput
+  invitedBy: ModelSubscriptionIDInput
+  token: ModelSubscriptionStringInput
+  status: ModelSubscriptionStringInput
+  expiresAt: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionInvitationFilterInput]
+  or: [ModelSubscriptionInvitationFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelUserConnection @aws_iam @aws_cognito_user_pools {
+  items: [User]!
+  nextToken: String
+}
+
+input ModelUserRoleInput {
+  eq: UserRole
+  ne: UserRole
+}
+
+input ModelUserFilterInput {
+  email: ModelStringInput
+  firstName: ModelStringInput
+  lastName: ModelStringInput
+  role: ModelUserRoleInput
+  avatarUrl: ModelStringInput
+  phoneNumber: ModelStringInput
+  timezone: ModelStringInput
+  lastLoginAt: ModelStringInput
+  isActive: ModelBooleanInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelUserFilterInput]
+  or: [ModelUserFilterInput]
+  not: ModelUserFilterInput
+  owner: ModelStringInput
+}
+
+input ModelUserConditionInput {
+  email: ModelStringInput
+  firstName: ModelStringInput
+  lastName: ModelStringInput
+  role: ModelUserRoleInput
+  avatarUrl: ModelStringInput
+  phoneNumber: ModelStringInput
+  timezone: ModelStringInput
+  lastLoginAt: ModelStringInput
+  isActive: ModelBooleanInput
+  and: [ModelUserConditionInput]
+  or: [ModelUserConditionInput]
+  not: ModelUserConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateUserInput {
+  email: AWSEmail!
+  firstName: String!
+  lastName: String!
+  role: UserRole
+  avatarUrl: AWSURL
+  phoneNumber: AWSPhone
+  timezone: String
+  lastLoginAt: AWSDateTime
+  isActive: Boolean
+  id: ID
+}
+
+input UpdateUserInput {
+  email: AWSEmail
+  firstName: String
+  lastName: String
+  role: UserRole
+  avatarUrl: AWSURL
+  phoneNumber: AWSPhone
+  timezone: String
+  lastLoginAt: AWSDateTime
+  isActive: Boolean
+  id: ID!
+}
+
+input DeleteUserInput {
+  id: ID!
+}
+
+input ModelSubscriptionUserFilterInput {
+  email: ModelSubscriptionStringInput
+  firstName: ModelSubscriptionStringInput
+  lastName: ModelSubscriptionStringInput
+  role: ModelSubscriptionStringInput
+  avatarUrl: ModelSubscriptionStringInput
+  phoneNumber: ModelSubscriptionStringInput
+  timezone: ModelSubscriptionStringInput
+  lastLoginAt: ModelSubscriptionStringInput
+  isActive: ModelSubscriptionBooleanInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionUserFilterInput]
+  or: [ModelSubscriptionUserFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelProjectConnection @aws_iam @aws_cognito_user_pools {
+  items: [Project]!
+  nextToken: String
+}
+
+input ModelProjectStatusInput {
+  eq: ProjectStatus
+  ne: ProjectStatus
+}
+
+input ModelProjectFilterInput {
+  organizationId: ModelIDInput
+  name: ModelStringInput
+  description: ModelStringInput
+  color: ModelStringInput
+  status: ModelProjectStatusInput
+  startDate: ModelStringInput
+  endDate: ModelStringInput
+  ownerId: ModelIDInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelProjectFilterInput]
+  or: [ModelProjectFilterInput]
+  not: ModelProjectFilterInput
+  owner: ModelStringInput
+}
+
+input ModelProjectConditionInput {
+  organizationId: ModelIDInput
+  name: ModelStringInput
+  description: ModelStringInput
+  color: ModelStringInput
+  status: ModelProjectStatusInput
+  startDate: ModelStringInput
+  endDate: ModelStringInput
+  ownerId: ModelIDInput
+  and: [ModelProjectConditionInput]
+  or: [ModelProjectConditionInput]
+  not: ModelProjectConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateProjectInput {
+  organizationId: ID!
+  name: String!
+  description: String
+  color: String
+  status: ProjectStatus
+  startDate: AWSDate
+  endDate: AWSDate
+  ownerId: ID!
+  id: ID
+}
+
+input UpdateProjectInput {
+  organizationId: ID
+  name: String
+  description: String
+  color: String
+  status: ProjectStatus
+  startDate: AWSDate
+  endDate: AWSDate
+  ownerId: ID
+  id: ID!
+}
+
+input DeleteProjectInput {
+  id: ID!
+}
+
+input ModelSubscriptionProjectFilterInput {
+  organizationId: ModelSubscriptionIDInput
+  name: ModelSubscriptionStringInput
+  description: ModelSubscriptionStringInput
+  color: ModelSubscriptionStringInput
+  status: ModelSubscriptionStringInput
+  startDate: ModelSubscriptionStringInput
+  endDate: ModelSubscriptionStringInput
+  ownerId: ModelSubscriptionIDInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionProjectFilterInput]
+  or: [ModelSubscriptionProjectFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelProjectMemberConnection @aws_iam @aws_cognito_user_pools {
+  items: [ProjectMember]!
+  nextToken: String
+}
+
+input ModelProjectMemberRoleInput {
+  eq: ProjectMemberRole
+  ne: ProjectMemberRole
+}
+
+input ModelProjectMemberFilterInput {
+  projectId: ModelIDInput
+  userId: ModelIDInput
+  role: ModelProjectMemberRoleInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelProjectMemberFilterInput]
+  or: [ModelProjectMemberFilterInput]
+  not: ModelProjectMemberFilterInput
+  owner: ModelStringInput
+}
+
+input ModelProjectMemberConditionInput {
+  projectId: ModelIDInput
+  userId: ModelIDInput
+  role: ModelProjectMemberRoleInput
+  and: [ModelProjectMemberConditionInput]
+  or: [ModelProjectMemberConditionInput]
+  not: ModelProjectMemberConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateProjectMemberInput {
+  projectId: ID!
+  userId: ID!
+  role: ProjectMemberRole
+  id: ID
+}
+
+input UpdateProjectMemberInput {
+  projectId: ID
+  userId: ID
+  role: ProjectMemberRole
+  id: ID!
+}
+
+input DeleteProjectMemberInput {
+  id: ID!
+}
+
+input ModelSubscriptionProjectMemberFilterInput {
+  projectId: ModelSubscriptionIDInput
+  userId: ModelSubscriptionIDInput
+  role: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionProjectMemberFilterInput]
+  or: [ModelSubscriptionProjectMemberFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelTaskConnection @aws_iam @aws_cognito_user_pools {
+  items: [Task]!
+  nextToken: String
+}
+
+input ModelTaskStatusInput {
+  eq: TaskStatus
+  ne: TaskStatus
+}
+
+input ModelTaskPriorityInput {
+  eq: TaskPriority
+  ne: TaskPriority
+}
+
+input ModelTaskFilterInput {
+  projectId: ModelIDInput
+  title: ModelStringInput
+  description: ModelStringInput
+  status: ModelTaskStatusInput
+  priority: ModelTaskPriorityInput
+  dueDate: ModelStringInput
+  startDate: ModelStringInput
+  createdById: ModelIDInput
+  assignedToId: ModelIDInput
+  columnId: ModelStringInput
+  position: ModelIntInput
+  tags: ModelStringInput
+  estimatedHours: ModelFloatInput
+  actualHours: ModelFloatInput
+  progressPercentage: ModelIntInput
+  completedAt: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelTaskFilterInput]
+  or: [ModelTaskFilterInput]
+  not: ModelTaskFilterInput
+  owner: ModelStringInput
+}
+
+input ModelTaskConditionInput {
+  projectId: ModelIDInput
+  title: ModelStringInput
+  description: ModelStringInput
+  status: ModelTaskStatusInput
+  priority: ModelTaskPriorityInput
+  dueDate: ModelStringInput
+  startDate: ModelStringInput
+  createdById: ModelIDInput
+  assignedToId: ModelIDInput
+  columnId: ModelStringInput
+  position: ModelIntInput
+  tags: ModelStringInput
+  estimatedHours: ModelFloatInput
+  actualHours: ModelFloatInput
+  progressPercentage: ModelIntInput
+  completedAt: ModelStringInput
+  and: [ModelTaskConditionInput]
+  or: [ModelTaskConditionInput]
+  not: ModelTaskConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateTaskInput {
+  projectId: ID!
+  title: String!
+  description: String
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: AWSDateTime
+  startDate: AWSDateTime
+  createdById: ID!
+  assignedToId: ID
+  columnId: String
+  position: Int
+  tags: [String]
+  estimatedHours: Float
+  actualHours: Float
+  progressPercentage: Int
+  completedAt: AWSDateTime
+  id: ID
+}
+
+input UpdateTaskInput {
+  projectId: ID
+  title: String
+  description: String
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: AWSDateTime
+  startDate: AWSDateTime
+  createdById: ID
+  assignedToId: ID
+  columnId: String
+  position: Int
+  tags: [String]
+  estimatedHours: Float
+  actualHours: Float
+  progressPercentage: Int
+  completedAt: AWSDateTime
+  id: ID!
+}
+
+input DeleteTaskInput {
+  id: ID!
+}
+
+input ModelSubscriptionTaskFilterInput {
+  projectId: ModelSubscriptionIDInput
+  title: ModelSubscriptionStringInput
+  description: ModelSubscriptionStringInput
+  status: ModelSubscriptionStringInput
+  priority: ModelSubscriptionStringInput
+  dueDate: ModelSubscriptionStringInput
+  startDate: ModelSubscriptionStringInput
+  createdById: ModelSubscriptionIDInput
+  assignedToId: ModelSubscriptionIDInput
+  columnId: ModelSubscriptionStringInput
+  position: ModelSubscriptionIntInput
+  tags: ModelSubscriptionStringInput
+  estimatedHours: ModelSubscriptionFloatInput
+  actualHours: ModelSubscriptionFloatInput
+  progressPercentage: ModelSubscriptionIntInput
+  completedAt: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionTaskFilterInput]
+  or: [ModelSubscriptionTaskFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelSubtaskConnection @aws_iam @aws_cognito_user_pools {
+  items: [Subtask]!
+  nextToken: String
+}
+
+input ModelSubtaskFilterInput {
+  taskId: ModelIDInput
+  title: ModelStringInput
+  completed: ModelBooleanInput
+  position: ModelIntInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelSubtaskFilterInput]
+  or: [ModelSubtaskFilterInput]
+  not: ModelSubtaskFilterInput
+  owner: ModelStringInput
+}
+
+input ModelSubtaskConditionInput {
+  taskId: ModelIDInput
+  title: ModelStringInput
+  completed: ModelBooleanInput
+  position: ModelIntInput
+  and: [ModelSubtaskConditionInput]
+  or: [ModelSubtaskConditionInput]
+  not: ModelSubtaskConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateSubtaskInput {
+  taskId: ID!
+  title: String!
+  completed: Boolean!
+  position: Int
+  id: ID
+}
+
+input UpdateSubtaskInput {
+  taskId: ID
+  title: String
+  completed: Boolean
+  position: Int
+  id: ID!
+}
+
+input DeleteSubtaskInput {
+  id: ID!
+}
+
+input ModelSubscriptionSubtaskFilterInput {
+  taskId: ModelSubscriptionIDInput
+  title: ModelSubscriptionStringInput
+  completed: ModelSubscriptionBooleanInput
+  position: ModelSubscriptionIntInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionSubtaskFilterInput]
+  or: [ModelSubscriptionSubtaskFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelCommentConnection @aws_iam @aws_cognito_user_pools {
+  items: [Comment]!
+  nextToken: String
+}
+
+input ModelCommentFilterInput {
+  taskId: ModelIDInput
+  userId: ModelIDInput
+  content: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelCommentFilterInput]
+  or: [ModelCommentFilterInput]
+  not: ModelCommentFilterInput
+  owner: ModelStringInput
+}
+
+input ModelCommentConditionInput {
+  taskId: ModelIDInput
+  userId: ModelIDInput
+  content: ModelStringInput
+  and: [ModelCommentConditionInput]
+  or: [ModelCommentConditionInput]
+  not: ModelCommentConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateCommentInput {
+  taskId: ID!
+  userId: ID!
+  content: String!
+  id: ID
+}
+
+input UpdateCommentInput {
+  taskId: ID
+  userId: ID
+  content: String
+  id: ID!
+}
+
+input DeleteCommentInput {
+  id: ID!
+}
+
+input ModelSubscriptionCommentFilterInput {
+  taskId: ModelSubscriptionIDInput
+  userId: ModelSubscriptionIDInput
+  content: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionCommentFilterInput]
+  or: [ModelSubscriptionCommentFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelAttachmentConnection @aws_iam @aws_cognito_user_pools {
+  items: [Attachment]!
+  nextToken: String
+}
+
+input ModelAttachmentFilterInput {
+  taskId: ModelIDInput
+  fileName: ModelStringInput
+  fileUrl: ModelStringInput
+  fileSize: ModelIntInput
+  fileType: ModelStringInput
+  uploadedById: ModelIDInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelAttachmentFilterInput]
+  or: [ModelAttachmentFilterInput]
+  not: ModelAttachmentFilterInput
+  owner: ModelStringInput
+}
+
+input ModelAttachmentConditionInput {
+  taskId: ModelIDInput
+  fileName: ModelStringInput
+  fileUrl: ModelStringInput
+  fileSize: ModelIntInput
+  fileType: ModelStringInput
+  uploadedById: ModelIDInput
+  and: [ModelAttachmentConditionInput]
+  or: [ModelAttachmentConditionInput]
+  not: ModelAttachmentConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateAttachmentInput {
+  taskId: ID!
+  fileName: String!
+  fileUrl: AWSURL!
+  fileSize: Int
+  fileType: String
+  uploadedById: ID!
+  id: ID
+}
+
+input UpdateAttachmentInput {
+  taskId: ID
+  fileName: String
+  fileUrl: AWSURL
+  fileSize: Int
+  fileType: String
+  uploadedById: ID
+  id: ID!
+}
+
+input DeleteAttachmentInput {
+  id: ID!
+}
+
+input ModelSubscriptionAttachmentFilterInput {
+  taskId: ModelSubscriptionIDInput
+  fileName: ModelSubscriptionStringInput
+  fileUrl: ModelSubscriptionStringInput
+  fileSize: ModelSubscriptionIntInput
+  fileType: ModelSubscriptionStringInput
+  uploadedById: ModelSubscriptionIDInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionAttachmentFilterInput]
+  or: [ModelSubscriptionAttachmentFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelChannelConnection @aws_iam @aws_cognito_user_pools {
+  items: [Channel]!
+  nextToken: String
+}
+
+input ModelChannelTypeInput {
+  eq: ChannelType
+  ne: ChannelType
+}
+
+input ModelChannelFilterInput {
+  name: ModelStringInput
+  description: ModelStringInput
+  projectId: ModelIDInput
+  type: ModelChannelTypeInput
+  createdById: ModelIDInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelChannelFilterInput]
+  or: [ModelChannelFilterInput]
+  not: ModelChannelFilterInput
+  owner: ModelStringInput
+}
+
+input ModelChannelConditionInput {
+  name: ModelStringInput
+  description: ModelStringInput
+  projectId: ModelIDInput
+  type: ModelChannelTypeInput
+  createdById: ModelIDInput
+  and: [ModelChannelConditionInput]
+  or: [ModelChannelConditionInput]
+  not: ModelChannelConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateChannelInput {
+  name: String!
+  description: String
+  projectId: ID
+  type: ChannelType
+  createdById: ID!
+  id: ID
+}
+
+input UpdateChannelInput {
+  name: String
+  description: String
+  projectId: ID
+  type: ChannelType
+  createdById: ID
+  id: ID!
+}
+
+input DeleteChannelInput {
+  id: ID!
+}
+
+input ModelSubscriptionChannelFilterInput {
+  name: ModelSubscriptionStringInput
+  description: ModelSubscriptionStringInput
+  projectId: ModelSubscriptionIDInput
+  type: ModelSubscriptionStringInput
+  createdById: ModelSubscriptionIDInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionChannelFilterInput]
+  or: [ModelSubscriptionChannelFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelMessageConnection @aws_iam @aws_cognito_user_pools {
+  items: [Message]!
+  nextToken: String
+}
+
+input ModelMessageFilterInput {
+  channelId: ModelIDInput
+  userId: ModelIDInput
+  content: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelMessageFilterInput]
+  or: [ModelMessageFilterInput]
+  not: ModelMessageFilterInput
+  owner: ModelStringInput
+}
+
+input ModelMessageConditionInput {
+  channelId: ModelIDInput
+  userId: ModelIDInput
+  content: ModelStringInput
+  and: [ModelMessageConditionInput]
+  or: [ModelMessageConditionInput]
+  not: ModelMessageConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateMessageInput {
+  channelId: ID!
+  userId: ID!
+  content: String!
+  id: ID
+}
+
+input UpdateMessageInput {
+  channelId: ID
+  userId: ID
+  content: String
+  id: ID!
+}
+
+input DeleteMessageInput {
+  id: ID!
+}
+
+input ModelSubscriptionMessageFilterInput {
+  channelId: ModelSubscriptionIDInput
+  userId: ModelSubscriptionIDInput
+  content: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionMessageFilterInput]
+  or: [ModelSubscriptionMessageFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelActivityLogConnection @aws_iam @aws_cognito_user_pools {
+  items: [ActivityLog]!
+  nextToken: String
+}
+
+input ModelActivityLogFilterInput {
+  userId: ModelIDInput
+  projectId: ModelIDInput
+  taskId: ModelIDInput
+  action: ModelStringInput
+  entityType: ModelStringInput
+  entityName: ModelStringInput
+  fromStatus: ModelStringInput
+  toStatus: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelActivityLogFilterInput]
+  or: [ModelActivityLogFilterInput]
+  not: ModelActivityLogFilterInput
+}
+
+input ModelActivityLogConditionInput {
+  userId: ModelIDInput
+  projectId: ModelIDInput
+  taskId: ModelIDInput
+  action: ModelStringInput
+  entityType: ModelStringInput
+  entityName: ModelStringInput
+  fromStatus: ModelStringInput
+  toStatus: ModelStringInput
+  and: [ModelActivityLogConditionInput]
+  or: [ModelActivityLogConditionInput]
+  not: ModelActivityLogConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+}
+
+input CreateActivityLogInput {
+  userId: ID!
+  projectId: ID
+  taskId: ID
+  action: String!
+  entityType: String
+  entityName: String
+  fromStatus: String
+  toStatus: String
+  id: ID
+}
+
+input UpdateActivityLogInput {
+  userId: ID
+  projectId: ID
+  taskId: ID
+  action: String
+  entityType: String
+  entityName: String
+  fromStatus: String
+  toStatus: String
+  id: ID!
+}
+
+input DeleteActivityLogInput {
+  id: ID!
+}
+
+input ModelSubscriptionActivityLogFilterInput {
+  userId: ModelSubscriptionIDInput
+  projectId: ModelSubscriptionIDInput
+  taskId: ModelSubscriptionIDInput
+  action: ModelSubscriptionStringInput
+  entityType: ModelSubscriptionStringInput
+  entityName: ModelSubscriptionStringInput
+  fromStatus: ModelSubscriptionStringInput
+  toStatus: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionActivityLogFilterInput]
+  or: [ModelSubscriptionActivityLogFilterInput]
+}
+
+type ModelNotificationConnection @aws_iam @aws_cognito_user_pools {
+  items: [Notification]!
+  nextToken: String
+}
+
+input ModelNotificationTypeInput {
+  eq: NotificationType
+  ne: NotificationType
+}
+
+input ModelNotificationFilterInput {
+  userId: ModelIDInput
+  type: ModelNotificationTypeInput
+  title: ModelStringInput
+  message: ModelStringInput
+  read: ModelBooleanInput
+  linkTo: ModelStringInput
+  id: ModelIDInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelNotificationFilterInput]
+  or: [ModelNotificationFilterInput]
+  not: ModelNotificationFilterInput
+  owner: ModelStringInput
+}
+
+input ModelNotificationConditionInput {
+  userId: ModelIDInput
+  type: ModelNotificationTypeInput
+  title: ModelStringInput
+  message: ModelStringInput
+  read: ModelBooleanInput
+  linkTo: ModelStringInput
+  and: [ModelNotificationConditionInput]
+  or: [ModelNotificationConditionInput]
+  not: ModelNotificationConditionInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  owner: ModelStringInput
+}
+
+input CreateNotificationInput {
+  userId: ID!
+  type: NotificationType
+  title: String!
+  message: String!
+  read: Boolean!
+  linkTo: String
+  id: ID
+}
+
+input UpdateNotificationInput {
+  userId: ID
+  type: NotificationType
+  title: String
+  message: String
+  read: Boolean
+  linkTo: String
+  id: ID!
+}
+
+input DeleteNotificationInput {
+  id: ID!
+}
+
+input ModelSubscriptionNotificationFilterInput {
+  userId: ModelSubscriptionIDInput
+  type: ModelSubscriptionStringInput
+  title: ModelSubscriptionStringInput
+  message: ModelSubscriptionStringInput
+  read: ModelSubscriptionBooleanInput
+  linkTo: ModelSubscriptionStringInput
+  id: ModelSubscriptionIDInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionNotificationFilterInput]
+  or: [ModelSubscriptionNotificationFilterInput]
+  owner: ModelStringInput
+}
