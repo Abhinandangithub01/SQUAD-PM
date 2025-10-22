@@ -74,7 +74,7 @@ export default function TrelloKanbanComplete({ projectId }: TrelloKanbanComplete
         title: newTaskTitle,
         description: '',
         projectId,
-        status: status as any, // Set status directly
+        status: status as 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | 'BLOCKED',
         priority: 'MEDIUM',
         createdById: userId,
         assignedToId: userId,
