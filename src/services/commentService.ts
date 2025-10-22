@@ -49,11 +49,12 @@ export const commentService = {
    */
   async create(input: CreateCommentInput) {
     try {
-      const { data, errors } = await client.models.Comment.create({
+      const commentData: any = {
         taskId: input.taskId,
         userId: input.userId,
         content: input.content,
-      });
+      };
+      const { data, errors } = await client.models.Comment.create(commentData);
 
       if (errors) {
         throw new Error(errors[0].message);
@@ -71,10 +72,11 @@ export const commentService = {
    */
   async update(id: string, input: UpdateCommentInput) {
     try {
-      const { data, errors } = await client.models.Comment.update({
+      const updateData: any = {
         id,
         content: input.content,
-      });
+      };
+      const { data, errors } = await client.models.Comment.update(updateData);
 
       if (errors) {
         throw new Error(errors[0].message);
