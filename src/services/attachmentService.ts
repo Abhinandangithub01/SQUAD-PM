@@ -45,14 +45,15 @@ export const attachmentService = {
       });
 
       // Create attachment record in DynamoDB
-      const { data, errors } = await client.models.Attachment.create({
+      const attachmentData: any = {
         taskId,
         fileName: file.name,
-        fileUrl: fileKey, // Store the S3 key, not the signed URL
+        fileUrl: fileKey,
         fileSize: file.size,
         fileType: file.type,
         uploadedById,
-      });
+      };
+      const { data, errors } = await client.models.Attachment.create(attachmentData);
 
       if (errors) {
         // If DB creation fails, try to delete the uploaded file
