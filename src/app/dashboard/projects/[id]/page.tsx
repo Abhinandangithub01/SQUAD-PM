@@ -43,6 +43,7 @@ export default function ProjectDetailsPage() {
 
   useEffect(() => {
     loadProjectData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
   const loadProjectData = async () => {
