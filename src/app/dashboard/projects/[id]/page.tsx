@@ -19,6 +19,7 @@ import {
   TargetIcon,
   LayoutGridIcon,
   XIcon,
+  PlusIcon,
 } from 'lucide-react';
 
 type TabType = 'tasks' | 'overview' | 'members' | 'milestones';
