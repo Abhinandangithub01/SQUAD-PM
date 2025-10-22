@@ -137,7 +137,9 @@ export default function TrelloKanbanComplete({ projectId }: TrelloKanbanComplete
     }
 
     try {
-      const { error } = await taskService.update(draggedTask.id, { status: newStatus });
+      const { error } = await taskService.update(draggedTask.id, { 
+        status: newStatus as 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | 'BLOCKED'
+      });
       
       if (error) {
         toast.error(error);
