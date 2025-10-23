@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import TrelloKanbanComplete from '@/components/features/TrelloKanbanComplete';
+import TrelloBoard from '@/components/features/TrelloBoard';
 import ProjectMembers from '@/components/features/ProjectMembers';
 import ActivityFeed from '@/components/features/ActivityFeed';
 import { projectService } from '@/services/projectService';
