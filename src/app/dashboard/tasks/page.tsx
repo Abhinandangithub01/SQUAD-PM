@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import TrelloBoardAllTasks from '@/components/features/TrelloBoardAllTasks';
 import { taskService } from '@/services/taskService';
 import { projectService } from '@/services/projectService';
 import { PlusIcon, ListIcon, LayoutGridIcon, Edit2Icon, Trash2Icon, MoreVerticalIcon } from 'lucide-react';
@@ -205,22 +206,10 @@ export default function TasksPage() {
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading tasks...</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading tasks...</p>
           </div>
         ) : viewMode === 'board' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {TASK_STATUSES.map((status) => (
-              <TaskColumn
-                key={status.id}
-                status={status}
-                tasks={tasksByStatus[status.id]}
-                projects={projects}
-                onEdit={openEditModal}
-                onDelete={openDeleteModal}
-                onStatusChange={handleStatusChange}
-              />
-            ))}
-          </div>
+          <TrelloBoardAllTasks />
         ) : (
           <TaskList
             tasks={tasks}
