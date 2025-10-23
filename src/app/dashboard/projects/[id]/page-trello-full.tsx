@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import TrelloBoard from '@/components/features/TrelloBoard';
+import TrelloBoardExact from '@/components/features/TrelloBoardExact';
 import { projectService } from '@/services/projectService';
 import { useToast } from '@/contexts/ToastContext';
 import {
@@ -114,7 +114,7 @@ export default function ProjectDetailsPage() {
 
       {/* Trello Board */}
       <div className="h-[calc(100vh-140px)]">
-        <TrelloBoard projectId={projectId} />
+        <TrelloBoardExact projectId={projectId} />
       </div>
     </DashboardLayout>
   );
