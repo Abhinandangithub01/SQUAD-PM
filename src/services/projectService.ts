@@ -111,10 +111,11 @@ export const projectService = {
    */
   async update(id: string, input: UpdateProjectInput) {
     try {
-      const { data, errors } = await client.models.Project.update({
+      const updateData: any = {
         id,
         ...input,
-      });
+      };
+      const { data, errors } = await client.models.Project.update(updateData);
 
       if (errors) {
         throw new Error(errors[0].message);
@@ -133,10 +134,11 @@ export const projectService = {
   async delete(id: string) {
     try {
       // Soft delete by archiving
-      const { data, errors } = await client.models.Project.update({
+      const deleteData: any = {
         id,
         status: 'ARCHIVED',
-      });
+      };
+      const { data, errors } = await client.models.Project.update(deleteData);
 
       if (errors) {
         throw new Error(errors[0].message);
