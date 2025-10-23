@@ -72,10 +72,11 @@ export const projectMemberService = {
    */
   async updateRole(memberId: string, role: MemberRole) {
     try {
-      const { data, errors } = await client.models.ProjectMember.update({
+      const updateData: any = {
         id: memberId,
         role,
-      });
+      };
+      const { data, errors } = await client.models.ProjectMember.update(updateData);
 
       if (errors) {
         throw new Error(errors[0].message);
