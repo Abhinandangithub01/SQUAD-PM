@@ -43,7 +43,7 @@ export default function TrelloBoardAllTasks() {
   const loadTasks = async () => {
     try {
       setLoading(true);
-      const { data, error } = await taskService.getAll();
+      const { data, error } = await taskService.list();
 
       if (error) {
         toast.error(error);
