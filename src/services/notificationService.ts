@@ -58,11 +58,12 @@ export const notificationService = {
    */
   async getUnreadCount(userId: string) {
     try {
+      const filter: any = { 
+        userId: { eq: userId },
+        read: { eq: false }
+      };
       const { data, errors } = await client.models.Notification.list({
-        filter: { 
-          userId: { eq: userId },
-          read: { eq: false }
-        },
+        filter,
       });
 
       if (errors) {
@@ -84,14 +85,15 @@ export const notificationService = {
    */
   async create(input: CreateNotificationInput) {
     try {
-      const { data, errors } = await client.models.Notification.create({
+      const notificationData: any = {
         userId: input.userId,
         type: input.type,
         title: input.title,
         message: input.message,
         linkTo: input.linkTo || '',
         read: false,
-      });
+      };
+      const { data, errors } = await client.models.Notification.create(notificationData);
 
       if (errors) {
         throw new Error(errors[0].message);
@@ -112,10 +114,11 @@ export const notificationService = {
    */
   async markAsRead(id: string) {
     try {
-      const { data, errors } = await client.models.Notification.update({
+      const updateData: any = {
         id,
         read: true,
-      });
+      };
+      const { data, errors } = await client.models.Notification.update(updateData);
 
       if (errors) {
         throw new Error(errors[0].message);
