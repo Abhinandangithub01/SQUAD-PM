@@ -105,21 +105,19 @@ export default function TrelloBoardAllTasks() {
       });
       setColumns(newColumns);
 
-      try {
-        const { error } = await taskService.update(movedTask.id, {
-          status: destination.droppableId as any,
-        });
+      // Update in background without blocking UI
+      taskService.update(movedTask.id, {
+        status: destination.droppableId as any,
+      }).then(({ error }) => {
         if (error) {
-          toast.error(error);
-          loadTasks();
-        } else {
-          toast.success('Task moved successfully');
+          toast.error('Failed to move task');
+          loadTasks(); // Reload on error
         }
-      } catch (error) {
+      }).catch((error) => {
         console.error('Error updating task:', error);
         toast.error('Failed to move task');
-        loadTasks();
-      }
+        loadTasks(); // Reload on error
+      });
     }
   };
 
