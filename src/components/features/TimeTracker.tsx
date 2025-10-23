@@ -116,7 +116,7 @@ export default function TimeTracker({ taskId }: TimeTrackerProps) {
       const now = new Date();
       const startTime = new Date(now.getTime() - duration * 60 * 1000);
 
-      const { error } = await timeTrackingService.createManualEntry({
+      const { error } = await timeTrackingService.createEntry({
         taskId,
         userId: user.id,
         startTime: startTime.toISOString(),

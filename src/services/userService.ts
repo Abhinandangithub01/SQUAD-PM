@@ -53,10 +53,11 @@ export const userService = {
    */
   async update(id: string, input: UpdateUserInput) {
     try {
-      const { data, errors } = await client.models.User.update({
+      const updateData: any = {
         id,
         ...input,
-      });
+      };
+      const { data, errors } = await client.models.User.update(updateData);
 
       if (errors) {
         throw new Error(errors[0].message);

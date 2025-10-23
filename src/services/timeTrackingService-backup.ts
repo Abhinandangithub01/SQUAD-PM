@@ -80,23 +80,4 @@ export const timeTrackingService = {
   async getTotalTime(taskId: string) {
     return { data: 0, error: null };
   },
-
-  /**
-   * Delete time entry
-   */
-  async delete(id: string) {
-    return { error: NOT_IMPLEMENTED };
-  },
-
-  /**
-   * Format duration in minutes to human readable string
-   */
-  formatDuration(minutes: number): string {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    }
-    return `${mins}m`;
-  },
 };
