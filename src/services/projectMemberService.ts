@@ -45,12 +45,13 @@ export const projectMemberService = {
    */
   async addMember(input: AddMemberInput) {
     try {
-      const { data, errors } = await client.models.ProjectMember.create({
+      const memberData: any = {
         projectId: input.projectId,
         userId: input.userId,
         role: input.role,
         joinedAt: new Date().toISOString(),
-      });
+      };
+      const { data, errors } = await client.models.ProjectMember.create(memberData);
 
       if (errors) {
         throw new Error(errors[0].message);
